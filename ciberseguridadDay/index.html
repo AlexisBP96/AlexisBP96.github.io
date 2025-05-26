@@ -14,15 +14,12 @@
       background-color: #000;
       font-family: 'Segoe UI', sans-serif;
     }
-    canvas {
-      display: block;
-    }
+    canvas { display: block; }
+
     #loginUI, #finalLogo {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -31,21 +28,14 @@
       text-align: center;
       gap: 20px;
     }
+
     #loginUI {
-      background: linear-gradient(to bottom, #000000cc, #000000ee), url('assets/background.png') no-repeat center center/cover;
+      background: linear-gradient(to bottom, #000000cc, #000000ee),
+      url('assets/background.png') no-repeat center center/cover;
     }
-    #loginUI img {
-      width: 120px;
-      margin-bottom: 10px;
-    }
-    #finalLogo {
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      pointer-events: none;
-    }
+
+    #loginUI img { width: 120px; margin-bottom: 10px; }
+
     .logo-footer {
       position: fixed;
       bottom: 20px;
@@ -54,35 +44,48 @@
       width: 120px;
       z-index: 3;
     }
+
     #loginUI h1 {
       color: #FFD700;
       font-size: 32px;
       margin: 0;
     }
+
     #loginUI p {
       color: #ffffff;
       font-size: 18px;
       max-width: 80%;
     }
+
     #loginUI input, #loginUI button {
       padding: 12px 20px;
       font-size: 16px;
       border-radius: 8px;
       border: none;
     }
-    #loginUI input {
-      width: 250px;
-    }
+
+    #loginUI input { width: 250px; }
+
     #loginUI button {
       background-color: #FFD700;
       color: #000;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.3s;
     }
+
     #loginUI button:hover {
       background-color: #e6c200;
     }
+
+    #finalLogo {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      pointer-events: none;
+    }
+
     .touch-controls {
       position: fixed;
       bottom: 100px;
@@ -92,6 +95,7 @@
       gap: 20px;
       z-index: 5;
     }
+
     .touch-controls button {
       padding: 10px 20px;
       font-size: 18px;
@@ -104,6 +108,7 @@
   </style>
 </head>
 <body>
+
 <div id="loginUI">
   <img src="assets/logo-pichincha.png" alt="Banco Pichincha">
   <h1>¡Bienvenido a la Feria de Ciberseguridad!</h1>
@@ -111,6 +116,7 @@
   <input type="text" id="usernameInput" placeholder="Ingresa tu nombre">
   <button onclick="startGame()">Comenzar misión</button>
 </div>
+
 <div id="finalLogo">
   <div style="text-align: center; color: white;">
     <h2 style="color: #FFD700; font-size: 32px; margin-bottom: 10px;">¡MISIÓN CUMPLIDA!</h2>
@@ -118,7 +124,9 @@
   </div>
   <canvas id="insigniaCanvas" width="500" height="500"></canvas>
 </div>
+
 <img src="assets/logo-pichincha.png" alt="Banco Pichincha" class="logo-footer">
+
 <div class="touch-controls" id="touchControls" style="display: none;">
   <button onclick="moveLeft()">⬅️</button>
   <button onclick="enterScene()">🚀</button>
@@ -126,226 +134,250 @@
 </div>
 
 <script>
-  let userSession = {
-    username: '',
-    completedStages: [false, false, false]
+let userSession = {
+  username: '',
+  completedStages: [false, false, false]
+};
+
+let gameInstance = null;
+let currentMapScene = null;
+
+class MapScene extends Phaser.Scene {
+  constructor() { super('MapScene'); }
+
+  preload() {
+    this.load.image('background', 'assets/background.jpg');
+    this.load.image('module', 'assets/module.png');
+    this.load.image('module-complete', 'assets/module-green.png');
+    this.load.image('character', 'assets/jedi.png');
+  }
+
+  create() {
+    currentMapScene = this;
+    document.getElementById('finalLogo').style.display = 'none';
+    document.getElementById('touchControls').style.display = 'flex';
+    this.drawScene();
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
+    this.scale.on('resize', () => {
+      this.children.removeAll();
+      this.drawScene();
+    });
+  }
+
+  drawScene() {
+    const width = this.scale.width;
+    const height = this.scale.height;
+    const headerHeight = 180;
+    const mapHeight = height - headerHeight;
+
+    this.add.rectangle(width / 2, headerHeight / 2, width, headerHeight, 0x000000, 0.9);
+    this.add.text(width / 2, 30, `Hola Ciberguardián, ${userSession.username}`, {
+      fontSize: '26px', fill: '#FFD700', fontFamily: 'Segoe UI'
+    }).setOrigin(0.5);
+    this.add.text(width / 2, 70, `Avanza por los módulos y demuestra tu destreza en ciberseguridad con cada misión.`, {
+      fontSize: '20px', fill: '#ffffff', fontFamily: 'Segoe UI'
+    }).setOrigin(0.5);
+    this.add.rectangle(width / 2, headerHeight + 2, width, 4, 0x00FF00);
+
+    const mapY = headerHeight + mapHeight / 2;
+    this.add.image(width / 2, mapY, 'background').setDisplaySize(width, mapHeight);
+
+    this.modules = [
+      { x: width * 0.2, y: headerHeight + mapHeight * 0.3 },
+      { x: width * 0.5, y: headerHeight + mapHeight * 0.5 },
+      { x: width * 0.8, y: headerHeight + mapHeight * 0.7 }
+    ];
+
+    this.currentNode = 0;
+
+    this.moduleSprites = this.modules.map((mod, i) => {
+      const key = userSession.completedStages[i] ? 'module-complete' : 'module';
+      const icon = this.add.image(mod.x, mod.y, key);
+      icon.setDisplaySize(64, 64);
+      this.add.text(mod.x - 20, mod.y + 40, `Fase ${i + 1}`, { fontSize: '14px', fill: '#fff' });
+      return icon;
+    });
+
+    this.character = this.add.image(this.modules[0].x, this.modules[0].y - 60, 'character');
+    this.character.setDisplaySize(64, 64);
+  }
+
+  update() {
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < this.modules.length - 1) {
+      this.currentNode++;
+      this.moveCharacter();
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.left) && this.currentNode > 0) {
+      this.currentNode--;
+      this.moveCharacter();
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.enterKey)) enterScene();
+  }
+
+  moveCharacter() {
+    const target = this.modules[this.currentNode];
+    this.character.x = target.x;
+    this.character.y = target.y - 60;
+  }
+}
+
+class TriviaScene extends Phaser.Scene {
+  constructor() { super('TriviaScene'); }
+
+  init(data) {
+    this.stage = data.stage;
+    this.selectedOption = null;
+    this.optionTexts = [];
+  }
+
+  create() {
+    document.getElementById('finalLogo').style.display = 'none';
+    document.getElementById('touchControls').style.display = 'none';
+    this.drawTrivia();
+    this.scale.on('resize', () => {
+      this.children.removeAll();
+      this.drawTrivia();
+    });
+  }
+
+  drawTrivia() {
+    const centerX = this.scale.width / 2;
+    const startY = this.scale.height / 4;
+
+    this.add.text(centerX, startY, `Trivia Fase ${this.stage}`, {
+      fontSize: '26px', fill: '#FFD700', fontFamily: 'Segoe UI'
+    }).setOrigin(0.5);
+
+    this.add.text(centerX, startY + 60, '¿Qué es phishing?', {
+      fontSize: '20px', fill: '#ffffff', fontFamily: 'Segoe UI'
+    }).setOrigin(0.5);
+
+    const opciones = [
+      'Una técnica para pescar',
+      'Un intento de engañar a usuarios para robar datos',
+      'Un software antivirus'
+    ];
+
+    this.optionTexts = opciones.map((op, i) => {
+      const text = this.add.text(centerX, startY + 130 + i * 50, op, {
+        fontSize: '18px', fill: '#ffffff', backgroundColor: '#333',
+        padding: { left: 10, right: 10, top: 5, bottom: 5 }, align: 'center'
+      }).setOrigin(0.5)
+        .setInteractive()
+        .on('pointerdown', () => this.seleccionarOpcion(i));
+      return text;
+    });
+
+    this.confirmButton = this.add.text(centerX, startY + 320, 'Responder', {
+      fontSize: '20px', fill: '#000', backgroundColor: '#FFD700',
+      padding: { left: 20, right: 20, top: 10, bottom: 10 }
+    }).setOrigin(0.5).setInteractive().setVisible(false)
+      .on('pointerdown', () => this.validarRespuesta());
+  }
+
+  seleccionarOpcion(index) {
+    this.selectedOption = index;
+    this.optionTexts.forEach((txt, i) => {
+      txt.setStyle({
+        backgroundColor: i === index ? '#FFD700' : '#333',
+        fill: i === index ? '#000' : '#fff'
+      });
+    });
+    this.confirmButton.setVisible(true);
+  }
+
+  validarRespuesta() {
+    if (this.selectedOption === null) return;
+    const opcion = this.optionTexts[this.selectedOption].text;
+    if (opcion.includes('engañar')) {
+      userSession.completedStages[this.stage - 1] = true;
+      const todas = userSession.completedStages.every(e => e);
+      this.scene.start(todas ? 'BadgeScene' : 'MapScene');
+    } else {
+      this.children.getAll().forEach(child => child.destroy());
+      this.drawTrivia();
+      const centerX = this.scale.width / 2;
+      this.add.text(centerX, this.scale.height - 80, '❌ Respuesta incorrecta. Intenta otra vez.', {
+        fontSize: '18px', fill: '#f00'
+      }).setOrigin(0.5);
+      this.time.delayedCall(2500, () => this.scene.start('MapScene'));
+    }
+  }
+}
+
+class BadgeScene extends Phaser.Scene {
+  constructor() { super('BadgeScene'); }
+
+  create() {
+    document.getElementById('finalLogo').style.display = 'flex';
+    document.getElementById('touchControls').style.display = 'none';
+    drawInsignia(userSession.username);
+    this.scale.on('resize', () => this.scene.restart());
+  }
+}
+
+function drawInsignia(nombre) {
+  const canvas = document.getElementById('insigniaCanvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = function () {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.font = 'bold 22px Segoe UI';
+    ctx.fillStyle = '#000';
+    ctx.textAlign = 'center';
+    ctx.fillText(nombre.toUpperCase(), canvas.width / 2, 362);
+  };
+  img.src = 'assets/insigniaBP.png';
+}
+
+function moveLeft() {
+  if (currentMapScene && currentMapScene.currentNode > 0) {
+    currentMapScene.currentNode--;
+    currentMapScene.moveCharacter();
+  }
+}
+
+function moveRight() {
+  if (currentMapScene && currentMapScene.currentNode < 2) {
+    currentMapScene.currentNode++;
+    currentMapScene.moveCharacter();
+  }
+}
+
+function enterScene() {
+  if (currentMapScene) {
+    const index = currentMapScene.currentNode;
+    const unlocked = index === 0 || userSession.completedStages[index - 1];
+    if (unlocked) {
+      currentMapScene.scene.start('TriviaScene', { stage: index + 1 });
+    }
+  }
+}
+
+function startGame() {
+  const username = document.getElementById('usernameInput').value;
+  if (username.trim() === '') return;
+  userSession.username = username;
+  document.getElementById('loginUI').style.display = 'none';
+
+  const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    backgroundColor: '#000',
+    scale: {
+      mode: Phaser.Scale.RESIZE,
+      autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    scene: [MapScene, TriviaScene, BadgeScene]
   };
 
-  let gameInstance = null;
-  let currentMapScene = null;
-
-  class MapScene extends Phaser.Scene {
-    constructor() {
-      super('MapScene');
-    }
-
-    preload() {
-      this.load.image('background', 'assets/background.jpg');
-      this.load.image('module', 'assets/module.png');
-      this.load.image('module-complete', 'assets/module-green.png');
-      this.load.image('character', 'assets/jedi.png');
-    }
-
-    create() {
-      currentMapScene = this;
-      document.getElementById('finalLogo').style.display = 'none';
-      document.getElementById('touchControls').style.display = 'flex';
-      this.drawScene();
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-
-      this.scale.on('resize', () => {
-        this.children.removeAll();
-        this.drawScene();
-      });
-    }
-
-    drawScene() {
-      const width = this.scale.width;
-      const height = this.scale.height;
-      const headerHeight = 180;
-      const mapHeight = height - headerHeight;
-
-      this.add.rectangle(width / 2, headerHeight / 2, width, headerHeight, 0x000000, 0.9);
-      this.add.text(width / 2, 30, `Hola Ciberguardián, ${userSession.username}`, { fontSize: '26px', fill: '#FFD700', fontFamily: 'Segoe UI' }).setOrigin(0.5);
-      this.add.text(width / 2, 70, `Avanza por los módulos y demuestra tu destreza en ciberseguridad con cada misión.`, { fontSize: '20px', fill: '#ffffff', fontFamily: 'Segoe UI' }).setOrigin(0.5);
-      this.add.rectangle(width / 2, headerHeight + 2, width, 4, 0x00FF00);
-
-      const mapY = headerHeight + mapHeight / 2;
-      this.add.image(width / 2, mapY, 'background').setDisplaySize(width, mapHeight);
-
-      this.modules = [
-        { x: width * 0.2, y: headerHeight + mapHeight * 0.3, unlocked: true },
-        { x: width * 0.5, y: headerHeight + mapHeight * 0.5, unlocked: false },
-        { x: width * 0.8, y: headerHeight + mapHeight * 0.7, unlocked: false }
-      ];
-
-      this.currentNode = 0;
-
-      this.moduleSprites = this.modules.map((mod, i) => {
-        const key = userSession.completedStages[i] ? 'module-complete' : 'module';
-        const icon = this.add.image(mod.x, mod.y, key);
-        icon.setDisplaySize(64, 64);
-        this.add.text(mod.x - 20, mod.y + 40, `Fase ${i + 1}`, { fontSize: '14px', fill: '#fff' });
-        return icon;
-      });
-
-      this.character = this.add.image(this.modules[0].x, this.modules[0].y - 60, 'character');
-      this.character.setDisplaySize(64, 64);
-    }
-
-    update() {
-      if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < this.modules.length - 1) {
-        this.currentNode++;
-        this.moveCharacter();
-      } else if (Phaser.Input.Keyboard.JustDown(this.cursors.left) && this.currentNode > 0) {
-        this.currentNode--;
-        this.moveCharacter();
-      }
-
-      if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-        const index = this.currentNode;
-        const unlocked = index === 0 || userSession.completedStages[index - 1];
-        if (unlocked) {
-          this.scene.start('TriviaScene', { stage: index + 1 });
-        }
-      }
-    }
-
-    moveCharacter() {
-      const target = this.modules[this.currentNode];
-      this.character.x = target.x;
-      this.character.y = target.y - 60;
-    }
-  }
-
-  class TriviaScene extends Phaser.Scene {
-    constructor() {
-      super('TriviaScene');
-    }
-
-    init(data) {
-      this.stage = data.stage;
-    }
-
-    create() {
-      document.getElementById('finalLogo').style.display = 'none';
-      document.getElementById('touchControls').style.display = 'none';
-      this.drawTrivia();
-      this.scale.on('resize', () => {
-        this.children.removeAll();
-        this.drawTrivia();
-      });
-    }
-
-    drawTrivia() {
-      const centerX = this.scale.width / 2;
-      const startY = this.scale.height / 4;
-
-      this.add.text(centerX - 120, startY, `Trivia Fase ${this.stage}`, { fontSize: '24px', fill: '#fff' });
-      this.add.text(centerX - 180, startY + 60, '¿Qué es phishing?', { fontSize: '20px', fill: '#fff' });
-
-      const opciones = [
-        'Una técnica para pescar',
-        'Un intento de engañar a usuarios para robar datos',
-        'Un software antivirus'
-      ];
-
-      opciones.forEach((op, i) => {
-        this.add.text(centerX - 180, startY + 120 + i * 40, op, { fontSize: '18px', fill: '#0f0' })
-          .setInteractive()
-          .on('pointerdown', () => this.validarRespuesta(op));
-      });
-    }
-
-    validarRespuesta(opcion) {
-      if (opcion.includes('engañar')) {
-        userSession.completedStages[this.stage - 1] = true;
-        const todas = userSession.completedStages.every(e => e);
-        this.scene.start(todas ? 'BadgeScene' : 'MapScene');
-      } else {
-        this.children.getAll().forEach(child => child.destroy());
-        this.drawTrivia();
-        const centerX = this.scale.width / 2;
-        this.add.text(centerX, this.scale.height - 100, 'Incorrecto. Intenta otra vez.', { fontSize: '18px', fill: '#f00' }).setOrigin(0.5);
-        this.time.delayedCall(2000, () => this.scene.start('MapScene'));
-      }
-    }
-  }
-
-  class BadgeScene extends Phaser.Scene {
-    constructor() {
-      super('BadgeScene');
-    }
-
-    create() {
-      document.getElementById('finalLogo').style.display = 'flex';
-      document.getElementById('touchControls').style.display = 'none';
-      drawInsignia(userSession.username);
-      this.scale.on('resize', () => this.scene.restart());
-    }
-  }
-
-  function drawInsignia(nombre) {
-    const canvas = document.getElementById('insigniaCanvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = function () {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.font = 'bold 22px Segoe UI';
-      ctx.fillStyle = '#000';
-      ctx.textAlign = 'center';
-      ctx.fillText(nombre.toUpperCase(), canvas.width / 2, 362);
-    };
-    img.src = 'assets/insigniaBP.png';
-  }
-
-  function moveLeft() {
-    if (currentMapScene && currentMapScene.currentNode > 0) {
-      currentMapScene.currentNode--;
-      currentMapScene.moveCharacter();
-    }
-  }
-
-  function moveRight() {
-    if (currentMapScene && currentMapScene.currentNode < 2) {
-      currentMapScene.currentNode++;
-      currentMapScene.moveCharacter();
-    }
-  }
-
-  function enterScene() {
-    if (currentMapScene) {
-      const index = currentMapScene.currentNode;
-      const unlocked = index === 0 || userSession.completedStages[index - 1];
-      if (unlocked) {
-        currentMapScene.scene.start('TriviaScene', { stage: index + 1 });
-      }
-    }
-  }
-
-  function startGame() {
-    const username = document.getElementById('usernameInput').value;
-    if (username.trim() === '') return;
-    userSession.username = username;
-    document.getElementById('loginUI').style.display = 'none';
-
-    const config = {
-      type: Phaser.AUTO,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      backgroundColor: '#000',
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      },
-      scene: [MapScene, TriviaScene, BadgeScene]
-    };
-
-    gameInstance = new Phaser.Game(config);
-  }
+  gameInstance = new Phaser.Game(config);
+}
 </script>
-<canvas id="insigniaCanvas" width="500" height="500" style="display: none;"></canvas>
+
 </body>
 </html>
