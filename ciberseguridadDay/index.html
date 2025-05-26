@@ -15,13 +15,15 @@
             background-color: #000;
             font-family: 'Segoe UI', sans-serif;
             touch-action: none;
+            /* Añadir un padding inferior para dejar espacio al footer y controles */
+            /* padding-bottom: 70px;  Considerar esto si el contenido principal fuera scrolleable */
         }
         canvas {
             display: block;
             max-width: 100vw;
             max-height: 100vh;
-            width: 100%; /* Asegurar que el canvas ocupe el 100% del contenedor */
-            height: 100%; /* Asegurar que el canvas ocupe el 100% del contenedor */
+            width: 100%;
+            height: 100%;
         }
 
         #loginUI, #finalLogo {
@@ -32,10 +34,11 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 2;
+            z-index: 10; /* Subir z-index para que esté por encima del canvas de Phaser */
             text-align: center;
-            gap: 20px;
-            box-sizing: border-box; /* Asegura que padding y border no aumenten el tamaño total */
+            gap: 15px; /* Reducir un poco el gap */
+            box-sizing: border-box;
+            padding: 15px;
         }
 
         #loginUI {
@@ -44,47 +47,45 @@
         }
 
         #loginUI img {
-            width: 100px; /* Tamaño base */
-            max-width: 30%; /* Limitar el ancho máximo en relación al viewport */
+            width: 100px;
+            max-width: 25%;
             height: auto;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .logo-footer {
             position: fixed;
-            bottom: 16px;
+            bottom: 10px; /* Ligeramente más arriba */
             left: 50%;
             transform: translateX(-50%);
-            width: 80px; /* Tamaño base */
-            max-width: 20%; /* Limitar el ancho máximo */
+            width: 70px; /* Un poco más pequeño */
+            max-width: 18%;
             height: auto;
-            z-index: 3;
+            z-index: 20; /* Asegurar que esté visible */
         }
 
         #loginUI h1 {
             color: #FFD700;
-            font-size: clamp(18px, 5vw, 32px);
+            font-size: clamp(18px, 4.5vw, 28px);
             margin: 0;
-            padding: 0 15px; /* Añadir un poco de padding horizontal */
         }
 
         #loginUI p {
             color: #ffffff;
-            font-size: clamp(14px, 3.5vw, 18px); /* Ligeramente más pequeño para móviles */
+            font-size: clamp(13px, 3.2vw, 16px);
             max-width: 90%;
-            padding: 0 15px; /* Añadir padding horizontal */
         }
 
         #loginUI input, #loginUI button {
-            padding: 12px 20px;
-            font-size: clamp(14px, 3.5vw, 18px); /* Ligeramente más pequeño para móviles */
+            padding: 10px 18px;
+            font-size: clamp(13px, 3.2vw, 16px);
             border-radius: 8px;
             border: none;
         }
 
         #loginUI input {
             width: 80%;
-            max-width: 300px;
+            max-width: 280px;
         }
 
         #loginUI button {
@@ -100,100 +101,104 @@
 
         #finalLogo {
             display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            pointer-events: none;
-            text-align: center;
-            padding: 15px;
+            /* z-index ya está en 10 */
         }
 
         #finalLogo h2 {
-            font-size: clamp(20px, 6vw, 36px);
+            font-size: clamp(20px, 5.5vw, 32px);
             color: #FFD700;
         }
 
         #finalLogo p {
-            font-size: clamp(16px, 4vw, 22px);
+            font-size: clamp(15px, 3.8vw, 20px);
             color: #ffffff;
         }
 
         .touch-controls {
             position: fixed;
-            bottom: 20px; /* Reducir la distancia desde la parte inferior */
+            /* Ajustar bottom para que esté encima del footer y con más espacio */
+            bottom: 55px; /* Incrementar esta distancia. Original era 20px, luego 55px puede ser un buen punto de partida*/
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 10px;
-            z-index: 5;
+            z-index: 25; /* Más alto que el footer */
             justify-content: center;
         }
 
         .touch-controls button {
             padding: 10px 16px;
-            font-size: clamp(18px, 5vw, 24px); /* Ligeramente más grande para mejor tacto */
+            font-size: clamp(18px, 5vw, 24px);
             border-radius: 10px;
             border: none;
-            background-color: #FFD700;
+            background-color: rgba(255, 215, 0, 0.85); /* Ligeramente transparente para ver a través */
             color: #000;
             font-weight: bold;
-            min-width: 60px; /* Asegurar un ancho mínimo para los botones */
-            text-align: center; /* Centrar el texto en los botones */
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.3); /* Añadir una sombra sutil */
+        }
+        .touch-controls button:active {
+            background-color: rgba(220, 180, 0, 0.95); /* Oscurecer al presionar */
         }
 
-        /* Media queries para ajustar aún más en pantallas pequeñas */
+
         @media (max-width: 600px) {
             #loginUI h1 {
-                font-size: clamp(20px, 6vw, 28px);
+                font-size: clamp(18px, 5.5vw, 26px);
             }
             #loginUI p {
-                font-size: clamp(13px, 3.8vw, 16px);
+                font-size: clamp(12px, 3.5vw, 15px);
             }
             #loginUI input, #loginUI button {
-                font-size: clamp(13px, 3.8vw, 16px);
-                padding: 10px 15px;
+                font-size: clamp(12px, 3.5vw, 15px);
+                padding: 8px 12px;
             }
             #finalLogo h2 {
-                font-size: clamp(22px, 7vw, 30px);
+                font-size: clamp(18px, 6.5vw, 28px);
             }
             #finalLogo p {
-                font-size: clamp(15px, 4.5vw, 20px);
+                font-size: clamp(14px, 4vw, 18px);
+            }
+            .touch-controls {
+                bottom: 50px; /* Ajustar si es necesario para pantallas más pequeñas */
             }
             .touch-controls button {
-                font-size: clamp(16px, 5.5vw, 22px);
+                font-size: clamp(16px, 5vw, 20px);
                 padding: 8px 12px;
                 min-width: 50px;
             }
-            #loginUI img {
-                max-width: 25%;
-            }
             .logo-footer {
-                max-width: 18%;
+                width: 60px;
+                bottom: 8px;
             }
         }
 
         @media (orientation: landscape) and (max-height: 500px) {
             #loginUI h1, #loginUI p, #loginUI input, #loginUI button,
             #finalLogo h2, #finalLogo p {
-                font-size: clamp(12px, 2.5vw, 16px); /* Ajustar para landscape pequeño */
-            }
-             #loginUI p {
                 font-size: clamp(11px, 2.2vw, 14px);
             }
+             #loginUI p {
+                font-size: clamp(10px, 2vw, 12px);
+            }
             .touch-controls {
-                bottom: 10px; /* Ajustar la posición en landscape pequeño */
+                bottom: 45px; /* Ajustar para landscape pequeño */
             }
             .touch-controls button {
-                font-size: clamp(14px, 4vw, 18px);
+                font-size: clamp(14px, 3.5vw, 16px);
                 padding: 6px 10px;
             }
             #loginUI img {
-                margin-bottom: 5px;
-                max-width: 20%;
+                margin-bottom: 3px;
+                max-width: 18%;
             }
              #loginUI, #finalLogo {
-                gap: 10px; /* Reducir el espacio entre elementos */
+                gap: 8px;
+            }
+            .logo-footer {
+                width: 50px;
+                bottom: 5px;
             }
         }
     </style>
@@ -202,7 +207,7 @@
 
 <div id="loginUI">
     <img src="assets/logo-pichincha.png" alt="Banco Pichincha">
-    <h1>¡Bienvenido a la Feria de Ciberseguridad! 3</h1>
+    <h1>¡Bienvenido a la Feria de Ciberseguridad! 4</h1>
     <p>Demuestra tu conocimiento Ciberguardián en protección digital. Supera los retos, responde las trivias y conquista la galaxia de la ciberseguridad.</p>
     <input type="text" id="usernameInput" placeholder="Ingresa tu nombre">
     <button onclick="startGame()">Comenzar misión</button>
@@ -213,7 +218,8 @@
         <h2 style="color: #FFD700;">¡MISIÓN CUMPLIDA!</h2>
         <p style="color: #ffffff;">Has superado todos los desafíos y obtuviste tu insignia Ciberguardián ⭐</p>
     </div>
-    <canvas id="insigniaCanvas" width="300" height="300"></canvas> </div>
+    <canvas id="insigniaCanvas" width="300" height="300"></canvas>
+</div>
 
 <img src="assets/logo-pichincha.png" alt="Banco Pichincha" class="logo-footer">
 
@@ -245,7 +251,9 @@ class MapScene extends Phaser.Scene {
     create() {
         currentMapScene = this;
         document.getElementById('finalLogo').style.display = 'none';
-        document.getElementById('touchControls').style.display = 'flex';
+        const touchControls = document.getElementById('touchControls');
+        if (touchControls) touchControls.style.display = 'flex';
+
         this.drawScene();
         this.cursors = this.input.keyboard.createCursorKeys();
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
@@ -254,7 +262,7 @@ class MapScene extends Phaser.Scene {
     }
 
     handleResize() {
-        // Destruir textos e imágenes existentes para evitar duplicados y fugas de memoria
+        // Destruir elementos específicos para evitar duplicados
         if (this.titleText) this.titleText.destroy();
         if (this.descriptionText) this.descriptionText.destroy();
         if (this.headerBg) this.headerBg.destroy();
@@ -265,76 +273,90 @@ class MapScene extends Phaser.Scene {
                 if (spriteGroup.icon) spriteGroup.icon.destroy();
                 if (spriteGroup.text) spriteGroup.text.destroy();
             });
+            this.moduleSprites = []; // Limpiar el array
         }
         if (this.character) this.character.destroy();
 
-        this.drawScene();
+        this.drawScene(); // Volver a dibujar la escena con las nuevas dimensiones
     }
 
     drawScene() {
         const width = this.scale.width;
         const height = this.scale.height;
-
-        // Ajustar dinámicamente la altura del encabezado
         const isLandscape = width > height;
-        const headerHeightPercentage = isLandscape ? 0.3 : 0.25; // Menos espacio para header en landscape
+
+        // *** AJUSTE PRINCIPAL AQUÍ: Reducir la altura del header ***
+        const headerHeightPercentage = isLandscape ? 0.18 : 0.15; // Reducido de 0.3/0.25
         const headerHeight = height * headerHeightPercentage;
         const mapHeight = height * (1 - headerHeightPercentage);
 
         this.headerBg = this.add.rectangle(width / 2, headerHeight / 2, width, headerHeight, 0x000000, 0.9);
 
-        const titleFontSize = isLandscape ? 'clamp(16px, 3.5vw, 24px)' : 'clamp(20px, 5vw, 28px)';
-        this.titleText = this.add.text(width / 2, headerHeight * 0.3, `Hola Ciberguardián, ${userSession.username}`, {
+        // Ajustar tamaño de fuente y posición de textos del header
+        const titleFontSize = isLandscape ? 'clamp(14px, 2.5vw, 20px)' : 'clamp(16px, 4vw, 22px)';
+        this.titleText = this.add.text(width / 2, headerHeight * 0.35, // Ajustar Y para centrar mejor
+         `Hola ${userSession.username.split(' ')[0]}, Ciberguardián`, { // Nombre más corto
             fontSize: titleFontSize, fill: '#FFD700', fontFamily: 'Segoe UI', wordWrap: { width: width * 0.9, useAdvancedWrap: true }, align: 'center'
         }).setOrigin(0.5);
 
-        const descFontSize = isLandscape ? 'clamp(12px, 2.5vw, 18px)' : 'clamp(14px, 3.5vw, 20px)';
-        this.descriptionText = this.add.text(width / 2, headerHeight * 0.7, `Avanza por los módulos y demuestra tu destreza en ciberseguridad con cada misión.`, {
+        const descFontSize = isLandscape ? 'clamp(11px, 2vw, 15px)' : 'clamp(12px, 3vw, 16px)';
+        this.descriptionText = this.add.text(width / 2, headerHeight * 0.75, // Ajustar Y
+         `Supera las misiones y demuestra tu destreza.`, { // Texto más corto
             fontSize: descFontSize, fill: '#ffffff', fontFamily: 'Segoe UI', wordWrap: { width: width * 0.95, useAdvancedWrap: true }, align: 'center'
         }).setOrigin(0.5);
 
-        this.headerLine = this.add.rectangle(width / 2, headerHeight + 2, width, 4, 0x00FF00);
+        this.headerLine = this.add.rectangle(width / 2, headerHeight -2, width, 4, 0x00FF00); // Línea justo al final del header
 
         const mapY = headerHeight + mapHeight / 2;
         this.mapBg = this.add.image(width / 2, mapY, 'background').setDisplaySize(width, mapHeight);
 
-        const moduleBaseY = headerHeight + mapHeight * (isLandscape ? 0.4 : 0.3); // Ajustar Y base en landscape
-        const moduleSpacingY = mapHeight * (isLandscape ? 0.2 : 0.2);
-
-        this.modules = [
-            { x: width * 0.2, y: moduleBaseY },
-            { x: width * 0.5, y: moduleBaseY + moduleSpacingY * (isLandscape ? 0.5 : 1) },
-            { x: width * 0.8, y: moduleBaseY + moduleSpacingY * (isLandscape ? 1 : 2) }
-        ];
-        // Asegurar que los módulos no se salgan de la pantalla en landscape
+        // Ajustar la posición Y base de los módulos debido al cambio en headerHeight
+        let moduleBaseY, moduleSpacingY;
         if (isLandscape) {
-            this.modules[1].y = headerHeight + mapHeight * 0.5;
-            this.modules[2].y = headerHeight + mapHeight * 0.7;
+            moduleBaseY = headerHeight + mapHeight * 0.35;
+            moduleSpacingY = mapHeight * 0.15;
+             this.modules = [
+                { x: width * 0.25, y: moduleBaseY + moduleSpacingY * 0.5 },
+                { x: width * 0.5,  y: moduleBaseY + moduleSpacingY * 1.5 },
+                { x: width * 0.75, y: moduleBaseY + moduleSpacingY * 0.5 }
+            ];
+        } else { // Portrait
+            moduleBaseY = headerHeight + mapHeight * 0.2;
+            moduleSpacingY = mapHeight * 0.25; // Mayor espaciado vertical en portrait
+            this.modules = [
+                { x: width * 0.25, y: moduleBaseY }, // Módulo 1 más arriba
+                { x: width * 0.5,  y: moduleBaseY + moduleSpacingY },
+                { x: width * 0.75, y: moduleBaseY + moduleSpacingY * 2 } // Módulo 3 más abajo
+            ];
         }
 
 
-        this.currentNode = this.currentNode !== undefined ? this.currentNode : 0; // Mantener el nodo actual si ya existe
+        this.currentNode = this.currentNode !== undefined ? this.currentNode : 0;
 
         this.moduleSprites = this.modules.map((mod, i) => {
             const key = userSession.completedStages?.[i] ? 'module-complete' : 'module';
             const icon = this.add.image(mod.x, mod.y, key);
-            const iconSize = Math.min(width * (isLandscape ? 0.08 : 0.12), isLandscape ? 60 : 70); // Iconos más pequeños en landscape
+            const iconSize = Math.min(width * (isLandscape ? 0.07 : 0.11), isLandscape ? 55 : 65);
             icon.setDisplaySize(iconSize, iconSize);
-            const moduleText = this.add.text(mod.x, mod.y + iconSize * 0.7, `Fase ${i + 1}`, { fontSize: 'clamp(10px, 2.5vw, 14px)', fill: '#fff', align: 'center' }).setOrigin(0.5);
+            const moduleText = this.add.text(mod.x, mod.y + iconSize * 0.75, `Fase ${i + 1}`, { fontSize: 'clamp(10px, 2.2vw, 13px)', fill: '#fff', align: 'center' }).setOrigin(0.5);
             return { icon: icon, text: moduleText };
         });
 
-        const characterSize = Math.min(width * (isLandscape ? 0.07 : 0.1), isLandscape ? 50 : 64);
+        const characterSize = Math.min(width * (isLandscape ? 0.06 : 0.09), isLandscape ? 45 : 60);
         if (this.modules?.[this.currentNode]) {
-             this.character = this.add.image(this.modules[this.currentNode].x, this.modules[this.currentNode].y - characterSize * 0.9, 'character');
+             this.character = this.add.image(this.modules[this.currentNode].x, this.modules[this.currentNode].y - characterSize * 1, 'character'); // Un poco más arriba del módulo
              this.character.setDisplaySize(characterSize, characterSize);
+        } else if (this.modules?.length > 0) { // Si currentNode es inválido pero hay módulos, poner en el primero
+            this.currentNode = 0;
+            this.character = this.add.image(this.modules[0].x, this.modules[0].y - characterSize * 1, 'character');
+            this.character.setDisplaySize(characterSize, characterSize);
         }
-
-        this.moveCharacter(false); // Reposicionar el personaje sin animación
+        this.moveCharacter(false);
     }
 
     update() {
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < this.modules.length - 1) {
+        if (!this.cursors) return; // Asegurarse de que los cursores están inicializados
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < (this.modules?.length - 1 || 0)) {
             this.currentNode++;
             this.moveCharacter();
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.left) && this.currentNode > 0) {
@@ -345,13 +367,13 @@ class MapScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.enterKey)) enterScene();
     }
 
-    moveCharacter(animate = true) { // Añadido parámetro para controlar la animación
+    moveCharacter(animate = true) {
         const target = this.modules?.[this.currentNode];
         if (target && this.character) {
             const isLandscape = this.scale.width > this.scale.height;
-            const characterSize = Math.min(this.scale.width * (isLandscape ? 0.07 : 0.1), isLandscape ? 50 : 64);
+            const characterSize = Math.min(this.scale.width * (isLandscape ? 0.06 : 0.09), isLandscape ? 45 : 60);
             const targetX = target.x;
-            const targetY = target.y - characterSize * 0.9; // Ajustar la Y del personaje ligeramente arriba del módulo
+            const targetY = target.y - characterSize * 1;
 
             if (animate) {
                  this.tweens.add({
@@ -359,13 +381,16 @@ class MapScene extends Phaser.Scene {
                     x: targetX,
                     y: targetY,
                     ease: 'Power2',
-                    duration: 300
+                    duration: 250
                 });
             } else {
                 this.character.x = targetX;
                 this.character.y = targetY;
             }
         }
+    }
+    shutdown() {
+        this.scale.off('resize', this.handleResize, this);
     }
 }
 
@@ -376,18 +401,20 @@ class TriviaScene extends Phaser.Scene {
         this.stage = data.stage;
         this.selectedOption = null;
         this.optionTexts = [];
-        this.uiElements = []; // Para manejar los elementos de UI y destruirlos al redimensionar
+        this.uiElements = [];
     }
 
     create() {
         document.getElementById('finalLogo').style.display = 'none';
-        document.getElementById('touchControls').style.display = 'none';
+        const touchControls = document.getElementById('touchControls');
+        if (touchControls) touchControls.style.display = 'none';
+
         this.drawTrivia();
         this.scale.on('resize', this.handleResize, this);
     }
 
     handleResize() {
-        this.uiElements.forEach(el => el.destroy());
+        this.uiElements.forEach(el => { if(el && el.destroy) el.destroy(); });
         this.uiElements = [];
         this.drawTrivia();
     }
@@ -396,15 +423,17 @@ class TriviaScene extends Phaser.Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
         const isLandscape = this.scale.width > this.scale.height;
-        const verticalScale = isLandscape ? 0.8 : 1; // Comprimir verticalmente en landscape
+        const verticalScale = isLandscape ? 0.9 : 1; // Comprimir menos en landscape
 
-        const title = this.add.text(centerX, centerY * 0.3 * verticalScale, `Trivia Fase ${this.stage}`, {
-            fontSize: `clamp(${isLandscape ? '20px' : '24px'}, 6vw, ${isLandscape ? '28px' : '32px'})`, fill: '#FFD700', fontFamily: 'Segoe UI', align: 'center'
+        const titleY = isLandscape ? centerY * 0.25 : centerY * 0.2;
+        const title = this.add.text(centerX, titleY * verticalScale, `Trivia Fase ${this.stage}`, {
+            fontSize: `clamp(${isLandscape ? '18px' : '22px'}, 5.5vw, ${isLandscape ? '26px' : '30px'})`, fill: '#FFD700', fontFamily: 'Segoe UI', align: 'center'
         }).setOrigin(0.5);
         this.uiElements.push(title);
 
-        const question = this.add.text(centerX, centerY * 0.6 * verticalScale, '¿Qué es phishing?', {
-            fontSize: `clamp(${isLandscape ? '16px' : '18px'}, 4.5vw, ${isLandscape ? '20px' : '24px'})`, fill: '#ffffff', fontFamily: 'Segoe UI', align: 'center', wordWrap: { width: this.scale.width * 0.9, useAdvancedWrap: true }
+        const questionY = isLandscape ? centerY * 0.5 : centerY * 0.45;
+        const question = this.add.text(centerX, questionY * verticalScale, '¿Qué es phishing?', {
+            fontSize: `clamp(${isLandscape ? '15px' : '17px'}, 4vw, ${isLandscape ? '19px' : '22px'})`, fill: '#ffffff', fontFamily: 'Segoe UI', align: 'center', wordWrap: { width: this.scale.width * 0.9, useAdvancedWrap: true }
         }).setOrigin(0.5);
         this.uiElements.push(question);
 
@@ -414,10 +443,14 @@ class TriviaScene extends Phaser.Scene {
             'Un software antivirus'
         ];
 
+        // Ajustar posición de opciones y botón de confirmar
+        const optionsStartY = isLandscape ? centerY * 0.8 : centerY * 0.75;
+        const optionSpacing = isLandscape ? this.scale.height * 0.15 : this.scale.height * 0.13;
+
         this.optionTexts = opciones.map((op, i) => {
-            const yPosition = centerY * (0.9 + i * 0.3) * verticalScale;
+            const yPosition = (optionsStartY + i * optionSpacing) * verticalScale;
             const optionText = this.add.text(centerX, yPosition, op, {
-                fontSize: `clamp(${isLandscape ? '14px' : '16px'}, 4vw, ${isLandscape ? '18px' : '20px'})`, fill: '#ffffff', backgroundColor: '#333',
+                fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.5vw, ${isLandscape ? '17px' : '19px'})`, fill: '#ffffff', backgroundColor: '#333',
                 padding: { left: 10, right: 10, top: 8, bottom: 8 }, align: 'center', wordWrap: { width: this.scale.width * 0.8, useAdvancedWrap: true }
             }).setOrigin(0.5)
                 .setInteractive({ useHandCursor: true })
@@ -426,59 +459,67 @@ class TriviaScene extends Phaser.Scene {
             return optionText;
         });
 
-        this.confirmButton = this.add.text(centerX, centerY * (0.9 + opciones.length * 0.3 + 0.2) * verticalScale, 'Responder', {
-            fontSize: `clamp(${isLandscape ? '16px' : '18px'}, 5vw, ${isLandscape ? '20px' : '22px'})`, fill: '#000', backgroundColor: '#FFD700',
+        const confirmButtonY = (optionsStartY + opciones.length * optionSpacing) * verticalScale;
+        this.confirmButton = this.add.text(centerX, confirmButtonY, 'Responder', {
+            fontSize: `clamp(${isLandscape ? '15px' : '17px'}, 4.5vw, ${isLandscape ? '19px' : '21px'})`, fill: '#000', backgroundColor: '#FFD700',
             padding: { left: 20, right: 20, top: 10, bottom: 10 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false)
             .on('pointerdown', () => this.validarRespuesta());
         this.uiElements.push(this.confirmButton);
 
-        if (this.selectedOption !== null) { // Restaurar estado si ya había una opción seleccionada
-            this.seleccionarOpcion(this.selectedOption, false); // No volver a mostrar el botón si ya está visible
+        if (this.selectedOption !== null && this.optionTexts[this.selectedOption]) {
+            this.seleccionarOpcion(this.selectedOption, this.confirmButton.visible);
         }
     }
 
     seleccionarOpcion(index, showConfirmButton = true) {
         this.selectedOption = index;
         this.optionTexts.forEach((txt, i) => {
-            txt.setStyle({
-                backgroundColor: i === index ? '#FFD700' : '#333',
-                fill: i === index ? '#000' : '#fff'
-            });
+            if (txt && txt.active) { // Verificar que el texto exista y esté activo
+                txt.setStyle({
+                    backgroundColor: i === index ? '#FFD700' : '#333',
+                    fill: i === index ? '#000' : '#fff'
+                });
+            }
         });
-        if (showConfirmButton && this.confirmButton) {
-             this.confirmButton.setVisible(true);
+        if (this.confirmButton && this.confirmButton.active) {
+            this.confirmButton.setVisible(showConfirmButton);
         }
     }
 
     validarRespuesta() {
         if (this.selectedOption === null || !this.optionTexts?.[this.selectedOption]) return;
 
-        this.scale.off('resize', this.handleResize, this); // Desactivar el listener de resize temporalmente
+        this.scale.off('resize', this.handleResize, this);
 
         const opcion = this.optionTexts[this.selectedOption].text;
         if (opcion.includes('engañar')) {
             userSession.completedStages = userSession.completedStages || [false, false, false];
-            if (this.stage -1 < userSession.completedStages.length) {
+            if (this.stage -1 >=0 && this.stage - 1 < userSession.completedStages.length) {
                 userSession.completedStages[(this.stage - 1)] = true;
             }
             const todas = userSession.completedStages.every(e => e === true);
             this.scene.start(todas ? 'BadgeScene' : 'MapScene');
         } else {
-            this.uiElements.forEach(el => el.destroy()); // Limpiar UI anterior
+            this.uiElements.forEach(el => {if(el && el.destroy) el.destroy()});
             this.uiElements = [];
-            this.drawTrivia(); // Redibujar la trivia para mostrarla "limpia"
-             const isLandscape = this.scale.width > this.scale.height;
+            this.drawTrivia();
+            const isLandscape = this.scale.width > this.scale.height;
 
-            const incorrectText = this.add.text(this.scale.width / 2, this.scale.height * (isLandscape ? 0.9 : 0.95) , '❌ Respuesta incorrecta. Intenta otra vez.', {
-                fontSize: `clamp(${isLandscape ? '14px' : '16px'}, 4vw, ${isLandscape ? '18px' : '20px'})`, fill: '#f00'
+            const incorrectText = this.add.text(this.scale.width / 2, this.scale.height * (isLandscape ? 0.92 : 0.95) , '❌ Respuesta incorrecta. Intenta otra vez.', {
+                fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, fill: '#f00'
             }).setOrigin(0.5);
-            this.uiElements.push(incorrectText); // Añadirlo para que se limpie si hay otro resize antes del timeout
+            this.uiElements.push(incorrectText);
 
             this.time.delayedCall(2000, () => {
-                this.scene.start('MapScene');
+                if(this.scene.key === 'TriviaScene') { // Asegurarse que la escena sigue activa
+                    this.scene.start('MapScene');
+                }
             });
         }
+    }
+    shutdown() {
+        this.scale.off('resize', this.handleResize, this);
     }
 }
 
@@ -487,8 +528,9 @@ class BadgeScene extends Phaser.Scene {
 
     create() {
         document.getElementById('finalLogo').style.display = 'flex';
-        document.getElementById('touchControls').style.display = 'none';
-        this.drawDynamicInsignia(userSession.username); // Cambiado a un método de la escena
+        const touchControls = document.getElementById('touchControls');
+        if (touchControls) touchControls.style.display = 'none';
+        this.drawDynamicInsignia(userSession.username);
         this.scale.on('resize', this.handleResize, this);
     }
 
@@ -504,8 +546,10 @@ class BadgeScene extends Phaser.Scene {
 
         img.onload = () => {
             const container = document.getElementById('finalLogo');
-            const containerWidth = container.clientWidth * 0.8; // Usar el 80% del contenedor
-            const containerHeight = container.clientHeight * 0.6; // Usar el 60% del contenedor
+            if (!container) return;
+            // Usar el 70% del contenedor para el canvas de la insignia, para dejar algo de margen
+            const containerWidth = container.clientWidth * 0.7;
+            const containerHeight = container.clientHeight * 0.5; // Un poco menos alto
 
             const aspectRatio = img.width / img.height;
             let newWidth = containerWidth;
@@ -515,9 +559,8 @@ class BadgeScene extends Phaser.Scene {
                 newHeight = containerHeight;
                 newWidth = newHeight * aspectRatio;
             }
-             // Asegurarse de que no sea más grande que las dimensiones originales de la imagen o un máximo
-            newWidth = Math.min(newWidth, img.width, 500);
-            newHeight = Math.min(newHeight, img.height, 500);
+            newWidth = Math.min(newWidth, img.width, 350); // Máximo de 350px
+            newHeight = Math.min(newHeight, img.height, 350);
 
 
             canvas.width = newWidth;
@@ -526,27 +569,25 @@ class BadgeScene extends Phaser.Scene {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            const fontSize = Math.max(12, canvas.width * 0.045); // Tamaño de fuente relativo al ancho del canvas
+            const fontSize = Math.max(10, canvas.width * 0.05);
             ctx.font = `bold ${fontSize}px Segoe UI`;
-            ctx.fillStyle = '#000'; // Color del texto
+            ctx.fillStyle = '#000';
             ctx.textAlign = 'center';
-            // Ajustar la posición Y del texto para que quede bien en la insignia
-            // Esto puede necesitar ajuste específico según la imagen de la insignia
-            ctx.fillText(nombre.toUpperCase(), canvas.width / 2, canvas.height * 0.725); // Ajustar este multiplicador si es necesario
+            ctx.fillText(nombre.toUpperCase(), canvas.width / 2, canvas.height * 0.725);
         };
         img.onerror = () => {
             console.error("No se pudo cargar la imagen de la insignia: assets/insigniaBP.png");
-            // Opcional: dibujar un placeholder o mensaje de error en el canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "red";
-            ctx.font = "16px Segoe UI";
-            ctx.textAlign = "center";
-            ctx.fillText("Error al cargar insignia", canvas.width / 2, canvas.height / 2);
+            if(ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "red";
+                ctx.font = "14px Segoe UI";
+                ctx.textAlign = "center";
+                ctx.fillText("Error insignia", canvas.width / 2, canvas.height / 2);
+            }
         }
         img.src = 'assets/insigniaBP.png';
     }
      shutdown() {
-        // Limpiar el listener de resize al salir de la escena
         this.scale.off('resize', this.handleResize, this);
     }
 }
@@ -570,14 +611,14 @@ function enterScene() {
     if (currentMapScene && currentMapScene.sys.isActive()) {
         const index = currentMapScene.currentNode;
         const unlocked = index === 0 || userSession?.completedStages?.[index - 1];
-        if (unlocked && currentMapScene.scene.key === 'MapScene') { // Asegurarse de que estamos en MapScene
-             // Desactivar controles táctiles temporalmente para evitar doble entrada
-            document.getElementById('touchControls').style.pointerEvents = 'none';
+        if (unlocked && currentMapScene.scene.key === 'MapScene') {
+            const touchControls = document.getElementById('touchControls');
+            if (touchControls) touchControls.style.pointerEvents = 'none';
+
             currentMapScene.scene.start('TriviaScene', { stage: index + 1 });
-            // Reactivar después de un breve retraso
             setTimeout(() => {
-                 if(document.getElementById('touchControls')) {
-                    document.getElementById('touchControls').style.pointerEvents = 'auto';
+                 if(touchControls) {
+                    touchControls.style.pointerEvents = 'auto';
                  }
             }, 500);
         }
@@ -588,12 +629,24 @@ function startGame() {
     const usernameInput = document.getElementById('usernameInput');
     const username = usernameInput.value.trim();
     if (username === '') {
-        usernameInput.style.border = "2px solid red"; // Feedback visual
+        usernameInput.style.border = "2px solid red";
+        // Pequeña alerta o mensaje en la UI sería mejor
+        if (!document.getElementById('usernameError')) {
+            const errorMsg = document.createElement('p');
+            errorMsg.id = 'usernameError';
+            errorMsg.textContent = '¡El nombre no puede estar vacío!';
+            errorMsg.style.color = 'red';
+            errorMsg.style.fontSize = 'clamp(12px, 3vw, 14px)';
+            usernameInput.parentNode.insertBefore(errorMsg, usernameInput.nextSibling);
+        }
         return;
     }
-    usernameInput.style.border = "none"; // Resetear borde
+    const existingError = document.getElementById('usernameError');
+    if (existingError) existingError.remove();
+
+    usernameInput.style.border = "none";
     userSession.username = username;
-    userSession.completedStages = [false, false, false]; // Resetear progreso
+    userSession.completedStages = [false, false, false];
     document.getElementById('loginUI').style.display = 'none';
 
     const config = {
@@ -606,18 +659,16 @@ function startGame() {
             autoCenter: Phaser.Scale.CENTER_BOTH
         },
         scene: [MapScene, TriviaScene, BadgeScene],
-        // Habilitar antiAliasing puede mejorar la apariencia de textos e imágenes rotadas/escaladas
         render: {
             antialias: true,
-            pixelArt: false // Usar false si no es pixel art para un mejor escalado
+            pixelArt: false
         }
     };
 
     if (gameInstance) {
-        // Limpiar listeners de escenas anteriores si existen
         gameInstance.scene.getScenes(true).forEach(scene => {
-            if (scene.scale && scene.handleResize) {
-                scene.scale.off('resize', scene.handleResize, scene);
+            if (scene.sys.isActive() && scene.shutdown) { // Asegurarse que la escena tiene shutdown
+                scene.shutdown(); // Llama al shutdown de la escena para limpiar listeners
             }
         });
         gameInstance.destroy(true);
@@ -625,24 +676,16 @@ function startGame() {
     gameInstance = new Phaser.Game(config);
 }
 
-// Asegurarse de que el juego se redimensiona correctamente al cambiar la orientación o tamaño de la ventana
 window.addEventListener('resize', () => {
-    if (gameInstance && gameInstance.scale && gameInstance.scale.game) { // Verificar que gameInstance y sus propiedades existen
+    if (gameInstance && gameInstance.scale && gameInstance.scale.game) {
         gameInstance.scale.resize(window.innerWidth, window.innerHeight);
-        // Las escenas ya manejan su propio redibujado a través del evento 'resize' de Phaser.Scale
     }
 });
 
-// Inicializar la vista de la insignia si ya está visible (ej. en caso de recarga en la pantalla final)
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('finalLogo').style.display === 'flex' && typeof BadgeScene !== 'undefined') {
-        // Esto es un poco más complejo porque la escena Phaser no estaría activa sin el juego.
-        // Lo ideal sería que startGame() maneje la lógica de ir a la escena correcta si los datos ya existen.
-        // Por ahora, si el logo final está visible, es probable que drawInsignia deba ser llamado
-        // si el flujo lo permite (ej. si username ya está en userSession).
-        // La lógica actual de BadgeScene.create ya lo llama, así que esto podría ser redundante
-        // o necesitar un mejor manejo del estado inicial.
-    }
+    // Limpiar mensaje de error si existe al recargar
+    const existingError = document.getElementById('usernameError');
+    if (existingError) existingError.remove();
 });
 
 </script>
