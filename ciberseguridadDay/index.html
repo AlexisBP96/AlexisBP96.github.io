@@ -17,6 +17,11 @@
             touch-action: none;
             color: #fff; 
         }
+        #phaser-game { /* Contenedor para el canvas de Phaser y la UI HTML superpuesta */
+            position: relative; /* Permite posicionar elementos HTML absolutamente dentro */
+            width: 100%;
+            height: 100%;
+        }
         #phaser-game canvas { 
             display: block;
             position: absolute;
@@ -114,13 +119,13 @@
             object-fit: contain; 
         }
 
-        /* Estilos para UI HTML de MapScene (Solo Header) */
+        /* --- Estilos para UI HTML de MapScene (Header y Textos de Módulos) --- */
         #mapHeader {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 10px; /* Ajustar según sea necesario */
+            padding: 10px; 
             box-sizing: border-box;
             text-align: center;
             z-index: 10; 
@@ -130,18 +135,132 @@
         }
         #mapTitle {
             color: #FFD700;
-            font-size: clamp(12px, 2vw, 18px); /* Consistente con MapScene */
+            font-size: clamp(12px, 2vw, 18px); 
             font-weight: bold;
             margin: 0 0 3px 0;
             text-shadow: 0.5px 0.5px 1px #000;
         }
         #mapDescription {
             color: #E0E0E0;
-            font-size: clamp(9px, 1.6vw, 13px); /* Consistente con MapScene */
+            font-size: clamp(9px, 1.6vw, 13px); 
             margin: 0;
             text-shadow: 0.5px 0.5px 1px #000;
         }
-        /* Ya no se necesita #mapModulesContainer ni .map-module */
+
+        #mapModuleTextsContainer { /* Contenedor para los textos HTML de los módulos */
+            position: absolute;
+            top: 0; /* Se ajustará con JS si es necesario, pero los divs internos son absolutos */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Para que no interfiera con el input de Phaser en los iconos */
+            z-index: 5; /* Detrás del personaje, pero encima del fondo */
+            display: none; /* Controlado por JS */
+        }
+
+        .map-module-text {
+            position: absolute; /* Posicionamiento se hará con JS */
+            transform: translateX(-50%); /* Para centrar el texto debajo del icono */
+            color: #E0E0E0;
+            font-size: clamp(8px, 1.5vw, 11px);
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            padding: 2px 4px;
+            /* background-color: rgba(0,0,0,0.3); Opcional para legibilidad */
+            /* border-radius: 3px; */
+            text-shadow: 0.5px 0.5px 1px #000;
+        }
+        .map-module-text.completed {
+            color: #77FF77;
+        }
+        .map-module-text.active {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+
+        /* --- Estilos para UI HTML de TriviaScene --- */
+        #triviaUI {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20; 
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            gap: 15px; 
+        }
+        #triviaTitle {
+            font-size: clamp(18px, 5.5vw, 28px);
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+        #triviaQuestion {
+            font-size: clamp(15px, 4vw, 22px);
+            color: #ffffff;
+            max-width: 90%;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px #000;
+        }
+        #triviaOptionsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 85%;
+            max-width: 400px;
+        }
+        .trivia-option {
+            font-size: clamp(13px, 3.5vw, 18px);
+            color: #ffffff;
+            background-color: rgba(51, 51, 51, 0.8); 
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid rgba(100,100,100,0.5);
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+        }
+        .trivia-option:hover {
+            background-color: rgba(65, 65, 65, 0.9);
+            border-color: rgba(150,150,150,0.7);
+        }
+        .trivia-option.selected {
+            background-color: #FFD700;
+            color: #000000;
+            font-weight: bold;
+            border-color: #FFD700;
+        }
+        #triviaConfirmButton {
+            font-size: clamp(15px, 4.5vw, 20px);
+            color: #000000;
+            background-color: #FFD700;
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.3);
+            transition: background-color 0.2s;
+            display: none; 
+        }
+        #triviaConfirmButton:hover {
+            background-color: #e6c200;
+        }
+        #triviaIncorrectMessage {
+            font-size: clamp(13px, 3.8vw, 17px);
+            color: #ff4d4d;
+            background-color: rgba(0,0,0,0.7);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none; 
+        }
+
 
         #bottomBarContainer {
             position: fixed;
@@ -204,6 +323,12 @@
 
             #mapTitle { font-size: clamp(13px, 3.2vw, 20px); }
             #mapDescription { font-size: clamp(10px, 2.5vw, 14px); }
+            .map-module-text { font-size: clamp(9px, 2.2vw, 12px); }
+            
+            #triviaTitle { font-size: clamp(16px, 5vw, 24px); }
+            #triviaQuestion { font-size: clamp(14px, 3.8vw, 20px); }
+            .trivia-option { font-size: clamp(12px, 3.2vw, 16px); padding: 10px 12px;}
+            #triviaConfirmButton { font-size: clamp(14px, 4vw, 18px); padding: 10px 20px;}
 
 
             .touch-controls { padding: 6px 0; gap: 10px; }
@@ -219,6 +344,13 @@
 
             #mapTitle { font-size: clamp(12px, 2vw, 18px); }
             #mapDescription { font-size: clamp(9px, 1.6vw, 13px); }
+            .map-module-text { font-size: clamp(8px, 1.5vw, 11px); }
+
+            #triviaUI { gap: 10px; padding: 15px;}
+            #triviaTitle { font-size: clamp(16px, 4.5vw, 22px); }
+            #triviaQuestion { font-size: clamp(13px, 3.2vw, 18px); margin-bottom: 5px;}
+            .trivia-option { font-size: clamp(11px, 2.8vw, 15px); padding: 8px 10px;}
+            #triviaConfirmButton { font-size: clamp(13px, 3.5vw, 17px); padding: 8px 18px;}
 
 
             .touch-controls { padding: 5px 0; }
@@ -245,6 +377,20 @@
     <div id="mapTitle"></div>
     <div id="mapDescription"></div>
 </div>
+<div id="mapModuleTextsContainer">
+    </div>
+
+
+<div id="triviaUI">
+    <div id="triviaTitle"></div>
+    <div id="triviaQuestion"></div>
+    <div id="triviaOptionsContainer">
+        </div>
+    <button id="triviaConfirmButton">Responder</button>
+    <div id="triviaIncorrectMessage"></div>
+</div>
+
+
 <div id="finalLogo">
     <div style="text-align: center; color: white;">
         <h2 style="color: #FFD700;">¡MISIÓN CUMPLIDA!</h2>
@@ -272,12 +418,14 @@ let userSession = {
 let gameInstance = null;
 let currentMapScene = null;
 
-const GLOBAL_FONT_FAMILY_HTML = 'Segoe UI, Arial, sans-serif'; // Para HTML
-const GLOBAL_FONT_FAMILY_PHASER = 'Arial, sans-serif'; // Fuente segura para Phaser si se usa texto
+const GLOBAL_FONT_FAMILY_HTML = 'Segoe UI, Arial, sans-serif'; 
 const MODULE_COUNT = 3; 
 
 // Elementos HTML de la UI del Mapa
-let mapHeaderDiv, mapTitleDiv, mapDescriptionDiv;
+let mapHeaderDiv, mapTitleDiv, mapDescriptionDiv, mapModuleTextsContainerDiv;
+// Elementos HTML de la UI de Trivia
+let triviaUIDiv, triviaTitleDiv, triviaQuestionDiv, triviaOptionsContainerDiv, triviaConfirmButton, triviaIncorrectMessageDiv;
+
 
 function createSceneBackground(scene) {
     scene.bg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
@@ -302,28 +450,31 @@ function resizeSceneBackground(scene) {
 class MapScene extends Phaser.Scene {
     constructor() { 
         super('MapScene');
-        this.moduleSprites = []; // Para almacenar los sprites de los módulos (icono y texto)
-        this.activeModuleSpriteIcon = null; // Para el icono del módulo activo
+        this.moduleSprites = []; 
+        this.htmlModuleTextElements = []; // Para los divs de texto HTML
     }
 
     preload() {
         this.load.image('background', 'assets/background.jpg');
-        this.load.image('module', 'assets/module.png'); // Cargar imagen de módulo normal
-        this.load.image('module-complete', 'assets/module-green.png'); // Cargar imagen de módulo completado
-        this.load.image('character', 'assets/jedi.png'); 
+        this.load.image('module', 'assets/module.png'); 
+        this.load.image('module-complete', 'assets/module-green.png'); 
+        this.load.image('character', 'assets/Jedi.png'); 
     }
 
     create() {
         currentMapScene = this;
-        this.hideHtmlUI(); 
+        this.hideAllHtmlUI(); 
         
         mapHeaderDiv = document.getElementById('mapHeader');
         mapTitleDiv = document.getElementById('mapTitle');
         mapDescriptionDiv = document.getElementById('mapDescription');
+        mapModuleTextsContainerDiv = document.getElementById('mapModuleTextsContainer');
         
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'flex'; 
         if (mapHeaderDiv) mapHeaderDiv.style.display = 'block';
+        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'block';
+
 
         createSceneBackground(this); 
 
@@ -332,27 +483,32 @@ class MapScene extends Phaser.Scene {
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
         this.scale.on('resize', this.handleResize, this);
+        this.updateModuleTextPositions(); // Posicionar textos HTML
         this.updateActiveModuleVisuals(); 
     }
 
-    hideHtmlUI() {
-        const mapH = document.getElementById('mapHeader');
-        if(mapH) mapH.style.display = 'none';
-        document.getElementById('finalLogo').style.display = 'none';
+    hideAllHtmlUI() {
+        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogo'];
+        elementsToHide.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
     }
-
 
     handleResize() {
         resizeSceneBackground(this);
-        // Destruir elementos de Phaser
         this.moduleSprites.forEach(spriteGroup => { 
             if(spriteGroup.icon) spriteGroup.icon.destroy();
-            if(spriteGroup.text) spriteGroup.text.destroy();
+            // No necesitamos destruir el texto de Phaser si ya no lo usamos
         });
         this.moduleSprites = [];
+        this.htmlModuleTextElements.forEach(textDiv => textDiv.remove());
+        this.htmlModuleTextElements = [];
+
         if (this.character) this.character.destroy();
         
         this.drawSceneElements(); 
+        this.updateModuleTextPositions();
         this.updateActiveModuleVisuals(); 
     }
 
@@ -361,39 +517,32 @@ class MapScene extends Phaser.Scene {
         const height = this.scale.height;
         this.isLandscape = width > height;
 
-        // Actualizar texto del header HTML
         mapTitleDiv.textContent = `Hola ${userSession.username.split(' ')[0]}, Ciberguardián`;
         mapDescriptionDiv.textContent = `Supera las misiones y demuestra tu destreza.`;
         
-        // Ajustar padding del header HTML basado en la altura real del header de Phaser
         const headerHeightPercentage = this.isLandscape ? 0.14 : 0.11; 
         mapHeaderDiv.style.paddingTop = `${height * headerHeightPercentage * 0.15}px`;
         mapHeaderDiv.style.paddingBottom = `${height * headerHeightPercentage * 0.15}px`;
         
-        // Módulos como sprites de Phaser
-        const baseIconSize = this.isLandscape ? Math.min(width * 0.06, 45) : Math.min(width * 0.11, 50); // Un poco más pequeños
-        const moduleTextFontSize = this.isLandscape ? 'clamp(8px, 1.5vw, 11px)' : 'clamp(9px, 2.2vw, 12px)';
+        const baseIconSize = this.isLandscape ? Math.min(width * 0.055, 42) : Math.min(width * 0.1, 48); // Ligeramente más pequeños
         
         this.modulePositions = []; 
         const headerActualHeight = mapHeaderDiv.offsetHeight || height * headerHeightPercentage;
 
-
         if (this.isLandscape) {
             const moduleAreaY = headerActualHeight + (height - headerActualHeight) * 0.65; 
-            const totalModuleWidth = width * 0.5; 
+            const totalModuleWidth = width * 0.45; // Más compactos
             const moduleSpacingX = totalModuleWidth / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1); 
             let currentX = (width - (moduleSpacingX * (MODULE_COUNT - 1))) / 2;
-
             for (let i = 0; i < MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: currentX, y: moduleAreaY });
                 currentX += moduleSpacingX;
             }
         } else { 
             const moduleAreaX = width / 2;
-            const moduleGroupHeight = (height - headerActualHeight) * 0.5; 
+            const moduleGroupHeight = (height - headerActualHeight) * 0.45; 
             const startY = headerActualHeight + (height - headerActualHeight) * 0.3;
-            const moduleSpacingY = moduleGroupHeight / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1) * 0.9;
-
+            const moduleSpacingY = moduleGroupHeight / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1) * 0.85;
             for (let i = 0; i < MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: moduleAreaX, y: startY + (i * moduleSpacingY) });
             }
@@ -401,28 +550,24 @@ class MapScene extends Phaser.Scene {
         
         this.currentNode = this.currentNode !== undefined ? this.currentNode : 0;
 
+        mapModuleTextsContainerDiv.innerHTML = ''; // Limpiar textos HTML anteriores
+        this.htmlModuleTextElements = [];
+
         this.moduleSprites = this.modulePositions.map((pos, i) => {
             const isComplete = userSession.completedStages?.[i];
             const iconKey = isComplete ? 'module-complete' : 'module';
             
-            const icon = this.add.image(pos.x, pos.y, iconKey)
-                .setDepth(1)
-                .setDisplaySize(baseIconSize, baseIconSize)
-                .setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => {
-                    this.currentNode = i;
-                    this.moveCharacter();
-                });
-
-            const textObj = this.add.text(pos.x, pos.y + baseIconSize * 0.6, `Fase ${i + 1}`, {
-                fontSize: moduleTextFontSize,
-                fontFamily: GLOBAL_FONT_FAMILY_PHASER,
-                fill: '#E0E0E0', 
-                align: 'center',
-                shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000', blur: 1}
-            }).setOrigin(0.5).setDepth(1.1);
+            const icon = this.add.image(pos.x, pos.y, iconKey).setDepth(1)
+                .setDisplaySize(baseIconSize, baseIconSize).setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => { this.currentNode = i; this.moveCharacter(); });
             
-            return { icon: icon, text: textObj, originalScale: icon.scaleX };
+            // Crear el div HTML para el texto del módulo
+            const textDiv = document.createElement('div');
+            textDiv.className = 'map-module-text';
+            mapModuleTextsContainerDiv.appendChild(textDiv);
+            this.htmlModuleTextElements.push(textDiv);
+            
+            return { icon: icon, textDiv: textDiv, originalScale: icon.scaleX };
         });
         
         const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.045, 38) : Math.min(width * 0.08, 45);
@@ -430,41 +575,63 @@ class MapScene extends Phaser.Scene {
 
         if (this.moduleSprites[this.currentNode]?.icon) {
             const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
-            this.character = this.add.image(
-                activeModuleIcon.x, 
+            this.character = this.add.image(activeModuleIcon.x, 
                 activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.4, 
-                'character'
-            ).setDepth(2).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
+                'character').setDepth(2).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
         }
+    }
+
+    updateModuleTextPositions() {
+        if (!mapModuleTextsContainerDiv) return;
+        const gameCanvas = this.game.canvas;
+
+        this.moduleSprites.forEach((spriteGroup, i) => {
+            if (spriteGroup.icon && spriteGroup.icon.active && spriteGroup.textDiv) {
+                const icon = spriteGroup.icon;
+                const textDiv = spriteGroup.textDiv;
+                
+                // Convertir coordenadas del mundo de Phaser a coordenadas del viewport
+                const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.5 + 5); // 5px de offset hacia abajo
+                
+                textDiv.style.left = `${pt.x}px`;
+                textDiv.style.top = `${pt.y}px`;
+
+                let moduleLabel = `Fase ${i + 1}`;
+                const isComplete = userSession.completedStages?.[i];
+                textDiv.classList.remove('completed', 'active');
+
+                if (isComplete) {
+                    textDiv.classList.add('completed');
+                    moduleLabel += " ⭐";
+                }
+                if (i === this.currentNode) {
+                    textDiv.classList.add('active');
+                }
+                textDiv.textContent = moduleLabel;
+            }
+        });
     }
     
     updateActiveModuleVisuals() {
         this.moduleSprites.forEach((spriteGroup, index) => {
             if (spriteGroup.icon && spriteGroup.icon.active) {
-                spriteGroup.icon.clearTint();
-                spriteGroup.icon.setScale(spriteGroup.originalScale);
-                spriteGroup.text.setStyle({ fill: '#E0E0E0' });
-
-
+                spriteGroup.icon.clearTint().setScale(spriteGroup.originalScale);
                 if (index === this.currentNode) {
                     this.activeModuleSpriteIcon = spriteGroup.icon;
-                    this.activeModuleSpriteIcon.setTint(0xFFFF99); // Tinte amarillo sutil
-                    this.activeModuleSpriteIcon.setScale(spriteGroup.originalScale * 1.05); // Ligeramente más grande
-                    spriteGroup.text.setStyle({ fill: '#FFD700' });
+                    this.activeModuleSpriteIcon.setTint(0xFFFF99).setScale(spriteGroup.originalScale * 1.05);
                 }
             }
         });
+        this.updateModuleTextPositions(); // Asegurar que los textos HTML también se actualicen
     }
 
     update() {
         if (!this.cursors) return;
         let moved = false;
         if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < (MODULE_COUNT - 1)) {
-            this.currentNode++;
-            moved = true;
+            this.currentNode++; moved = true;
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.left) && this.currentNode > 0) {
-            this.currentNode--;
-            moved = true;
+            this.currentNode--; moved = true;
         }
         if(moved) this.moveCharacter();
         if (Phaser.Input.Keyboard.JustDown(this.enterKey)) enterScene();
@@ -472,17 +639,12 @@ class MapScene extends Phaser.Scene {
 
     moveCharacter(animate = true) {
         this.updateActiveModuleVisuals(); 
-
         const activeModuleIcon = this.moduleSprites?.[this.currentNode]?.icon;
         if (activeModuleIcon && this.character && this.character.active) {
             const targetX = activeModuleIcon.x;
             const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * activeModuleIcon.scaleY / 2 - this.character.displayHeight * 0.4; 
-
-            if (animate && this.character.scene) {
-                this.tweens.add({
-                    targets: this.character, x: targetX, y: targetY,
-                    ease: 'Sine.easeInOut', duration: 250 
-                });
+            if (animate) {
+                this.tweens.add({ targets: this.character, x: targetX, y: targetY, ease: 'Sine.easeInOut', duration: 250 });
             } else {
                 this.character.x = targetX; this.character.y = targetY;
             }
@@ -491,129 +653,107 @@ class MapScene extends Phaser.Scene {
     shutdown() {
         this.scale.off('resize', this.handleResize, this);
         if (mapHeaderDiv) mapHeaderDiv.style.display = 'none';
+        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'none';
     }
 }
 
-class TriviaScene extends Phaser.Scene { // Sin cambios mayores, se mantiene en Phaser
+class TriviaScene extends Phaser.Scene { // Mantenemos UI HTML para Trivia
     constructor() { super('TriviaScene'); }
     init(data) {
-        this.stage = data.stage; this.selectedOption = null;
-        this.optionTexts = []; this.uiElements = [];
+        this.stage = data.stage; this.selectedOptionIndex = -1; 
+        this.htmlOptionElements = [];
     }
     preload() {
         if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
     }
     create() {
-        document.getElementById('mapHeader').style.display = 'none';
-        document.getElementById('finalLogo').style.display = 'none';
+        this.hideAllHtmlUI();
+        triviaUIDiv = document.getElementById('triviaUI');
+        triviaTitleDiv = document.getElementById('triviaTitle');
+        triviaQuestionDiv = document.getElementById('triviaQuestion');
+        triviaOptionsContainerDiv = document.getElementById('triviaOptionsContainer');
+        triviaConfirmButton = document.getElementById('triviaConfirmButton');
+        triviaIncorrectMessageDiv = document.getElementById('triviaIncorrectMessage');
+
+        if(triviaUIDiv) triviaUIDiv.style.display = 'flex';
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
-        createSceneBackground(this);
-        this.drawTriviaUI();
-        this.scale.on('resize', this.handleResize, this);
+        
+        createSceneBackground(this); 
+        this.drawTriviaUI(); 
     }
-    handleResize() {
-        resizeSceneBackground(this);
-        this.uiElements.forEach(el => { if(el && el.destroy) el.destroy(); });
-        this.uiElements = []; this.optionTexts = [];
-        this.drawTriviaUI();
+    hideAllHtmlUI() {
+        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogo'];
+        elementsToHide.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
     }
     drawTriviaUI() {
-        const centerX = this.scale.width / 2; const centerY = this.scale.height / 2;
-        const isLandscape = this.scale.width > this.scale.height; const verticalScale = isLandscape ? 0.85 : 0.95; 
-        const titleY = centerY * (isLandscape ? 0.22 : 0.15) * verticalScale; 
-        const title = this.add.text(centerX, titleY, `Trivia Fase ${this.stage}`, {
-            fontSize: `clamp(${isLandscape ? '15px' : '18px'}, 4.5vw, ${isLandscape ? '22px' : '26px'})`, 
-            fill: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY_PHASER, align: 'center',
-            stroke: '#000000', strokeThickness: 1,
-            shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, stroke: true, fill: true }
-        }).setOrigin(0.5).setDepth(1); this.uiElements.push(title);
-        const questionY = centerY * (isLandscape ? 0.42 : 0.35) * verticalScale; 
-        const question = this.add.text(centerX, questionY, '¿Qué es phishing?', {
-            fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.5vw, ${isLandscape ? '17px' : '19px'})`, 
-            fill: '#ffffff', fontFamily: GLOBAL_FONT_FAMILY_PHASER, align: 'center', 
-            wordWrap: { width: this.scale.width * 0.85, useAdvancedWrap: true },
-            shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true }
-        }).setOrigin(0.5).setDepth(1); this.uiElements.push(question);
+        triviaTitleDiv.textContent = `Trivia Fase ${this.stage}`;
+        triviaQuestionDiv.textContent = '¿Qué es phishing?'; 
         const opciones = ['Una técnica para pescar', 'Un intento de engañar a usuarios para robar datos', 'Un software antivirus'];
-        const optionsStartY = centerY * (isLandscape ? 0.68 : 0.60) * verticalScale; 
-        const optionHeight = this.scale.height * (isLandscape ? 0.08 : 0.07); 
-        const optionSpacing = optionHeight * 1.25; 
-        this.optionTexts = opciones.map((op, i) => {
-            const yPos = optionsStartY + i * optionSpacing;
-            const txt = this.add.text(centerX, yPos, op, {
-                fontSize: `clamp(${isLandscape ? '11px' : '13px'}, 3vw, ${isLandscape ? '15px' : '17px'})`, 
-                fill: '#ffffff', backgroundColor: '#282828', fontFamily: GLOBAL_FONT_FAMILY_PHASER, 
-                padding: { left: 10, right: 10, top: 7, bottom: 7 }, 
-                align: 'center', wordWrap: { width: this.scale.width * 0.75, useAdvancedWrap: true },
-            }).setOrigin(0.5).setDepth(1).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.seleccionarOpcion(i));
-            this.uiElements.push(txt); return txt;
+        triviaOptionsContainerDiv.innerHTML = ''; 
+        this.htmlOptionElements = [];
+        opciones.forEach((opcionTexto, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'trivia-option';
+            optionDiv.textContent = opcionTexto;
+            optionDiv.onclick = () => this.seleccionarOpcion(index);
+            triviaOptionsContainerDiv.appendChild(optionDiv);
+            this.htmlOptionElements.push(optionDiv);
         });
-        const confirmBtnY = optionsStartY + opciones.length * optionSpacing + optionHeight * 0.4;
-        this.confirmButton = this.add.text(centerX, confirmBtnY, 'Responder', {
-            fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, 
-            fill: '#000000', backgroundColor: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY_PHASER,
-            padding: { left: 18, right: 18, top: 9, bottom: 9 }, 
-            shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000000', blur: 1, fill: true}
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(1);
-        this.uiElements.push(this.confirmButton); this.confirmButton.on('pointerdown', () => this.validarRespuesta());
-        if (this.selectedOption !== null && this.optionTexts?.[this.selectedOption]) {
-            this.seleccionarOpcion(this.selectedOption, this.confirmButton.visible);
-        }
+        triviaConfirmButton.onclick = () => this.validarRespuesta();
+        triviaConfirmButton.style.display = 'none'; 
+        triviaIncorrectMessageDiv.style.display = 'none'; 
+        this.selectedOptionIndex = -1; 
     }
-    seleccionarOpcion(index, showConfirmButton = true) {
-        this.selectedOption = index;
-        this.optionTexts.forEach((txt, i) => {
-            if (txt && txt.active) txt.setStyle({ backgroundColor: i === index ? '#FFD700' : '#282828', fill: i === index ? '#000000' : '#FFFFFF' });
-        });
-        if (this.confirmButton && this.confirmButton.active) this.confirmButton.setVisible(showConfirmButton);
+    seleccionarOpcion(index) {
+        this.selectedOptionIndex = index;
+        this.htmlOptionElements.forEach((div, i) => div.classList.toggle('selected', i === index));
+        triviaConfirmButton.style.display = 'block';
+        triviaIncorrectMessageDiv.style.display = 'none';
     }
     validarRespuesta() {
-        if (this.selectedOption === null || !this.optionTexts?.[this.selectedOption]) return;
-        const opcion = this.optionTexts?.[this.selectedOption]?.text;
-        if (opcion?.includes('engañar')) {
+        if (this.selectedOptionIndex === -1) return;
+        const opcionSeleccionadaTexto = this.htmlOptionElements[this.selectedOptionIndex].textContent;
+        if (opcionSeleccionadaTexto.includes('engañar a usuarios para robar datos')) { 
             userSession.completedStages[this.stage - 1] = true; 
             const todasCompletadas = userSession.completedStages.every(e => e === true);
-            this.scale.off('resize', this.handleResize, this);
             this.scene.start(todasCompletadas ? 'BadgeScene' : 'MapScene');
         } else {
-            if (this.incorrectMsg && this.incorrectMsg.destroy) this.incorrectMsg.destroy();
-            const isLandscape = this.scale.width > this.scale.height;
-            this.incorrectMsg = this.add.text(this.scale.width/2, this.scale.height * (isLandscape ? 0.92 : 0.95), '❌ Respuesta incorrecta. Intenta otra vez.', {
-                fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, fill: '#ff0000', 
-                backgroundColor: 'rgba(0,0,0,0.7)', fontFamily: GLOBAL_FONT_FAMILY_PHASER, padding: {x:8, y:5}, 
-                shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true}
-            }).setOrigin(0.5).setDepth(2); this.uiElements.push(this.incorrectMsg);
-            this.optionTexts.forEach(txt => txt.disableInteractive());
-            if(this.confirmButton) this.confirmButton.disableInteractive().setVisible(false);
-            this.time.delayedCall(2000, () => {
-                if(this.scene.key === 'TriviaScene') {
-                    this.scale.off('resize', this.handleResize, this); this.scene.start('MapScene');
-                }
-            });
+            triviaIncorrectMessageDiv.textContent = '❌ Respuesta incorrecta. Intenta otra vez.';
+            triviaIncorrectMessageDiv.style.display = 'block';
+            this.htmlOptionElements.forEach(div => div.classList.remove('selected'));
+            this.selectedOptionIndex = -1;
+            triviaConfirmButton.style.display = 'none';
         }
     }
     shutdown() {
-        this.scale.off('resize', this.handleResize, this);
-        this.uiElements.forEach(el => { if(el && typeof el.destroy === 'function') el.destroy(); });
-        this.uiElements = []; this.optionTexts = [];
-        if (this.incorrectMsg && typeof this.incorrectMsg.destroy === 'function') this.incorrectMsg.destroy();
+        if(triviaUIDiv) triviaUIDiv.style.display = 'none';
     }
 }
 
-class BadgeScene extends Phaser.Scene { // Sin cambios
+class BadgeScene extends Phaser.Scene { 
     constructor() { super('BadgeScene'); }
     preload() {
         if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
         this.load.image('insigniaBP', 'assets/insigniaBP.png');
     }
     create() {
-        document.getElementById('mapHeader').style.display = 'none';
+        this.hideAllHtmlUI();
         document.getElementById('finalLogo').style.display = 'flex';
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
         createSceneBackground(this);
         this.drawDynamicInsignia(userSession.username);
+    }
+    hideAllHtmlUI() {
+        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI'];
+        elementsToHide.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
     }
     drawDynamicInsignia(nombre) {
         const canvas = document.getElementById('insigniaCanvas'); if (!canvas) return;
@@ -680,6 +820,7 @@ function startGame() {
         height: window.innerHeight,
         resolution: window.devicePixelRatio || 1, 
         parent: 'phaser-game', 
+        transparent: true, 
         scale: {
             mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH
@@ -698,16 +839,40 @@ function startGame() {
     gameInstance = new Phaser.Game(config);
 }
 
-window.addEventListener('resize', () => { /* Phaser maneja esto */ });
+window.addEventListener('resize', () => { 
+    if (gameInstance && gameInstance.scene.isActive('MapScene')) {
+        // Forzar una actualización de las posiciones del texto HTML si la escena del mapa está activa
+        // Esto es un poco un hack, idealmente el listener de resize de la escena se encargaría
+        const mapScene = gameInstance.scene.getScene('MapScene');
+        if (mapScene && typeof mapScene.updateModuleTextPositions === 'function') {
+            // Pequeño delay para asegurar que el reescalado de Phaser haya terminado
+            setTimeout(() => mapScene.updateModuleTextPositions(), 50);
+        }
+    }
+});
 document.addEventListener('DOMContentLoaded', () => {
     const existingError = document.getElementById('usernameError');
     if (existingError) existingError.remove();
+    
+    mapHeaderDiv = document.getElementById('mapHeader');
+    mapTitleDiv = document.getElementById('mapTitle');
+    mapDescriptionDiv = document.getElementById('mapDescription');
+    mapModuleTextsContainerDiv = document.getElementById('mapModuleTextsContainer');
+    
+    triviaUIDiv = document.getElementById('triviaUI');
+    triviaTitleDiv = document.getElementById('triviaTitle');
+    triviaQuestionDiv = document.getElementById('triviaQuestion');
+    triviaOptionsContainerDiv = document.getElementById('triviaOptionsContainer');
+    triviaConfirmButton = document.getElementById('triviaConfirmButton');
+    triviaIncorrectMessageDiv = document.getElementById('triviaIncorrectMessage');
+
     const bottomBar = document.getElementById('bottomBarContainer');
-    const mapUIHeader = document.getElementById('mapHeader');
     
     if (document.getElementById('loginUI').style.display !== 'none') {
         if (bottomBar) bottomBar.style.display = 'none';
-        if (mapUIHeader) mapUIHeader.style.display = 'none';
+        if (mapHeaderDiv) mapHeaderDiv.style.display = 'none';
+        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'none';
+        if (triviaUIDiv) triviaUIDiv.style.display = 'none';
     }
 });
 
