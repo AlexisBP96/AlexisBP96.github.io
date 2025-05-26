@@ -15,13 +15,14 @@
             background-color: #000;
             font-family: 'Segoe UI', sans-serif;
             touch-action: none;
+            color: #fff; 
         }
-        canvas { 
+        #phaser-game canvas { 
             display: block;
-            max-width: 100vw;
-            max-height: 100vh;
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0; 
         }
 
         #loginUI, #finalLogo {
@@ -113,6 +114,34 @@
             object-fit: contain; 
         }
 
+        /* Estilos para UI HTML de MapScene (Solo Header) */
+        #mapHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px; /* Ajustar según sea necesario */
+            box-sizing: border-box;
+            text-align: center;
+            z-index: 10; 
+            background-color: rgba(0,0,0,0.8); 
+            border-bottom: 1px solid rgba(0, 221, 0, 0.7); 
+            display: none; 
+        }
+        #mapTitle {
+            color: #FFD700;
+            font-size: clamp(12px, 2vw, 18px); /* Consistente con MapScene */
+            font-weight: bold;
+            margin: 0 0 3px 0;
+            text-shadow: 0.5px 0.5px 1px #000;
+        }
+        #mapDescription {
+            color: #E0E0E0;
+            font-size: clamp(9px, 1.6vw, 13px); /* Consistente con MapScene */
+            margin: 0;
+            text-shadow: 0.5px 0.5px 1px #000;
+        }
+        /* Ya no se necesita #mapModulesContainer ni .map-module */
 
         #bottomBarContainer {
             position: fixed;
@@ -173,6 +202,9 @@
             #finalLogo p { font-size: clamp(13px, 3.8vw, 16px); }
             #insigniaCanvas { max-width: 75vw; max-height: 55vh; }
 
+            #mapTitle { font-size: clamp(13px, 3.2vw, 20px); }
+            #mapDescription { font-size: clamp(10px, 2.5vw, 14px); }
+
 
             .touch-controls { padding: 6px 0; gap: 10px; }
             .touch-controls button { font-size: clamp(16px, 4vw, 20px); padding: 8px 12px; min-width: 50px; }
@@ -185,6 +217,9 @@
             #loginUI p { font-size: clamp(10px, 2vw, 12px); }
             #insigniaCanvas { max-width: 50vw; max-height: 70vh; }
 
+            #mapTitle { font-size: clamp(12px, 2vw, 18px); }
+            #mapDescription { font-size: clamp(9px, 1.6vw, 13px); }
+
 
             .touch-controls { padding: 5px 0; }
             .touch-controls button { font-size: clamp(14px, 3.5vw, 16px); padding: 6px 10px; }
@@ -195,6 +230,8 @@
     </style>
 </head>
 <body>
+<div id="phaser-game">
+    </div>
 
 <div id="loginUI">
     <img src="assets/logo-pichincha.png" alt="Banco Pichincha">
@@ -204,6 +241,10 @@
     <button onclick="startGame()">Comenzar misión</button>
 </div>
 
+<div id="mapHeader">
+    <div id="mapTitle"></div>
+    <div id="mapDescription"></div>
+</div>
 <div id="finalLogo">
     <div style="text-align: center; color: white;">
         <h2 style="color: #FFD700;">¡MISIÓN CUMPLIDA!</h2>
@@ -231,17 +272,21 @@ let userSession = {
 let gameInstance = null;
 let currentMapScene = null;
 
-const GLOBAL_FONT_FAMILY = 'Segoe UI';
+const GLOBAL_FONT_FAMILY_HTML = 'Segoe UI, Arial, sans-serif'; // Para HTML
+const GLOBAL_FONT_FAMILY_PHASER = 'Arial, sans-serif'; // Fuente segura para Phaser si se usa texto
 const MODULE_COUNT = 3; 
+
+// Elementos HTML de la UI del Mapa
+let mapHeaderDiv, mapTitleDiv, mapDescriptionDiv;
 
 function createSceneBackground(scene) {
     scene.bg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
         .setDisplaySize(scene.scale.width, scene.scale.height)
-        .setDepth(-1);
+        .setDepth(-1); 
 
     scene.overlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
         .setOrigin(0)
-        .setDepth(-0.5);
+        .setDepth(-0.5); 
 }
 
 function resizeSceneBackground(scene) {
@@ -257,24 +302,32 @@ function resizeSceneBackground(scene) {
 class MapScene extends Phaser.Scene {
     constructor() { 
         super('MapScene');
-        this.moduleTextObjects = []; 
+        this.moduleSprites = []; // Para almacenar los sprites de los módulos (icono y texto)
+        this.activeModuleSpriteIcon = null; // Para el icono del módulo activo
     }
 
     preload() {
         this.load.image('background', 'assets/background.jpg');
-        this.load.image('character', 'assets/Jedi.jpeg'); // Asegúrate que el nombre del archivo sea correcto
+        this.load.image('module', 'assets/module.png'); // Cargar imagen de módulo normal
+        this.load.image('module-complete', 'assets/module-green.png'); // Cargar imagen de módulo completado
+        this.load.image('character', 'assets/jedi.png'); 
     }
 
     create() {
         currentMapScene = this;
-        document.getElementById('finalLogo').style.display = 'none';
+        this.hideHtmlUI(); 
+        
+        mapHeaderDiv = document.getElementById('mapHeader');
+        mapTitleDiv = document.getElementById('mapTitle');
+        mapDescriptionDiv = document.getElementById('mapDescription');
         
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'flex'; 
+        if (mapHeaderDiv) mapHeaderDiv.style.display = 'block';
 
-        createSceneBackground(this);
+        createSceneBackground(this); 
 
-        this.drawSceneElements();
+        this.drawSceneElements(); 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
@@ -282,61 +335,53 @@ class MapScene extends Phaser.Scene {
         this.updateActiveModuleVisuals(); 
     }
 
+    hideHtmlUI() {
+        const mapH = document.getElementById('mapHeader');
+        if(mapH) mapH.style.display = 'none';
+        document.getElementById('finalLogo').style.display = 'none';
+    }
+
+
     handleResize() {
         resizeSceneBackground(this);
-
-        if (this.titleText) this.titleText.destroy();
-        if (this.descriptionText) this.descriptionText.destroy();
-        if (this.headerBgPhaser) this.headerBgPhaser.destroy(); 
-        if (this.headerLine) this.headerLine.destroy();
-        
-        this.moduleTextObjects.forEach(textObj => { if(textObj) textObj.destroy(); });
-        this.moduleTextObjects = [];
-        
+        // Destruir elementos de Phaser
+        this.moduleSprites.forEach(spriteGroup => { 
+            if(spriteGroup.icon) spriteGroup.icon.destroy();
+            if(spriteGroup.text) spriteGroup.text.destroy();
+        });
+        this.moduleSprites = [];
         if (this.character) this.character.destroy();
         
-        this.drawSceneElements();
+        this.drawSceneElements(); 
         this.updateActiveModuleVisuals(); 
     }
 
-    drawSceneElements() {
+    drawSceneElements() { 
         const width = this.scale.width;
         const height = this.scale.height;
-        const isLandscape = width > height;
+        this.isLandscape = width > height;
 
-        const headerHeightPercentage = isLandscape ? 0.14 : 0.11; 
-        const headerHeight = height * headerHeightPercentage;
+        // Actualizar texto del header HTML
+        mapTitleDiv.textContent = `Hola ${userSession.username.split(' ')[0]}, Ciberguardián`;
+        mapDescriptionDiv.textContent = `Supera las misiones y demuestra tu destreza.`;
         
-        this.headerBgPhaser = this.add.rectangle(width / 2, headerHeight / 2, width, headerHeight, 0x000000, 0.8).setDepth(0);
-
-        const titleFontSize = isLandscape ? 'clamp(12px, 2vw, 18px)' : 'clamp(13px, 3.2vw, 20px)'; 
-        this.titleText = this.add.text(width / 2, headerHeight * 0.4, 
-            `Hola ${userSession.username.split(' ')[0]}, Ciberguardián`, {
-                fontSize: titleFontSize, fill: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY, 
-                wordWrap: { width: width * 0.85, useAdvancedWrap: true }, align: 'center',
-                stroke: '#000000', strokeThickness: 1,
-                shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000000', blur: 1, stroke: true, fill: true }
-            }).setOrigin(0.5).setDepth(1);
-
-        const descFontSize = isLandscape ? 'clamp(9px, 1.6vw, 13px)' : 'clamp(10px, 2.5vw, 14px)'; 
-        this.descriptionText = this.add.text(width / 2, headerHeight * 0.75, 
-            `Supera las misiones y demuestra tu destreza.`, {
-                fontSize: descFontSize, fill: '#E0E0E0', fontFamily: GLOBAL_FONT_FAMILY, 
-                wordWrap: { width: width * 0.9, useAdvancedWrap: true }, align: 'center',
-                shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000000', blur: 1, fill: true }
-            }).setOrigin(0.5).setDepth(1);
-
-        this.headerLine = this.add.rectangle(width / 2, headerHeight -1, width, 1, 0x00DD00, 0.7).setDepth(1);
-
-        const moduleBaseFontSize = isLandscape ? 'clamp(14px, 2.5vw, 20px)' : 'clamp(16px, 3.5vw, 22px)';
-        const modulePadding = { x: 15, y: 8 };
+        // Ajustar padding del header HTML basado en la altura real del header de Phaser
+        const headerHeightPercentage = this.isLandscape ? 0.14 : 0.11; 
+        mapHeaderDiv.style.paddingTop = `${height * headerHeightPercentage * 0.15}px`;
+        mapHeaderDiv.style.paddingBottom = `${height * headerHeightPercentage * 0.15}px`;
+        
+        // Módulos como sprites de Phaser
+        const baseIconSize = this.isLandscape ? Math.min(width * 0.06, 45) : Math.min(width * 0.11, 50); // Un poco más pequeños
+        const moduleTextFontSize = this.isLandscape ? 'clamp(8px, 1.5vw, 11px)' : 'clamp(9px, 2.2vw, 12px)';
         
         this.modulePositions = []; 
+        const headerActualHeight = mapHeaderDiv.offsetHeight || height * headerHeightPercentage;
 
-        if (isLandscape) {
-            const moduleAreaY = headerHeight + (height - headerHeight) * 0.6; 
-            const totalModuleTextWidthEstimate = width * 0.7; // Aumentar un poco el espacio para los textos
-            const moduleSpacingX = totalModuleTextWidthEstimate / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1); 
+
+        if (this.isLandscape) {
+            const moduleAreaY = headerActualHeight + (height - headerActualHeight) * 0.65; 
+            const totalModuleWidth = width * 0.5; 
+            const moduleSpacingX = totalModuleWidth / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1); 
             let currentX = (width - (moduleSpacingX * (MODULE_COUNT - 1))) / 2;
 
             for (let i = 0; i < MODULE_COUNT; i++) {
@@ -345,9 +390,9 @@ class MapScene extends Phaser.Scene {
             }
         } else { 
             const moduleAreaX = width / 2;
-            const moduleGroupHeight = (height - headerHeight) * 0.55; 
-            const startY = headerHeight + (height - headerHeight) * 0.25;
-            const moduleSpacingY = moduleGroupHeight / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1);
+            const moduleGroupHeight = (height - headerActualHeight) * 0.5; 
+            const startY = headerActualHeight + (height - headerActualHeight) * 0.3;
+            const moduleSpacingY = moduleGroupHeight / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1) * 0.9;
 
             for (let i = 0; i < MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: moduleAreaX, y: startY + (i * moduleSpacingY) });
@@ -356,63 +401,57 @@ class MapScene extends Phaser.Scene {
         
         this.currentNode = this.currentNode !== undefined ? this.currentNode : 0;
 
-        this.moduleTextObjects = this.modulePositions.map((pos, i) => {
+        this.moduleSprites = this.modulePositions.map((pos, i) => {
             const isComplete = userSession.completedStages?.[i];
-            let moduleLabel = `Fase ${i + 1}`;
-            if (isComplete) moduleLabel += " ⭐"; 
-
-            const textObj = this.add.text(pos.x, pos.y, moduleLabel, {
-                fontSize: moduleBaseFontSize,
-                fontFamily: GLOBAL_FONT_FAMILY,
-                fill: isComplete ? '#77FF77' : '#CCCCCC', 
-                backgroundColor: 'rgba(20,20,20,0.5)',
-                padding: modulePadding,
-                align: 'center',
-                fixedWidth: width * (isLandscape ? 0.2 : 0.5), 
-            }).setOrigin(0.5).setDepth(1).setInteractive({ useHandCursor: true });
+            const iconKey = isComplete ? 'module-complete' : 'module';
             
-            textObj.on('pointerdown', () => {
-                this.currentNode = i;
-                this.moveCharacter();
-            });
-            return textObj;
+            const icon = this.add.image(pos.x, pos.y, iconKey)
+                .setDepth(1)
+                .setDisplaySize(baseIconSize, baseIconSize)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => {
+                    this.currentNode = i;
+                    this.moveCharacter();
+                });
+
+            const textObj = this.add.text(pos.x, pos.y + baseIconSize * 0.6, `Fase ${i + 1}`, {
+                fontSize: moduleTextFontSize,
+                fontFamily: GLOBAL_FONT_FAMILY_PHASER,
+                fill: '#E0E0E0', 
+                align: 'center',
+                shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000', blur: 1}
+            }).setOrigin(0.5).setDepth(1.1);
+            
+            return { icon: icon, text: textObj, originalScale: icon.scaleX };
         });
         
-        // Ajuste del tamaño del personaje
-        const baseCharacterSizeWidth = isLandscape ? Math.min(width * 0.05, 40) : Math.min(width * 0.085, 48);
-        // Para un personaje más alto, podemos hacer que la altura sea un poco mayor que el ancho, o usar la proporción de la imagen
-        // Si la imagen 'character' es, por ejemplo, 1:1.5 (ancho:alto)
-        // const characterAspectRatio = 1.5; 
-        // const baseCharacterSizeHeight = baseCharacterSizeWidth * characterAspectRatio;
-        // Por ahora, lo haremos un poco más alto que ancho de forma fija:
+        const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.045, 38) : Math.min(width * 0.08, 45);
         const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3;
 
-
-        if (this.moduleTextObjects[this.currentNode]) {
-            const activeModuleText = this.moduleTextObjects[this.currentNode];
+        if (this.moduleSprites[this.currentNode]?.icon) {
+            const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
             this.character = this.add.image(
-                activeModuleText.x, 
-                activeModuleText.y - activeModuleText.displayHeight / 2 - baseCharacterSizeHeight * 0.5, // Ajuste para anclar por "pies"
+                activeModuleIcon.x, 
+                activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.4, 
                 'character'
             ).setDepth(2).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
         }
     }
     
     updateActiveModuleVisuals() {
-        this.moduleTextObjects.forEach((textObj, index) => {
-            if (textObj && textObj.active) {
-                const isComplete = userSession.completedStages?.[index];
-                let fill = isComplete ? '#77FF77' : '#CCCCCC'; 
-                let fontWeight = 'normal';
+        this.moduleSprites.forEach((spriteGroup, index) => {
+            if (spriteGroup.icon && spriteGroup.icon.active) {
+                spriteGroup.icon.clearTint();
+                spriteGroup.icon.setScale(spriteGroup.originalScale);
+                spriteGroup.text.setStyle({ fill: '#E0E0E0' });
+
 
                 if (index === this.currentNode) {
-                    fill = '#FFD700'; 
-                    fontWeight = 'bold';
+                    this.activeModuleSpriteIcon = spriteGroup.icon;
+                    this.activeModuleSpriteIcon.setTint(0xFFFF99); // Tinte amarillo sutil
+                    this.activeModuleSpriteIcon.setScale(spriteGroup.originalScale * 1.05); // Ligeramente más grande
+                    spriteGroup.text.setStyle({ fill: '#FFD700' });
                 }
-                textObj.setStyle({ 
-                    fill: fill, 
-                    fontStyle: fontWeight, 
-                });
             }
         });
     }
@@ -434,11 +473,10 @@ class MapScene extends Phaser.Scene {
     moveCharacter(animate = true) {
         this.updateActiveModuleVisuals(); 
 
-        const activeModuleText = this.moduleTextObjects?.[this.currentNode];
-        if (activeModuleText && this.character && this.character.active) {
-            const targetX = activeModuleText.x;
-            // Ajustar Y para que la base del personaje esté sobre el texto
-            const targetY = activeModuleText.y - activeModuleText.displayHeight / 2 - this.character.displayHeight * 0.5; 
+        const activeModuleIcon = this.moduleSprites?.[this.currentNode]?.icon;
+        if (activeModuleIcon && this.character && this.character.active) {
+            const targetX = activeModuleIcon.x;
+            const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * activeModuleIcon.scaleY / 2 - this.character.displayHeight * 0.4; 
 
             if (animate && this.character.scene) {
                 this.tweens.add({
@@ -452,128 +490,86 @@ class MapScene extends Phaser.Scene {
     }
     shutdown() {
         this.scale.off('resize', this.handleResize, this);
+        if (mapHeaderDiv) mapHeaderDiv.style.display = 'none';
     }
 }
 
-class TriviaScene extends Phaser.Scene {
+class TriviaScene extends Phaser.Scene { // Sin cambios mayores, se mantiene en Phaser
     constructor() { super('TriviaScene'); }
-
     init(data) {
-        this.stage = data.stage;
-        this.selectedOption = null;
-        this.optionTexts = [];
-        this.uiElements = [];
+        this.stage = data.stage; this.selectedOption = null;
+        this.optionTexts = []; this.uiElements = [];
     }
-
     preload() {
-        if (!this.textures.exists('background')) {
-            this.load.image('background', 'assets/background.jpg');
-        }
+        if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
     }
-
     create() {
+        document.getElementById('mapHeader').style.display = 'none';
         document.getElementById('finalLogo').style.display = 'none';
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
-
         createSceneBackground(this);
-
         this.drawTriviaUI();
         this.scale.on('resize', this.handleResize, this);
     }
-
     handleResize() {
         resizeSceneBackground(this);
-
         this.uiElements.forEach(el => { if(el && el.destroy) el.destroy(); });
-        this.uiElements = [];
-        this.optionTexts = [];
-
+        this.uiElements = []; this.optionTexts = [];
         this.drawTriviaUI();
     }
-
     drawTriviaUI() {
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2;
-        const isLandscape = this.scale.width > this.scale.height;
-        const verticalScale = isLandscape ? 0.85 : 0.95; 
-
+        const centerX = this.scale.width / 2; const centerY = this.scale.height / 2;
+        const isLandscape = this.scale.width > this.scale.height; const verticalScale = isLandscape ? 0.85 : 0.95; 
         const titleY = centerY * (isLandscape ? 0.22 : 0.15) * verticalScale; 
         const title = this.add.text(centerX, titleY, `Trivia Fase ${this.stage}`, {
             fontSize: `clamp(${isLandscape ? '15px' : '18px'}, 4.5vw, ${isLandscape ? '22px' : '26px'})`, 
-            fill: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY, align: 'center',
+            fill: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY_PHASER, align: 'center',
             stroke: '#000000', strokeThickness: 1,
             shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, stroke: true, fill: true }
-        }).setOrigin(0.5).setDepth(1);
-        this.uiElements.push(title);
-
+        }).setOrigin(0.5).setDepth(1); this.uiElements.push(title);
         const questionY = centerY * (isLandscape ? 0.42 : 0.35) * verticalScale; 
         const question = this.add.text(centerX, questionY, '¿Qué es phishing?', {
             fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.5vw, ${isLandscape ? '17px' : '19px'})`, 
-            fill: '#ffffff', fontFamily: GLOBAL_FONT_FAMILY, align: 'center', 
+            fill: '#ffffff', fontFamily: GLOBAL_FONT_FAMILY_PHASER, align: 'center', 
             wordWrap: { width: this.scale.width * 0.85, useAdvancedWrap: true },
             shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true }
-        }).setOrigin(0.5).setDepth(1);
-        this.uiElements.push(question);
-
-        const opciones = [
-            'Una técnica para pescar',
-            'Un intento de engañar a usuarios para robar datos',
-            'Un software antivirus'
-        ];
-
+        }).setOrigin(0.5).setDepth(1); this.uiElements.push(question);
+        const opciones = ['Una técnica para pescar', 'Un intento de engañar a usuarios para robar datos', 'Un software antivirus'];
         const optionsStartY = centerY * (isLandscape ? 0.68 : 0.60) * verticalScale; 
         const optionHeight = this.scale.height * (isLandscape ? 0.08 : 0.07); 
         const optionSpacing = optionHeight * 1.25; 
-
         this.optionTexts = opciones.map((op, i) => {
-            const yPosition = optionsStartY + i * optionSpacing;
-            const optionText = this.add.text(centerX, yPosition, op, {
+            const yPos = optionsStartY + i * optionSpacing;
+            const txt = this.add.text(centerX, yPos, op, {
                 fontSize: `clamp(${isLandscape ? '11px' : '13px'}, 3vw, ${isLandscape ? '15px' : '17px'})`, 
-                fill: '#ffffff', backgroundColor: '#282828', fontFamily: GLOBAL_FONT_FAMILY, 
+                fill: '#ffffff', backgroundColor: '#282828', fontFamily: GLOBAL_FONT_FAMILY_PHASER, 
                 padding: { left: 10, right: 10, top: 7, bottom: 7 }, 
                 align: 'center', wordWrap: { width: this.scale.width * 0.75, useAdvancedWrap: true },
-            }).setOrigin(0.5).setDepth(1)
-                .setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => this.seleccionarOpcion(i));
-            this.uiElements.push(optionText);
-            return optionText;
+            }).setOrigin(0.5).setDepth(1).setInteractive({ useHandCursor: true }).on('pointerdown', () => this.seleccionarOpcion(i));
+            this.uiElements.push(txt); return txt;
         });
-
-        const confirmButtonY = optionsStartY + opciones.length * optionSpacing + optionHeight * 0.4;
-        this.confirmButton = this.add.text(centerX, confirmButtonY, 'Responder', {
+        const confirmBtnY = optionsStartY + opciones.length * optionSpacing + optionHeight * 0.4;
+        this.confirmButton = this.add.text(centerX, confirmBtnY, 'Responder', {
             fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, 
-            fill: '#000000', backgroundColor: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY,
+            fill: '#000000', backgroundColor: '#FFD700', fontFamily: GLOBAL_FONT_FAMILY_PHASER,
             padding: { left: 18, right: 18, top: 9, bottom: 9 }, 
             shadow: { offsetX: 0.5, offsetY: 0.5, color: '#000000', blur: 1, fill: true}
         }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setVisible(false).setDepth(1);
-        this.uiElements.push(this.confirmButton);
-        this.confirmButton.on('pointerdown', () => this.validarRespuesta());
-
-
+        this.uiElements.push(this.confirmButton); this.confirmButton.on('pointerdown', () => this.validarRespuesta());
         if (this.selectedOption !== null && this.optionTexts?.[this.selectedOption]) {
             this.seleccionarOpcion(this.selectedOption, this.confirmButton.visible);
         }
     }
-
     seleccionarOpcion(index, showConfirmButton = true) {
         this.selectedOption = index;
         this.optionTexts.forEach((txt, i) => {
-            if (txt && txt.active) {
-                txt.setStyle({
-                    backgroundColor: i === index ? '#FFD700' : '#282828',
-                    fill: i === index ? '#000000' : '#FFFFFF'
-                });
-            }
+            if (txt && txt.active) txt.setStyle({ backgroundColor: i === index ? '#FFD700' : '#282828', fill: i === index ? '#000000' : '#FFFFFF' });
         });
-        if (this.confirmButton && this.confirmButton.active) {
-            this.confirmButton.setVisible(showConfirmButton);
-        }
+        if (this.confirmButton && this.confirmButton.active) this.confirmButton.setVisible(showConfirmButton);
     }
-
     validarRespuesta() {
         if (this.selectedOption === null || !this.optionTexts?.[this.selectedOption]) return;
-
         const opcion = this.optionTexts?.[this.selectedOption]?.text;
         if (opcion?.includes('engañar')) {
             userSession.completedStages[this.stage - 1] = true; 
@@ -582,25 +578,17 @@ class TriviaScene extends Phaser.Scene {
             this.scene.start(todasCompletadas ? 'BadgeScene' : 'MapScene');
         } else {
             if (this.incorrectMsg && this.incorrectMsg.destroy) this.incorrectMsg.destroy();
-
             const isLandscape = this.scale.width > this.scale.height;
-            this.incorrectMsg = this.add.text(this.scale.width / 2, this.scale.height * (isLandscape ? 0.92 : 0.95) , '❌ Respuesta incorrecta. Intenta otra vez.', {
-                fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, 
-                fill: '#ff0000', 
-                backgroundColor: 'rgba(0,0,0,0.7)', 
-                fontFamily: GLOBAL_FONT_FAMILY, 
-                padding: {x:8, y:5}, 
+            this.incorrectMsg = this.add.text(this.scale.width/2, this.scale.height * (isLandscape ? 0.92 : 0.95), '❌ Respuesta incorrecta. Intenta otra vez.', {
+                fontSize: `clamp(${isLandscape ? '13px' : '15px'}, 3.8vw, ${isLandscape ? '17px' : '19px'})`, fill: '#ff0000', 
+                backgroundColor: 'rgba(0,0,0,0.7)', fontFamily: GLOBAL_FONT_FAMILY_PHASER, padding: {x:8, y:5}, 
                 shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 1, fill: true}
-            }).setOrigin(0.5).setDepth(2);
-            this.uiElements.push(this.incorrectMsg);
-
+            }).setOrigin(0.5).setDepth(2); this.uiElements.push(this.incorrectMsg);
             this.optionTexts.forEach(txt => txt.disableInteractive());
             if(this.confirmButton) this.confirmButton.disableInteractive().setVisible(false);
-
             this.time.delayedCall(2000, () => {
                 if(this.scene.key === 'TriviaScene') {
-                    this.scale.off('resize', this.handleResize, this);
-                    this.scene.start('MapScene');
+                    this.scale.off('resize', this.handleResize, this); this.scene.start('MapScene');
                 }
             });
         }
@@ -608,83 +596,54 @@ class TriviaScene extends Phaser.Scene {
     shutdown() {
         this.scale.off('resize', this.handleResize, this);
         this.uiElements.forEach(el => { if(el && typeof el.destroy === 'function') el.destroy(); });
-        this.uiElements = [];
-        this.optionTexts = [];
+        this.uiElements = []; this.optionTexts = [];
         if (this.incorrectMsg && typeof this.incorrectMsg.destroy === 'function') this.incorrectMsg.destroy();
     }
 }
 
-class BadgeScene extends Phaser.Scene {
+class BadgeScene extends Phaser.Scene { // Sin cambios
     constructor() { super('BadgeScene'); }
-
     preload() {
-        if (!this.textures.exists('background')) {
-            this.load.image('background', 'assets/background.jpg');
-        }
+        if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
         this.load.image('insigniaBP', 'assets/insigniaBP.png');
     }
-
     create() {
+        document.getElementById('mapHeader').style.display = 'none';
         document.getElementById('finalLogo').style.display = 'flex';
         const bottomBarContainer = document.getElementById('bottomBarContainer');
         if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
-
         createSceneBackground(this);
         this.drawDynamicInsignia(userSession.username);
     }
-
     drawDynamicInsignia(nombre) {
-        const canvas = document.getElementById('insigniaCanvas');
-        if (!canvas) return;
+        const canvas = document.getElementById('insigniaCanvas'); if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        
         const imgTexture = this.textures.get('insigniaBP');
         if (!imgTexture || imgTexture.key === '__MISSING') {
-            console.error("Textura de la insignia 'insigniaBP' no encontrada o no cargada.");
-            canvas.width = 200; 
-            canvas.height = 50;
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            ctx.fillStyle = "red";
-            ctx.font = `14px ${GLOBAL_FONT_FAMILY}`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("Error: Insignia no cargada", canvas.width / 2, canvas.height / 2);
-            return;
+            console.error("Textura insignia no cargada."); canvas.width = 200; canvas.height = 50;
+            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="red"; ctx.font=`14px ${GLOBAL_FONT_FAMILY_HTML}`;
+            ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("Error Insignia",canvas.width/2,canvas.height/2); return;
         }
-        
         const img = imgTexture.getSourceImage(); 
-
-        canvas.width = img.naturalWidth || img.width; 
-        canvas.height = img.naturalHeight || img.height;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
+        canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
+        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height);
         const fontSize = Math.max(8, canvas.width * 0.05); 
-        ctx.font = `bold ${fontSize}px ${GLOBAL_FONT_FAMILY}`;
-        ctx.fillStyle = '#000000'; 
-        ctx.textAlign = 'center';
-        ctx.fillText(nombre.toUpperCase(), canvas.width / 2, canvas.height * 0.735); 
+        ctx.font = `bold ${fontSize}px ${GLOBAL_FONT_FAMILY_HTML}`; ctx.fillStyle = '#000000'; 
+        ctx.textAlign = 'center'; ctx.fillText(nombre.toUpperCase(), canvas.width/2, canvas.height * 0.735); 
     }
-
-     shutdown() { /* No specific Phaser listeners to remove here */ }
+    shutdown() {}
 }
-
 
 function moveLeft() {
     if (currentMapScene && currentMapScene.sys.isActive() && currentMapScene.currentNode > 0) {
-        currentMapScene.currentNode--;
-        currentMapScene.moveCharacter();
+        currentMapScene.currentNode--; currentMapScene.moveCharacter();
     }
 }
-
 function moveRight() {
     if (currentMapScene && currentMapScene.sys.isActive() && currentMapScene.currentNode < (MODULE_COUNT - 1)) {
-        currentMapScene.currentNode++;
-        currentMapScene.moveCharacter();
+        currentMapScene.currentNode++; currentMapScene.moveCharacter();
     }
 }
-
 function enterScene() {
     if (currentMapScene && currentMapScene.sys.isActive()) {
         const index = currentMapScene.currentNode;
@@ -702,18 +661,14 @@ function startGame() {
         usernameInput.style.border = "2px solid red";
         let errorMsg = document.getElementById('usernameError');
         if (!errorMsg) {
-            errorMsg = document.createElement('p');
-            errorMsg.id = 'usernameError';
-            errorMsg.textContent = '¡El nombre no puede estar vacío!';
-            errorMsg.style.color = 'red';
+            errorMsg = document.createElement('p'); errorMsg.id = 'usernameError';
+            errorMsg.textContent = '¡El nombre no puede estar vacío!'; errorMsg.style.color = 'red';
             errorMsg.style.fontSize = 'clamp(12px, 3vw, 14px)';
             usernameInput.parentNode.insertBefore(errorMsg, usernameInput.nextSibling);
-        }
-        return;
+        } return;
     }
     const existingError = document.getElementById('usernameError');
     if (existingError) existingError.remove();
-
     usernameInput.style.border = "none";
     userSession.username = username;
     userSession.completedStages = Array(MODULE_COUNT).fill(false); 
@@ -724,41 +679,35 @@ function startGame() {
         width: window.innerWidth,
         height: window.innerHeight,
         resolution: window.devicePixelRatio || 1, 
+        parent: 'phaser-game', 
         scale: {
             mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH
         },
         scene: [MapScene, TriviaScene, BadgeScene],
-        render: {
-            antialias: true, 
-            pixelArt: false 
-        },
-        pipeline: { 
-            PostFX: true
-        }
+        render: { antialias: true, pixelArt: false },
+        pipeline: { PostFX: true }
     };
 
     if (gameInstance) {
         gameInstance.scene.getScenes(true).forEach(scene => {
-            if (scene.sys.isActive() && scene.shutdown) {
-                scene.shutdown();
-            }
+            if (scene.sys.isActive() && scene.shutdown) scene.shutdown();
         });
-        gameInstance.destroy(true);
-        gameInstance = null;
+        gameInstance.destroy(true); gameInstance = null;
     }
     gameInstance = new Phaser.Game(config);
 }
 
-window.addEventListener('resize', () => { /* Phaser maneja esto con ScaleManager */ });
-
+window.addEventListener('resize', () => { /* Phaser maneja esto */ });
 document.addEventListener('DOMContentLoaded', () => {
     const existingError = document.getElementById('usernameError');
     if (existingError) existingError.remove();
-
-    const bottomBarContainer = document.getElementById('bottomBarContainer');
+    const bottomBar = document.getElementById('bottomBarContainer');
+    const mapUIHeader = document.getElementById('mapHeader');
+    
     if (document.getElementById('loginUI').style.display !== 'none') {
-        if (bottomBarContainer) bottomBarContainer.style.display = 'none';
+        if (bottomBar) bottomBar.style.display = 'none';
+        if (mapUIHeader) mapUIHeader.style.display = 'none';
     }
 });
 
