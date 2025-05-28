@@ -166,7 +166,6 @@
             border: 1px solid var(--holo-panel-border);
             background-color: rgba(5, 10, 20, 0.7);
             color: var(--holo-text-primary);
-            /* font-family: var(--sans-serif-font); Explicitly inherited */
             box-sizing: border-box;
             outline: none;
             transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -174,13 +173,12 @@
         #usernameInput::placeholder {
             color: var(--holo-text-secondary);
             opacity: 0.7;
-            /* font-family: var(--sans-serif-font); Explicitly inherited */
         }
         #usernameInput:focus {
             border-color: var(--holo-panel-border-focus);
             box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
         }
-        #loginButton { /* Shared button styles could be a generic class .holo-button */
+        #loginButton {
             width: 100%;
             padding: clamp(12px, 2.5vh, 15px) 20px;
             font-size: clamp(15px, 3.2vw, 16px);
@@ -196,7 +194,7 @@
             box-shadow: 0 2px 8px rgba(255,215,0,0.2);
         }
         #loginButton:hover {
-            background: #FFDF30; /* Slightly lighter gold for hover */
+            background: #FFDF30;
             box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 0 0 10px var(--banco-pichincha-gold);
             transform: translateY(-2px) scale(1.02);
         }
@@ -205,27 +203,25 @@
             box-shadow: 0 1px 4px rgba(255,215,0,0.15);
         }
         #usernameError {
-            /* Removed !important by ensuring selector specificity or avoiding overrides */
             color: var(--holo-error-text);
-            /* font-family: var(--sans-serif-font); Inherited */
             font-size: clamp(12px, 2.2vw, 14px);
             background-color: var(--holo-error-bg);
             padding: 10px 12px;
             border-radius: 6px;
-            margin-top: -10px; /* To fit nicely between input and button */
+            margin-top: -10px;
             margin-bottom: 12px;
             width: 100%;
             box-sizing: border-box;
             text-align: center;
             border: 1px solid var(--holo-error-text);
             opacity: 0;
-            max-height: 0; /* For transition effect */
+            max-height: 0;
             overflow: hidden;
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
         }
         #usernameError.visible {
             opacity: 1;
-            max-height: 100px; /* Sufficient height for the message */
+            max-height: 100px;
         }
 
         /* --- Fullscreen UI Panel (Base for Trivia, Final Badge) --- */
@@ -239,7 +235,7 @@
             z-index: 20;
             padding: 20px;
             box-sizing: border-box;
-            background-color: var(--body-bg); /* Semi-transparent overlay on game canvas */
+            background-color: var(--body-bg);
         }
         .panel-content-wrapper {
             background: var(--holo-panel-bg);
@@ -272,7 +268,7 @@
             text-align: center;
             max-width: 90%;
         }
-        .panel-button { /* Generic button style for panels */
+        .panel-button {
             padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 25px);
             font-size: clamp(14px, 3vw, 15px);
             border-radius: 6px;
@@ -299,11 +295,10 @@
             padding: clamp(8px, 1.5vh, 12px) 15px;
             box-sizing: border-box;
             text-align: center;
-            z-index: 10; /* Above Phaser canvas, below other full UIs */
+            z-index: 10;
             background: var(--holo-panel-bg-header);
             border-bottom: 1px solid var(--holo-panel-border);
             box-shadow: 0 2px 15px rgba(0, 150, 200, 0.1);
-            /* display: none; Managed by JS */
         }
         #mapTitle {
             color: var(--banco-pichincha-gold);
@@ -317,17 +312,16 @@
             font-size: clamp(11px, 2vw, 13px);
             margin: 0;
         }
-        #mapModuleTextsContainer { /* Container for absolutely positioned module texts */
+        #mapModuleTextsContainer {
             position: absolute; top:0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Don't interfere with Phaser canvas */
-            z-index: 5; /* Above canvas, below map header */
+            pointer-events: none;
+            z-index: 5;
         }
         .map-module-text {
-            position: absolute; /* Positioned by JS */
+            position: absolute;
             transform: translateX(-50%);
             color: var(--holo-text-secondary);
             font-size: clamp(9px, 1.8vw, 11px);
-            /* font-family: var(--sans-serif-font); Inherited */
             text-align: center;
             padding: 3px 6px;
             background-color: rgba(10, 22, 38, 0.7);
@@ -339,7 +333,6 @@
         .map-module-text.active    { color: var(--banco-pichincha-gold); font-weight: 600; }
 
         /* --- Trivia UI Specifics --- */
-        /* #triviaUI already styled by .fullscreen-ui-panel */
         #triviaOptionsContainer {
             display: flex;
             flex-direction: column;
@@ -376,7 +369,6 @@
             padding: 10px 12px;
             border-radius: 6px;
             margin-top: 15px;
-            /* display: none; Managed by JS */
             border: 1px solid var(--holo-error-text);
             width: 100%;
             max-width: 450px;
@@ -385,13 +377,12 @@
         }
 
         /* --- Final Badge/Logo UI Specifics --- */
-        /* #finalLogo already styled by .fullscreen-ui-panel */
         #insigniaCanvas {
             display: block;
             margin: 15px auto;
             max-width: clamp(200px, 60vw, 280px);
             max-height: clamp(150px, 50vh, 240px);
-            width: auto; height: auto; /* Maintain aspect ratio */
+            width: auto; height: auto;
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(255,215,0,0.2);
@@ -402,8 +393,7 @@
             position: fixed; bottom: 0; left: 0;
             width: 100%;
             background-color: rgba(10, 22, 38, 0.9);
-            z-index: 25; /* Above Map elements, below fullscreen panels */
-            /* display: none; Managed by JS */
+            z-index: 25;
             flex-direction: column;
             align-items: center;
             border-top: 1px solid var(--holo-panel-border);
@@ -418,9 +408,9 @@
             justify-content: center;
             align-items: center;
         }
-        .touch-controls button { /* Specific styling for touch buttons */
+        .touch-controls button {
             padding: clamp(8px, 1.8vh, 10px) clamp(12px, 2.5vw, 16px);
-            font-size: clamp(16px, 4vw, 20px); /* Larger for touch */
+            font-size: clamp(16px, 4vw, 20px);
             border-radius: 6px;
             border: 1px solid var(--banco-pichincha-gold);
             background-color: var(--banco-pichincha-gold);
@@ -437,7 +427,7 @@
             transform: scale(1.05);
         }
         .touch-controls button:active {
-            transform: scale(1); /* Reset scale on active for touch feedback */
+            transform: scale(1);
         }
         .logo-footer {
             width: clamp(45px, 10vw, 50px);
@@ -450,15 +440,20 @@
         /* --- Media Queries --- */
         @media (max-width: 600px) {
             .panel-content-wrapper {
-                max-width: calc(100% - 20px); /* Ensure padding doesn't cause overflow */
+                max-width: calc(100% - 20px); 
             }
+             /* Ajustes para pantallas muy pequeñas en portrait */
+            .holo-title { font-size: clamp(18px, 5vw, 22px); }
+            .holo-subtitle { font-size: clamp(12px, 2.5vw, 14px); }
+            #usernameInput { font-size: clamp(13px, 3vw, 15px); }
+            #loginButton { font-size: clamp(14px, 3.2vw, 15px); }
+            .map-module-text { font-size: clamp(8px, 1.8vw, 10px); }
         }
         @media (orientation: landscape) and (max-height: 500px) {
-            /* Adjustments for small landscape screens */
             .panel-content-wrapper {
-                max-width: 500px; /* Or a percentage */
-                padding: clamp(15px, 3vw, 25px); /* Reduced padding */
-                gap: clamp(10px, 2vh, 15px);    /* Reduced gap */
+                max-width: 500px; 
+                padding: clamp(15px, 3vw, 25px); 
+                gap: clamp(10px, 2vh, 15px);    
             }
             #mapHeader {
                 padding: clamp(6px, 1vh, 10px) 10px;
@@ -467,6 +462,10 @@
                  padding: clamp(6px, 1.5vh, 8px) clamp(10px, 2vw, 14px);
                  font-size: clamp(14px, 3.5vw, 18px);
             }
+        }
+         @media (max-height: 700px) and (orientation: portrait) {
+            .touch-controls { padding: clamp(5px, 1vh, 8px) 0; }
+            .logo-footer { width: clamp(35px, 8vw, 40px); margin-bottom: clamp(3px, 0.5vh, 5px); }
         }
     </style>
 </head>
@@ -524,9 +523,9 @@
 <script>
 // --- Constants and Global State ---
 const GLOBAL_CONFIG = {
-    FONT_FAMILY_HTML: 'Segoe UI, Arial, sans-serif', // Used by BadgeScene for canvas text
+    FONT_FAMILY_HTML: 'Segoe UI, Arial, sans-serif', 
     MODULE_COUNT: 3,
-    ASSETS_PATH: 'assets/' // Centralized asset path
+    ASSETS_PATH: 'assets/' 
 };
 
 let userSession = {
@@ -534,12 +533,10 @@ let userSession = {
     completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
 };
 let gameInstance = null;
-let currentMapSceneRef = null; // More descriptive name
+let currentMapSceneRef = null; 
 
-// --- DOM Element References ---
-// Grouped DOM element caching for better organization
 const DOM_ELEMENTS = {
-    loginUI: null, usernameInput: null, loginButton: null, usernameErrorContainer: null, // holographicPanel is parent of error
+    loginUI: null, usernameInput: null, loginButton: null, usernameErrorContainer: null,
     mapHeader: null, mapTitle: null, mapDescription: null, mapModuleTextsContainer: null,
     triviaUI: null, triviaTitle: null, triviaQuestion: null, triviaOptionsContainer: null, triviaConfirmButton: null, triviaIncorrectMessage: null,
     finalLogoUI: null, insigniaCanvas: null,
@@ -547,31 +544,21 @@ const DOM_ELEMENTS = {
     phaserGameContainer: null
 };
 
-// --- Utility Functions ---
-/**
- * Shows specified HTML elements and hides others from a predefined list of main UI containers.
- * @param {string[]} elementsToShow - Array of element IDs to show.
- */
 function manageUIContainersVisibility(elementsToShow = []) {
     const ALL_MAIN_UI_IDS = ['loginUI', 'mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogoUI', 'bottomBarContainer'];
     ALL_MAIN_UI_IDS.forEach(id => {
-        const element = DOM_ELEMENTS[id] || document.getElementById(id); // Fallback for elements not in DOM_ELEMENTS yet
+        const element = DOM_ELEMENTS[id] || document.getElementById(id); 
         if (element) {
             if (elementsToShow.includes(id)) {
                 element.style.display = (id === 'loginUI' || id === 'triviaUI' || id === 'finalLogoUI' || id === 'bottomBarContainer') ? 'flex' : 'block';
                 element.classList.remove('hidden');
             } else {
-                // element.style.display = 'none'; // Class .hidden handles this
                 element.classList.add('hidden');
             }
         }
     });
 }
 
-/**
- * Creates a standard background for scenes like Trivia and Badge.
- * @param {Phaser.Scene} scene - The Phaser scene instance.
- */
 function createStandardSceneBackground(scene) {
     if (scene.bgStandard) scene.bgStandard.destroy();
     if (scene.overlayStandard) scene.overlayStandard.destroy();
@@ -581,9 +568,8 @@ function createStandardSceneBackground(scene) {
         .setDepth(-1);
     scene.overlayStandard = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
         .setOrigin(0)
-        .setDepth(-0.5); // Between background and other scene elements
+        .setDepth(-0.5);
 
-    // Handle resize for this specific background
     const resizeHandler = () => {
         if (scene.bgStandard && scene.bgStandard.active) {
             scene.bgStandard.setPosition(scene.scale.width / 2, scene.scale.height / 2)
@@ -594,7 +580,6 @@ function createStandardSceneBackground(scene) {
         }
     };
     scene.scale.on('resize', resizeHandler, scene);
-    // Store handler to remove it on shutdown
     scene.sys.events.once('shutdown', () => {
         scene.scale.off('resize', resizeHandler, scene);
         if (scene.bgStandard) { scene.bgStandard.destroy(); scene.bgStandard = null; }
@@ -602,22 +587,18 @@ function createStandardSceneBackground(scene) {
     }, scene);
 }
 
-/**
- * Creates a focused background for the Map Scene.
- * @param {Phaser.Scene} scene - The Phaser scene instance.
- */
 function createMapFocusedBackground(scene) {
     if (scene.mapFocusedBg) scene.mapFocusedBg.destroy();
     if (scene.mapFocusedOverlay) scene.mapFocusedOverlay.destroy();
 
     scene.mapFocusedBg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
         .setDisplaySize(scene.scale.width, scene.scale.height)
-        .setDepth(-2) // Deepest layer in Phaser scene
-        .setTint(0x333333); // Dark tint
+        .setDepth(-2) 
+        .setTint(0x333333); 
 
-    scene.mapFocusedOverlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x03060A, 0.6) // --body-bg color with opacity
+    scene.mapFocusedOverlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x03060A, 0.6) 
         .setOrigin(0)
-        .setDepth(-1); // Above background, below modules
+        .setDepth(-1); 
 
     const resizeHandler = () => {
         if (scene.mapFocusedBg && scene.mapFocusedBg.active) {
@@ -636,16 +617,15 @@ function createMapFocusedBackground(scene) {
     }, scene);
 }
 
-// --- Phaser Scenes ---
 class MapScene extends Phaser.Scene {
     constructor() {
         super('MapScene');
-        this.moduleSprites = []; // Array of {icon: Phaser.Image, textDiv: HTMLElement, originalScaleX: number, originalScaleY: number}
-        this.htmlModuleTextElements = []; // References to the HTML text divs
+        this.moduleSprites = [];
+        this.htmlModuleTextElements = [];
         this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
         this.character = null;
-        this.currentNode = 0; // Index of the currently selected module
-        this.modulePositions = []; // Calculated positions for modules
+        this.currentNode = 0;
+        this.modulePositions = [];
         this.isLandscape = false;
         this.cursors = null;
         this.enterKey = null;
@@ -661,30 +641,25 @@ class MapScene extends Phaser.Scene {
     create() {
         currentMapSceneRef = this;
         manageUIContainersVisibility(['mapHeader', 'mapModuleTextsContainer', 'bottomBarContainer']);
-
         createMapFocusedBackground(this);
 
         this.activeModuleEffects.border = this.add.graphics().setDepth(1);
-        this.activeModuleEffects.scanline = this.add.graphics().setDepth(3); // Above character
+        this.activeModuleEffects.scanline = this.add.graphics().setDepth(3);
 
-        this.drawSceneElements(); // Initial draw
+        this.drawSceneElements();
         this.cursors = this.input.keyboard.createCursorKeys();
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
         this.scale.on('resize', this.handleResize, this);
-        // Initial update of text positions and visuals after elements are drawn
         this.updateModuleTextPositions();
         this.updateActiveModuleVisuals();
     }
 
     handleResize() {
-        // Clear existing Phaser-drawn elements that depend on screen size
         this.moduleSprites.forEach(spriteGroup => { if (spriteGroup.icon) spriteGroup.icon.destroy(); });
         this.moduleSprites = [];
-
         if (DOM_ELEMENTS.mapModuleTextsContainer) DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
         this.htmlModuleTextElements = [];
-
 
         if (this.character) this.character.destroy();
         if (this.activeModuleEffects.border) this.activeModuleEffects.border.clear();
@@ -692,7 +667,6 @@ class MapScene extends Phaser.Scene {
         if (this.activeModuleEffects.scanlineTween && this.activeModuleEffects.scanlineTween.isPlaying()) {
             this.activeModuleEffects.scanlineTween.stop();
         }
-
         this.drawSceneElements();
         this.updateModuleTextPositions(); 
         this.updateActiveModuleVisuals(); 
@@ -712,9 +686,11 @@ class MapScene extends Phaser.Scene {
         const headerHeightPercentage = this.isLandscape ? 0.1 : 0.08;
         const headerActualHeight = DOM_ELEMENTS.mapHeader ? (DOM_ELEMENTS.mapHeader.offsetHeight || height * headerHeightPercentage) : height * headerHeightPercentage;
         const bottomBarActualHeight = DOM_ELEMENTS.bottomBar && DOM_ELEMENTS.bottomBar.style.display !== 'none' ? DOM_ELEMENTS.bottomBar.offsetHeight : 0;
-
-        const baseIconSize = this.isLandscape ? Math.min(width * 0.07, 56) : Math.min(width * 0.14, 60);
-        const verticalAvailableHeight = height - headerActualHeight - bottomBarActualHeight - (this.isLandscape ? 20 : 40); 
+        
+        // Ajustes para móviles
+        const baseIconSize = this.isLandscape ? Math.min(width * 0.07, 56) : Math.min(width * 0.16, 50); 
+        const verticalMargin = this.isLandscape ? 20 : height * 0.12; // Mayor margen vertical en portrait
+        const verticalAvailableHeight = height - headerActualHeight - bottomBarActualHeight - verticalMargin;
 
         this.modulePositions = [];
         if (this.isLandscape) {
@@ -728,9 +704,9 @@ class MapScene extends Phaser.Scene {
             }
         } else { // Portrait
             const moduleAreaX = width / 2;
-            const moduleGroupHeight = verticalAvailableHeight * 0.75; 
-            const startY = headerActualHeight + (verticalAvailableHeight - moduleGroupHeight) / 2 + (baseIconSize/2); 
-            const moduleSpacingY = GLOBAL_CONFIG.MODULE_COUNT > 1 ? moduleGroupHeight / (GLOBAL_CONFIG.MODULE_COUNT -1) : 0; // Corrected: MODULE_COUNT - 1
+            const moduleGroupHeight = verticalAvailableHeight * 0.7; // Ocupar menos espacio vertical
+            const startY = headerActualHeight + (verticalAvailableHeight - moduleGroupHeight) / 2 + (baseIconSize/2) + (height * 0.02); // Ligeramente más abajo para centrar mejor
+            const moduleSpacingY = GLOBAL_CONFIG.MODULE_COUNT > 1 ? moduleGroupHeight / (GLOBAL_CONFIG.MODULE_COUNT -1) : 0;
             for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: moduleAreaX, y: startY + (i * moduleSpacingY) });
             }
@@ -758,7 +734,7 @@ class MapScene extends Phaser.Scene {
             return { icon: icon, textDiv: textDiv, originalScaleX: icon.scaleX, originalScaleY: icon.scaleY };
         });
 
-        const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.035, 30) : Math.min(width * 0.065, 36);
+        const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.035, 30) : Math.min(width * 0.08, 30); 
         const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3; 
 
         if (this.moduleSprites[this.currentNode]?.icon) {
@@ -773,15 +749,13 @@ class MapScene extends Phaser.Scene {
 
     updateModuleTextPositions() {
         if (!DOM_ELEMENTS.mapModuleTextsContainer || this.htmlModuleTextElements.length !== this.moduleSprites.length) return;
-
         this.moduleSprites.forEach((spriteGroup, i) => {
             if (spriteGroup.icon && spriteGroup.icon.active && this.htmlModuleTextElements[i]) {
                 const icon = spriteGroup.icon;
                 const textDiv = this.htmlModuleTextElements[i];
-                const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.6 + 10); 
+                const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.6 + (this.isLandscape ? 10 : 5)); // Menos espacio en portrait
                 textDiv.style.left = `${pt.x}px`;
                 textDiv.style.top = `${pt.y}px`;
-
                 let moduleLabel = `Misión ${i + 1}`;
                 const isComplete = userSession.completedStages[i];
                 textDiv.classList.remove('completed', 'active');
@@ -815,36 +789,26 @@ class MapScene extends Phaser.Scene {
                     width: icon.displayWidth,
                     height: icon.displayHeight
                 };
-
                 if (index === this.currentNode) {
                     icon.setScale(spriteGroup.originalScaleX * 1.1, spriteGroup.originalScaleY * 1.1);
-
                     this.activeModuleEffects.border.lineStyle(3, 0xFFD700, 0.8)
                         .strokeRoundedRect(baseRect.x - 3, baseRect.y - 3, baseRect.width + 6, baseRect.height + 6, 5);
                     this.activeModuleEffects.border.lineStyle(1.5, 0xFFFFFF, 0.5) 
                         .strokeRoundedRect(baseRect.x - 1, baseRect.y - 1, baseRect.width + 2, baseRect.height + 2, 4);
-
                     const scanlineWidth = icon.displayWidth * 0.8;
                     const scanlineStartX = icon.x - scanlineWidth / 2;
                     let scanlineCurrentY = icon.y - icon.displayHeight / 2; 
-
                     this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, 0.2).fillRect(scanlineStartX, scanlineCurrentY, scanlineWidth, 2);
-
                     this.activeModuleEffects.scanlineTween = this.tweens.add({
                         targets: { y: scanlineCurrentY, alpha: 0.2 }, 
                         y: icon.y + icon.displayHeight / 2 - 2, 
-                        alpha: 0.05,
-                        ease: 'Linear',
-                        duration: 1500,
-                        repeat: -1,
-                        yoyo: true,
+                        alpha: 0.05, ease: 'Linear', duration: 1500, repeat: -1, yoyo: true,
                         onUpdate: (tween, target) => {
                             this.activeModuleEffects.scanline.clear();
                             this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, target.alpha);
                             this.activeModuleEffects.scanline.fillRect(scanlineStartX, target.y, scanlineWidth, 2);
                         }
                     });
-
                 } else if (userSession.completedStages[index]) {
                     icon.setTint(0xDDDDDD); 
                      this.activeModuleEffects.border.lineStyle(2, 0x60FF60, 0.5) 
@@ -862,24 +826,12 @@ class MapScene extends Phaser.Scene {
         if (!this.cursors || !this.input.keyboard.enabled) return;
         let moved = false;
         if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
-            if (this.currentNode > 0) {
-                this.currentNode--;
-                moved = true;
-            }
+            if (this.currentNode > 0) { this.currentNode--; moved = true; }
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
-            if (this.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) {
-                this.currentNode++;
-                moved = true;
-            }
+            if (this.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) { this.currentNode++; moved = true; }
         }
-
-        if (moved) {
-            this.moveCharacterAndVisuals();
-        }
-
-        if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-            this.attemptEnterScene();
-        }
+        if (moved) this.moveCharacterAndVisuals();
+        if (Phaser.Input.Keyboard.JustDown(this.enterKey)) this.attemptEnterScene();
     }
 
     moveCharacterAndVisuals(animate = true) {
@@ -891,8 +843,7 @@ class MapScene extends Phaser.Scene {
             if (animate) {
                 this.tweens.add({ targets: this.character, x: targetX, y: targetY, ease: 'Sine.easeInOut', duration: 250 });
             } else {
-                this.character.x = targetX;
-                this.character.y = targetY;
+                this.character.x = targetX; this.character.y = targetY;
             }
         }
     }
@@ -901,18 +852,12 @@ class MapScene extends Phaser.Scene {
         if (!this.scene.isActive()) return; 
         const targetStageIndex = this.currentNode;
         const isUnlocked = targetStageIndex === 0 || userSession.completedStages[targetStageIndex - 1];
-
-        if (isUnlocked) {
-            this.scene.start('TriviaScene', { stageIndex: targetStageIndex }); 
-        } else {
-            console.log(`Module ${targetStageIndex + 1} is locked.`);
-        }
+        if (isUnlocked) this.scene.start('TriviaScene', { stageIndex: targetStageIndex });
+        else console.log(`Module ${targetStageIndex + 1} is locked.`);
     }
 
     shutdown() {
         this.scale.off('resize', this.handleResize, this);
-        // this.input.keyboard.disableGlobalCapture(); // Consider if you need to re-enable this based on broader application structure
-
         if (this.activeModuleEffects.scanlineTween && this.activeModuleEffects.scanlineTween.isPlaying()) {
             this.activeModuleEffects.scanlineTween.stop();
         }
@@ -920,15 +865,12 @@ class MapScene extends Phaser.Scene {
         if (this.activeModuleEffects.border) this.activeModuleEffects.border.destroy();
         if (this.activeModuleEffects.scanline) this.activeModuleEffects.scanline.destroy();
         this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
-
         if (this.character) this.character.destroy();
         this.character = null;
         this.moduleSprites.forEach(spriteGroup => { if (spriteGroup.icon) spriteGroup.icon.destroy(); });
         this.moduleSprites = [];
-
         if (DOM_ELEMENTS.mapModuleTextsContainer) DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
         this.htmlModuleTextElements = [];
-
         currentMapSceneRef = null; 
         console.log("MapScene shutdown complete");
     }
@@ -937,30 +879,23 @@ class MapScene extends Phaser.Scene {
 class TriviaScene extends Phaser.Scene {
     constructor() {
         super('TriviaScene');
-        this.currentStageIndex = 0;
-        this.selectedOptionIndex = -1;
-        this.htmlOptionElements = [];
-        this.currentTriviaData = null;
+        this.currentStageIndex = 0; this.selectedOptionIndex = -1;
+        this.htmlOptionElements = []; this.currentTriviaData = null;
     }
-
     init(data) {
-        this.currentStageIndex = data.stageIndex;
-        this.selectedOptionIndex = -1;
+        this.currentStageIndex = data.stageIndex; this.selectedOptionIndex = -1;
         this.htmlOptionElements = [];
     }
-
     preload() {
         if (!this.textures.exists('background')) {
             this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
         }
     }
-
     create() {
         manageUIContainersVisibility(['triviaUI']);
         createStandardSceneBackground(this);
         this.loadAndDisplayTrivia();
     }
-
     loadAndDisplayTrivia() {
         const TRIVIA_QUESTIONS = [
             { question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?", options: ["Verdadero", "Falso"], correctAnswerIndex: 0 },
@@ -968,60 +903,38 @@ class TriviaScene extends Phaser.Scene {
             { question: "Actualizar el software de tus dispositivos regularmente ayuda a protegerte de vulnerabilidades. ¿Verdadero o Falso?", options: ["Verdadero", "Falso"], correctAnswerIndex: 0 }
         ];
         this.currentTriviaData = TRIVIA_QUESTIONS[this.currentStageIndex] || TRIVIA_QUESTIONS[0];
-
         if (!this.currentTriviaData || !DOM_ELEMENTS.triviaTitle || !DOM_ELEMENTS.triviaQuestion || !DOM_ELEMENTS.triviaOptionsContainer || !DOM_ELEMENTS.triviaConfirmButton || !DOM_ELEMENTS.triviaIncorrectMessage) {
-            console.error("Trivia UI elements or data missing.");
-            this.goBackToMap();
-            return;
+            console.error("Trivia UI elements or data missing."); this.goBackToMap(); return;
         }
-
         DOM_ELEMENTS.triviaTitle.textContent = `Desafío de Ciberseguridad ${this.currentStageIndex + 1}`;
         DOM_ELEMENTS.triviaQuestion.textContent = this.currentTriviaData.question;
-
-        DOM_ELEMENTS.triviaOptionsContainer.innerHTML = '';
-        this.htmlOptionElements = [];
-
+        DOM_ELEMENTS.triviaOptionsContainer.innerHTML = ''; this.htmlOptionElements = [];
         this.currentTriviaData.options.forEach((optionText, index) => {
             const optionDiv = document.createElement('div');
-            optionDiv.className = 'trivia-option';
-            optionDiv.textContent = optionText;
+            optionDiv.className = 'trivia-option'; optionDiv.textContent = optionText;
             optionDiv.onclick = () => this.selectOption(index);
             DOM_ELEMENTS.triviaOptionsContainer.appendChild(optionDiv);
             this.htmlOptionElements.push(optionDiv);
         });
-
         DOM_ELEMENTS.triviaConfirmButton.onclick = () => this.validateAnswer();
         DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
         DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
-        
         this.selectedOptionIndex = -1;
     }
-
     selectOption(index) {
         this.selectedOptionIndex = index;
         this.htmlOptionElements.forEach((div, i) => div.classList.toggle('selected', i === index));
-        
-        if (DOM_ELEMENTS.triviaConfirmButton) {
-            DOM_ELEMENTS.triviaConfirmButton.classList.remove('hidden');
-        }
-        if (DOM_ELEMENTS.triviaIncorrectMessage) {
-            DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
-        }
+        if (DOM_ELEMENTS.triviaConfirmButton) DOM_ELEMENTS.triviaConfirmButton.classList.remove('hidden');
+        if (DOM_ELEMENTS.triviaIncorrectMessage) DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
     }
-
     validateAnswer() {
         if (this.selectedOptionIndex === -1 || !this.currentTriviaData) return;
-
         const isCorrect = this.selectedOptionIndex === this.currentTriviaData.correctAnswerIndex;
-
         if (isCorrect) {
             userSession.completedStages[this.currentStageIndex] = true;
             const allStagesCompleted = userSession.completedStages.every(status => status === true);
-            if (allStagesCompleted) {
-                this.scene.start('BadgeScene');
-            } else {
-                this.goBackToMap();
-            }
+            if (allStagesCompleted) this.scene.start('BadgeScene');
+            else this.goBackToMap();
         } else {
             if (DOM_ELEMENTS.triviaIncorrectMessage) {
                 DOM_ELEMENTS.triviaIncorrectMessage.textContent = 'Respuesta incorrecta. ¡Intenta de nuevo o repasa tus conocimientos!';
@@ -1029,16 +942,10 @@ class TriviaScene extends Phaser.Scene {
             }
             this.htmlOptionElements.forEach(div => div.classList.remove('selected'));
             this.selectedOptionIndex = -1;
-            if (DOM_ELEMENTS.triviaConfirmButton) {
-                DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
-            }
+            if (DOM_ELEMENTS.triviaConfirmButton) DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
         }
     }
-
-    goBackToMap() {
-        this.scene.start('MapScene');
-    }
-
+    goBackToMap() { this.scene.start('MapScene'); }
     shutdown() {
         if (DOM_ELEMENTS.triviaConfirmButton) DOM_ELEMENTS.triviaConfirmButton.onclick = null;
         this.htmlOptionElements.forEach(div => div.onclick = null);
@@ -1049,81 +956,53 @@ class TriviaScene extends Phaser.Scene {
 
 class BadgeScene extends Phaser.Scene {
     constructor() { super('BadgeScene'); }
-
     preload() {
         if (!this.textures.exists('background')) {
             this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
         }
         this.load.image('insigniaBP', `${GLOBAL_CONFIG.ASSETS_PATH}insigniaBP.png`);
     }
-
     create() {
         manageUIContainersVisibility(['finalLogoUI']);
         createStandardSceneBackground(this);
         this.drawDynamicInsignia(userSession.username || "Agente");
     }
-
     drawDynamicInsignia(agentName) {
         const canvas = DOM_ELEMENTS.insigniaCanvas;
-        if (!canvas) {
-            console.error("Insignia canvas element not found.");
-            return;
-        }
+        if (!canvas) { console.error("Insignia canvas element not found."); return; }
         const ctx = canvas.getContext('2d');
         const insigniaTexture = this.textures.get('insigniaBP');
-
         if (!insigniaTexture || insigniaTexture.key === '__MISSING' || insigniaTexture.key === '__DEFAULT') {
             console.error("Insignia texture not loaded or missing. Displaying error on canvas.");
-            canvas.width = 200; canvas.height = 60;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "red";
-            ctx.font = `12px ${GLOBAL_CONFIG.FONT_FAMILY_HTML}`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+            canvas.width = 200; canvas.height = 60; ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "red"; ctx.font = `12px ${GLOBAL_CONFIG.FONT_FAMILY_HTML}`;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
             ctx.fillText("Error: Insignia no disponible", canvas.width / 2, canvas.height / 2);
             return;
         }
-
         const img = insigniaTexture.getSourceImage();
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-
+        canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const fontSize = Math.max(10, Math.round(canvas.width * 0.055));
         ctx.font = `bold ${fontSize}px ${GLOBAL_CONFIG.FONT_FAMILY_HTML}`;
-        ctx.fillStyle = '#0A1625'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle'; 
-        
-        // --- AJUSTE DE POSICIÓN DEL TEXTO ---
-        // El valor original era 0.76, luego 0.735. 0.74 es un punto intermedio.
-        // Ajusta este multiplicador (e.g., 0.73, 0.74, 0.75) para centrar el texto
-        // perfectamente en la franja dorada de tu insignia específica.
+        ctx.fillStyle = '#0A1625'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
         ctx.fillText(agentName.toUpperCase(), canvas.width / 2, canvas.height * 0.725); 
     }
-
-    shutdown() {
-        console.log("BadgeScene shutdown complete");
-    }
+    shutdown() { console.log("BadgeScene shutdown complete"); }
 }
 
-
-// --- Global Game Control Functions ---
 function handleMoveLeft() {
     if (currentMapSceneRef && currentMapSceneRef.scene.isActive()) {
          if (currentMapSceneRef.currentNode > 0) {
-            currentMapSceneRef.currentNode--;
-            currentMapSceneRef.moveCharacterAndVisuals();
+            currentMapSceneRef.currentNode--; currentMapSceneRef.moveCharacterAndVisuals();
         }
     }
 }
 function handleMoveRight() {
     if (currentMapSceneRef && currentMapSceneRef.scene.isActive()) {
         if (currentMapSceneRef.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) {
-            currentMapSceneRef.currentNode++;
-            currentMapSceneRef.moveCharacterAndVisuals();
+            currentMapSceneRef.currentNode++; currentMapSceneRef.moveCharacterAndVisuals();
         }
     }
 }
@@ -1136,99 +1015,63 @@ function handleEnterScene() {
 function startGame() {
     const username = DOM_ELEMENTS.usernameInput.value.trim();
     const usernameErrorDiv = document.getElementById('usernameError'); 
-
     if (username === '') {
         DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-error-text)";
         DOM_ELEMENTS.usernameInput.style.boxShadow = "0 0 8px rgba(255, 112, 112, 0.5)";
-
         let errorMsgElement = usernameErrorDiv;
         if (!errorMsgElement) { 
-            errorMsgElement = document.createElement('p');
-            errorMsgElement.id = 'usernameError';
+            errorMsgElement = document.createElement('p'); errorMsgElement.id = 'usernameError';
             const holographicPanel = document.getElementById('holographicPanel');
             if (holographicPanel && DOM_ELEMENTS.loginButton) {
                 holographicPanel.insertBefore(errorMsgElement, DOM_ELEMENTS.loginButton);
             }
         }
         errorMsgElement.textContent = 'El Identificador de Agente es obligatorio.';
-        errorMsgElement.className = ''; 
-        errorMsgElement.classList.add('visible');
-        return;
+        errorMsgElement.className = ''; errorMsgElement.classList.add('visible'); return;
     }
-
     if (usernameErrorDiv) {
         usernameErrorDiv.classList.remove('visible');
         DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-panel-border)";
         DOM_ELEMENTS.usernameInput.style.boxShadow = "none";
     }
-
-    userSession.username = username;
-    userSession.completedStages.fill(false);
-
+    userSession.username = username; userSession.completedStages.fill(false);
     manageUIContainersVisibility([]); 
-
     const phaserConfig = {
-        type: Phaser.AUTO,
-        width: window.innerWidth,
-        height: window.innerHeight,
-        resolution: window.devicePixelRatio || 1,
-        parent: 'phaser-game',
-        transparent: true,
-        scale: {
-            mode: Phaser.Scale.RESIZE,
-            autoCenter: Phaser.Scale.CENTER_BOTH
-        },
+        type: Phaser.AUTO, width: window.innerWidth, height: window.innerHeight,
+        resolution: window.devicePixelRatio || 1, parent: 'phaser-game', transparent: true,
+        scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
         scene: [MapScene, TriviaScene, BadgeScene],
-        render: {
-            antialias: true,
-            pixelArt: false
-        },
-        input: { 
-            keyboard: {
-                capture: [ Phaser.Input.Keyboard.KeyCodes.LEFT, Phaser.Input.Keyboard.KeyCodes.RIGHT, Phaser.Input.Keyboard.KeyCodes.ENTER, Phaser.Input.Keyboard.KeyCodes.SPACE ]
-            }
-        }
+        render: { antialias: true, pixelArt: false },
+        input: { keyboard: { capture: [ Phaser.Input.Keyboard.KeyCodes.LEFT, Phaser.Input.Keyboard.KeyCodes.RIGHT, Phaser.Input.Keyboard.KeyCodes.ENTER, Phaser.Input.Keyboard.KeyCodes.SPACE ]}}
     };
-
     if (gameInstance) {
         gameInstance.scene.getScenes(true).forEach(scene => {
-            if (scene.sys.isActive() && typeof scene.shutdown === 'function') {
-                scene.shutdown(); 
-            }
-            if(scene.sys.isActive()) { 
-                 gameInstance.scene.stop(scene.scene.key);
-            }
+            if (scene.sys.isActive() && typeof scene.shutdown === 'function') scene.shutdown();
+            if(scene.sys.isActive()) gameInstance.scene.stop(scene.scene.key);
         });
-        gameInstance.destroy(true); 
-        gameInstance = null;
+        gameInstance.destroy(true); gameInstance = null;
     }
     gameInstance = new Phaser.Game(phaserConfig);
 }
 
-// --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Cache DOM elements
     DOM_ELEMENTS.phaserGameContainer = document.getElementById('phaser-game');
     DOM_ELEMENTS.loginUI = document.getElementById('loginUI');
     DOM_ELEMENTS.usernameInput = document.getElementById('usernameInput');
     DOM_ELEMENTS.loginButton = document.getElementById('loginButton');
     DOM_ELEMENTS.usernameErrorContainer = document.getElementById('holographicPanel'); 
-
     DOM_ELEMENTS.mapHeader = document.getElementById('mapHeader');
     DOM_ELEMENTS.mapTitle = document.getElementById('mapTitle');
     DOM_ELEMENTS.mapDescription = document.getElementById('mapDescription');
     DOM_ELEMENTS.mapModuleTextsContainer = document.getElementById('mapModuleTextsContainer');
-
     DOM_ELEMENTS.triviaUI = document.getElementById('triviaUI');
     DOM_ELEMENTS.triviaTitle = document.getElementById('triviaTitle');
     DOM_ELEMENTS.triviaQuestion = document.getElementById('triviaQuestion');
     DOM_ELEMENTS.triviaOptionsContainer = document.getElementById('triviaOptionsContainer');
     DOM_ELEMENTS.triviaConfirmButton = document.getElementById('triviaConfirmButton');
     DOM_ELEMENTS.triviaIncorrectMessage = document.getElementById('triviaIncorrectMessage');
-
     DOM_ELEMENTS.finalLogoUI = document.getElementById('finalLogo');
     DOM_ELEMENTS.insigniaCanvas = document.getElementById('insigniaCanvas');
-
     DOM_ELEMENTS.bottomBar = document.getElementById('bottomBarContainer');
     DOM_ELEMENTS.touchControls.left = document.getElementById('moveLeftButton');
     DOM_ELEMENTS.touchControls.enter = document.getElementById('enterSceneButton');
@@ -1236,23 +1079,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     manageUIContainersVisibility(['loginUI']);
 
-    if (DOM_ELEMENTS.loginButton) {
-        DOM_ELEMENTS.loginButton.onclick = startGame;
-    }
-    if (DOM_ELEMENTS.touchControls.left) {
-        DOM_ELEMENTS.touchControls.left.onclick = handleMoveLeft;
-    }
-    if (DOM_ELEMENTS.touchControls.enter) {
-        DOM_ELEMENTS.touchControls.enter.onclick = handleEnterScene;
-    }
-    if (DOM_ELEMENTS.touchControls.right) {
-        DOM_ELEMENTS.touchControls.right.onclick = handleMoveRight;
-    }
-
+    if (DOM_ELEMENTS.loginButton) DOM_ELEMENTS.loginButton.onclick = startGame;
+    if (DOM_ELEMENTS.touchControls.left) DOM_ELEMENTS.touchControls.left.onclick = handleMoveLeft;
+    if (DOM_ELEMENTS.touchControls.enter) DOM_ELEMENTS.touchControls.enter.onclick = handleEnterScene;
+    if (DOM_ELEMENTS.touchControls.right) DOM_ELEMENTS.touchControls.right.onclick = handleMoveRight;
+    
     const preExistingError = document.getElementById('usernameError');
-    if (preExistingError) {
-        preExistingError.classList.remove('visible');
-    }
+    if (preExistingError) preExistingError.classList.remove('visible');
 });
 
 </script>
