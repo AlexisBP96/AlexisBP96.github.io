@@ -3,606 +3,791 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ciberseguridad Day</title>
+    <title>Ciberseguridad Day - Banco Pichincha</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
     <style>
+        :root {
+            --banco-pichincha-gold: #FFD700;
+            --banco-pichincha-gold-glow: rgba(255, 215, 0, 0.5);
+            --holo-panel-bg: rgba(15, 22, 38, 0.9);
+            --holo-panel-bg-header: rgba(15, 22, 38, 0.85);
+            --holo-panel-border: rgba(0, 220, 255, 0.35);
+            --holo-panel-border-focus: rgba(255, 215, 0, 0.7);
+            --holo-text-primary: #EAEFF5;
+            --holo-text-secondary: #A0B0C5;
+            --holo-error-text: #FF7070;
+            --holo-error-bg: rgba(255, 80, 80, 0.15);
+            --holo-button-text: #0A1625;
+            --sans-serif-font: 'Segoe UI', 'Roboto', Arial, Helvetica, sans-serif;
+            --body-bg: #03060A;
+        }
+
+        /* --- Global Resets & Base Styles --- */
         html, body {
             margin: 0;
             padding: 0;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #000;
-            font-family: 'Segoe UI', sans-serif;
-            touch-action: none;
-            color: #fff; 
+            background-color: var(--body-bg);
+            font-family: var(--sans-serif-font);
+            touch-action: none; /* Prevents default touch behaviors like pinch-zoom */
+            color: var(--holo-text-primary);
+            -webkit-font-smoothing: antialiased; /* Improves font rendering on WebKit */
+            -moz-osx-font-smoothing: grayscale; /* Improves font rendering on Firefox */
         }
-        #phaser-game { /* Contenedor para el canvas de Phaser y la UI HTML superpuesta */
-            position: relative; /* Permite posicionar elementos HTML absolutamente dentro */
+
+        #phaser-game {
+            position: relative; /* Needed for z-indexing canvas and UI */
             width: 100%;
             height: 100%;
         }
-        #phaser-game canvas { 
+
+        #phaser-game canvas {
             display: block;
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 0; 
+            z-index: 0; /* Phaser canvas behind HTML UI */
         }
 
-        #loginUI, #finalLogo {
+        /* --- Utility Classes --- */
+        .hidden {
+            display: none !important; /* Utility to forcefully hide elements */
+        }
+
+        /* --- Animated Background Lines --- */
+        .animated-lines {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 1; /* Above body background, below login panel */
+            pointer-events: none; /* Ensure lines don't interfere with interaction */
+        }
+
+        .animated-lines .line {
+            position: absolute;
+            background-color: rgba(0, 150, 200, 0.1);
+            opacity: 0;
+            animation: moveLine 15s infinite linear;
+        }
+        /* Minimized repetitive line styling by using more generic selectors where possible */
+        .animated-lines .line.horizontal:nth-child(1) { height: 1px; width: 200%; left: -100%; top: 10%; animation-delay: 0s; animation-duration: 10s; }
+        .animated-lines .line.horizontal:nth-child(2) { height: 2px; width: 150%; left: -50%; top: 30%; animation-delay: 2s; animation-duration: 12s; }
+        .animated-lines .line.horizontal:nth-child(3) { height: 1px; width: 250%; left: -150%; top: 50%; animation-delay: 4s; animation-duration: 8s;  }
+        .animated-lines .line.horizontal:nth-child(4) { height: 1px; width: 180%; left: -80%; top: 70%; animation-delay: 1s; animation-duration: 15s; }
+        .animated-lines .line.horizontal:nth-child(5) { height: 2px; width: 220%; left: -120%; top: 90%; animation-delay: 3s; animation-duration: 11s; }
+
+        .animated-lines .line.vertical:nth-child(6)  { width: 1px; height: 200%; top: -100%; left: 10%; animation-name: moveLineVertical; animation-delay: 0.5s; animation-duration: 13s; }
+        .animated-lines .line.vertical:nth-child(7)  { width: 2px; height: 150%; top: -50%; left: 30%; animation-name: moveLineVertical; animation-delay: 2.5s; animation-duration: 9s;  }
+        .animated-lines .line.vertical:nth-child(8)  { width: 1px; height: 250%; top: -150%; left: 50%; animation-name: moveLineVertical; animation-delay: 4.5s; animation-duration: 14s; }
+        .animated-lines .line.vertical:nth-child(9)  { width: 1px; height: 180%; top: -80%; left: 70%; animation-name: moveLineVertical; animation-delay: 1.5s; animation-duration: 10s; }
+        .animated-lines .line.vertical:nth-child(10) { width: 2px; height: 220%; top: -120%; left: 90%; animation-name: moveLineVertical; animation-delay: 3.5s; animation-duration: 12s; }
+
+        @keyframes moveLine {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        @keyframes moveLineVertical {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        @keyframes fadeInHoloPanel {
+            from { opacity: 0; transform: perspective(1000px) rotateY(-5deg) scale(0.9); }
+            to { opacity: 1; transform: perspective(1000px) rotateY(0deg) scale(1); }
+        }
+
+        /* --- Login UI --- */
+        #loginUI {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; /* Default state, managed by JS */
+            justify-content: center;
+            align-items: center;
+            z-index: 30; /* Highest UI layer */
+            box-sizing: border-box;
+            padding: 20px;
+            overflow: hidden; /* To contain animated lines if they were inside */
+        }
+
+        #holographicPanel {
+            position: relative;
+            z-index: 2; /* Above animated lines */
+            background: linear-gradient(145deg, rgba(10, 22, 38, 0.9), rgba(20, 32, 58, 0.95));
+            padding: clamp(30px, 5vw, 40px);
+            border-radius: 10px;
+            border: 1px solid var(--holo-panel-border);
+            box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 0 0 15px rgba(0,180,255,0.1) inset;
+            width: 100%;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 30; 
-            text-align: center;
-            gap: 10px; 
-            box-sizing: border-box;
-            padding: 15px;
+            gap: clamp(18px, 3vh, 22px);
+            animation: fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            transform-style: preserve-3d;
         }
-
-        #loginUI {
-            background: linear-gradient(to bottom, #000000cc, #000000ee),
-            url('assets/background.jpg') no-repeat center center/cover;
-        }
-
-        #loginUI img {
-            width: 100px;
-            max-width: 25%;
+        .holo-logo {
+            width: clamp(100px, 18vw, 120px);
             height: auto;
-            margin-bottom: 5px;
+            margin-bottom: clamp(5px, 1.5vh, 10px);
         }
-
-        #loginUI h1 {
-            color: #FFD700;
-            font-size: clamp(18px, 4.5vw, 28px);
+        .holo-title {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 600;
             margin: 0;
+            text-shadow: 0 0 12px var(--banco-pichincha-gold-glow);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
-
-        #loginUI p {
-            color: #ffffff;
-            font-size: clamp(13px, 3.2vw, 16px);
+        .holo-subtitle {
+            color: var(--holo-text-secondary);
+            font-size: clamp(13px, 2.5vw, 15px);
             max-width: 90%;
+            margin: -12px 0 0 0; /* Slight overlap for tighter design */
+            line-height: 1.5;
+            text-align: center;
         }
-
-        #loginUI input, #loginUI button {
-            padding: 10px 18px;
-            font-size: clamp(13px, 3.2vw, 16px);
-            border-radius: 8px;
-            border: none;
-        }
-
-        #loginUI input {
-            width: 80%;
-            max-width: 280px;
-        }
-
-        #loginUI button {
-            background-color: #FFD700;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #loginUI button:hover {
-            background-color: #e6c200;
-        }
-
-        #finalLogo {
-            display: none; 
-        }
-
-        #finalLogo h2 {
-            font-size: clamp(18px, 5vw, 28px); 
-            color: #FFD700;
-            margin-bottom: 3px; 
-        }
-
-        #finalLogo p {
-            font-size: clamp(14px, 3.5vw, 18px); 
-            color: #ffffff;
-            margin-top: 0;
-            margin-bottom: 10px; 
-        }
-        
-        #insigniaCanvas {
-            display: block; 
-            margin: 0 auto; 
-            max-width: 80vw;   
-            max-height: 60vh;  
-            width: auto; 
-            height: auto; 
-            object-fit: contain; 
-        }
-
-        /* --- Estilos para UI HTML de MapScene (Header y Textos de Módulos) --- */
-        #mapHeader {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .holo-input-group { /* Can be removed if only one input and no complex grouping */
             width: 100%;
-            padding: 10px; 
+            position: relative;
+        }
+        #usernameInput {
+            width: 100%;
+            padding: clamp(12px, 2.5vh, 15px) 18px;
+            font-size: clamp(14px, 3vw, 16px);
+            border-radius: 6px;
+            border: 1px solid var(--holo-panel-border);
+            background-color: rgba(5, 10, 20, 0.7);
+            color: var(--holo-text-primary);
+            /* font-family: var(--sans-serif-font); Explicitly inherited */
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        #usernameInput::placeholder {
+            color: var(--holo-text-secondary);
+            opacity: 0.7;
+            /* font-family: var(--sans-serif-font); Explicitly inherited */
+        }
+        #usernameInput:focus {
+            border-color: var(--holo-panel-border-focus);
+            box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
+        }
+        #loginButton { /* Shared button styles could be a generic class .holo-button */
+            width: 100%;
+            padding: clamp(12px, 2.5vh, 15px) 20px;
+            font-size: clamp(15px, 3.2vw, 16px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 2px 8px rgba(255,215,0,0.2);
+        }
+        #loginButton:hover {
+            background: #FFDF30; /* Slightly lighter gold for hover */
+            box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 0 0 10px var(--banco-pichincha-gold);
+            transform: translateY(-2px) scale(1.02);
+        }
+        #loginButton:active {
+            transform: translateY(0px) scale(1);
+            box-shadow: 0 1px 4px rgba(255,215,0,0.15);
+        }
+        #usernameError {
+            /* Removed !important by ensuring selector specificity or avoiding overrides */
+            color: var(--holo-error-text);
+            /* font-family: var(--sans-serif-font); Inherited */
+            font-size: clamp(12px, 2.2vw, 14px);
+            background-color: var(--holo-error-bg);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: -10px; /* To fit nicely between input and button */
+            margin-bottom: 12px;
+            width: 100%;
             box-sizing: border-box;
             text-align: center;
-            z-index: 10; 
-            background-color: rgba(0,0,0,0.8); 
-            border-bottom: 1px solid rgba(0, 221, 0, 0.7); 
-            display: none; 
+            border: 1px solid var(--holo-error-text);
+            opacity: 0;
+            max-height: 0; /* For transition effect */
+            overflow: hidden;
+            transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
         }
-        #mapTitle {
-            color: #FFD700;
-            font-size: clamp(12px, 2vw, 18px); 
-            font-weight: bold;
-            margin: 0 0 3px 0;
-            text-shadow: 0.5px 0.5px 1px #000;
-        }
-        #mapDescription {
-            color: #E0E0E0;
-            font-size: clamp(9px, 1.6vw, 13px); 
-            margin: 0;
-            text-shadow: 0.5px 0.5px 1px #000;
+        #usernameError.visible {
+            opacity: 1;
+            max-height: 100px; /* Sufficient height for the message */
         }
 
-        #mapModuleTextsContainer { /* Contenedor para los textos HTML de los módulos */
-            position: absolute;
-            top: 0; /* Se ajustará con JS si es necesario, pero los divs internos son absolutos */
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Para que no interfiera con el input de Phaser en los iconos */
-            z-index: 5; /* Detrás del personaje, pero encima del fondo */
-            display: none; /* Controlado por JS */
-        }
-
-        .map-module-text {
-            position: absolute; /* Posicionamiento se hará con JS */
-            transform: translateX(-50%); /* Para centrar el texto debajo del icono */
-            color: #E0E0E0;
-            font-size: clamp(8px, 1.5vw, 11px);
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            padding: 2px 4px;
-            /* background-color: rgba(0,0,0,0.3); Opcional para legibilidad */
-            /* border-radius: 3px; */
-            text-shadow: 0.5px 0.5px 1px #000;
-        }
-        .map-module-text.completed {
-            color: #77FF77;
-        }
-        .map-module-text.active {
-            color: #FFD700;
-            font-weight: bold;
-        }
-
-
-        /* --- Estilos para UI HTML de TriviaScene --- */
-        #triviaUI {
-            position: absolute;
-            top: 0; left: 0;
+        /* --- Fullscreen UI Panel (Base for Trivia, Final Badge) --- */
+        .fullscreen-ui-panel {
+            position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            display: none; 
+            display: none; /* Managed by JS */
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 20; 
+            z-index: 20;
             padding: 20px;
             box-sizing: border-box;
+            background-color: var(--body-bg); /* Semi-transparent overlay on game canvas */
+        }
+        .panel-content-wrapper {
+            background: var(--holo-panel-bg);
+            padding: clamp(25px, 4vw, 35px);
+            border-radius: 10px;
+            border: 1px solid var(--holo-panel-border);
+            box-shadow: 0 0 25px rgba(0, 180, 255, 0.1), 0 0 10px rgba(0,180,255,0.05) inset;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(15px, 2.5vh, 20px);
+            animation: fadeInHoloPanel 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
+            opacity: 0; /* Initial state for animation */
+        }
+        .panel-content-wrapper .panel-header-title {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(18px, 4.5vw, 22px);
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px var(--banco-pichincha-gold-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .panel-content-wrapper .panel-text {
+            color: var(--holo-text-primary);
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
             text-align: center;
-            gap: 15px; 
-        }
-        #triviaTitle {
-            font-size: clamp(18px, 5.5vw, 28px);
-            color: #FFD700;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px #000;
-        }
-        #triviaQuestion {
-            font-size: clamp(15px, 4vw, 22px);
-            color: #ffffff;
             max-width: 90%;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 2px #000;
         }
+        .panel-button { /* Generic button style for panels */
+            padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 25px);
+            font-size: clamp(14px, 3vw, 15px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 2px 6px rgba(255,215,0,0.15);
+        }
+        .panel-button:hover {
+            background: #FFDF30;
+            box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
+            transform: translateY(-1px);
+        }
+
+        /* --- Map Specific UI --- */
+        #mapHeader {
+            position: absolute; top: 0; left: 0;
+            width: 100%;
+            padding: clamp(8px, 1.5vh, 12px) 15px;
+            box-sizing: border-box;
+            text-align: center;
+            z-index: 10; /* Above Phaser canvas, below other full UIs */
+            background: var(--holo-panel-bg-header);
+            border-bottom: 1px solid var(--holo-panel-border);
+            box-shadow: 0 2px 15px rgba(0, 150, 200, 0.1);
+            /* display: none; Managed by JS */
+        }
+        #mapTitle {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(14px, 2.5vw, 18px);
+            font-weight: 600;
+            margin: 0 0 2px 0;
+            text-shadow: 0 0 8px var(--banco-pichincha-gold-glow);
+        }
+        #mapDescription {
+            color: var(--holo-text-secondary);
+            font-size: clamp(11px, 2vw, 13px);
+            margin: 0;
+        }
+        #mapModuleTextsContainer { /* Container for absolutely positioned module texts */
+            position: absolute; top:0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Don't interfere with Phaser canvas */
+            z-index: 5; /* Above canvas, below map header */
+        }
+        .map-module-text {
+            position: absolute; /* Positioned by JS */
+            transform: translateX(-50%);
+            color: var(--holo-text-secondary);
+            font-size: clamp(9px, 1.8vw, 11px);
+            /* font-family: var(--sans-serif-font); Inherited */
+            text-align: center;
+            padding: 3px 6px;
+            background-color: rgba(10, 22, 38, 0.7);
+            border-radius: 3px;
+            text-shadow: 0 0 3px #000;
+            border: 1px solid rgba(0, 150, 200, 0.15);
+        }
+        .map-module-text.completed { color: #60FF60; }
+        .map-module-text.active    { color: var(--banco-pichincha-gold); font-weight: 600; }
+
+        /* --- Trivia UI Specifics --- */
+        /* #triviaUI already styled by .fullscreen-ui-panel */
         #triviaOptionsContainer {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            width: 85%;
-            max-width: 400px;
+            width: 100%;
+            max-width: 450px;
         }
         .trivia-option {
-            font-size: clamp(13px, 3.5vw, 18px);
-            color: #ffffff;
-            background-color: rgba(51, 51, 51, 0.8); 
-            padding: 12px 15px;
-            border-radius: 8px;
+            font-size: clamp(13px, 2.8vw, 15px);
+            color: var(--holo-text-primary);
+            background-color: rgba(25, 40, 65, 0.7);
+            padding: clamp(10px, 2vh, 14px) 15px;
+            border-radius: 6px;
             cursor: pointer;
-            border: 1px solid rgba(100,100,100,0.5);
-            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+            border: 1px solid var(--holo-panel-border);
+            transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+            text-align: left;
         }
         .trivia-option:hover {
-            background-color: rgba(65, 65, 65, 0.9);
-            border-color: rgba(150,150,150,0.7);
+            background-color: rgba(35, 50, 80, 0.8);
+            border-color: var(--banco-pichincha-gold);
+            transform: scale(1.02);
         }
         .trivia-option.selected {
-            background-color: #FFD700;
-            color: #000000;
-            font-weight: bold;
-            border-color: #FFD700;
-        }
-        #triviaConfirmButton {
-            font-size: clamp(15px, 4.5vw, 20px);
-            color: #000000;
-            background-color: #FFD700;
-            padding: 12px 25px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0px 2px 5px rgba(0,0,0,0.3);
-            transition: background-color 0.2s;
-            display: none; 
-        }
-        #triviaConfirmButton:hover {
-            background-color: #e6c200;
+            background-color: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            border-color: var(--banco-pichincha-gold);
         }
         #triviaIncorrectMessage {
-            font-size: clamp(13px, 3.8vw, 17px);
-            color: #ff4d4d;
-            background-color: rgba(0,0,0,0.7);
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-top: 10px;
-            display: none; 
-        }
-
-
-        #bottomBarContainer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
+            font-size: clamp(13px, 2.5vw, 14px);
+            color: var(--holo-error-text);
+            background-color: var(--holo-error-bg);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            /* display: none; Managed by JS */
+            border: 1px solid var(--holo-error-text);
             width: 100%;
-            background-color: #000000; 
-            z-index: 25; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
+            max-width: 450px;
+            box-sizing: border-box;
+            text-align: center;
         }
 
+        /* --- Final Badge/Logo UI Specifics --- */
+        /* #finalLogo already styled by .fullscreen-ui-panel */
+        #insigniaCanvas {
+            display: block;
+            margin: 15px auto;
+            max-width: clamp(200px, 60vw, 280px);
+            max-height: clamp(150px, 50vh, 240px);
+            width: auto; height: auto; /* Maintain aspect ratio */
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,215,0,0.2);
+        }
+
+        /* --- Bottom Bar / Touch Controls --- */
+        #bottomBarContainer {
+            position: fixed; bottom: 0; left: 0;
+            width: 100%;
+            background-color: rgba(10, 22, 38, 0.9);
+            z-index: 25; /* Above Map elements, below fullscreen panels */
+            /* display: none; Managed by JS */
+            flex-direction: column;
+            align-items: center;
+            border-top: 1px solid var(--holo-panel-border);
+            box-shadow: 0 -2px 15px rgba(0, 150, 200, 0.1);
+        }
         .touch-controls {
-            width: 100%; 
+            width: 100%;
             box-sizing: border-box;
-            padding: 8px 0;
+            padding: clamp(8px, 1.5vh, 10px) 0;
             display: flex;
             gap: 15px;
             justify-content: center;
             align-items: center;
-            border-top: 2px solid #00FF00; 
         }
-
-        .touch-controls button {
-            padding: 10px 16px;
-            font-size: clamp(18px, 4.5vw, 22px);
-            border-radius: 8px;
-            border: none;
-            background-color: #FFD700;
-            color: #000;
-            font-weight: bold;
-            min-width: 55px;
+        .touch-controls button { /* Specific styling for touch buttons */
+            padding: clamp(8px, 1.8vh, 10px) clamp(12px, 2.5vw, 16px);
+            font-size: clamp(16px, 4vw, 20px); /* Larger for touch */
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background-color: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            min-width: 50px;
             text-align: center;
-            box-shadow: 0px 1px 3px rgba(0,0,0,0.2);
+            box-shadow: 0 1px 4px rgba(255,215,0,0.2);
+            transition: all 0.2s ease-in-out;
+        }
+        .touch-controls button:hover {
+            background-color: #FFDF30;
+            box-shadow: 0 0 10px var(--banco-pichincha-gold-glow);
+            transform: scale(1.05);
         }
         .touch-controls button:active {
-            background-color: #e6c200;
+            transform: scale(1); /* Reset scale on active for touch feedback */
         }
-
         .logo-footer {
-            width: 60px;
-            max-width: 15%;
+            width: clamp(45px, 10vw, 50px);
             height: auto;
-            margin-top: 5px; 
-            margin-bottom: 5px; 
+            margin-top: 5px;
+            margin-bottom: clamp(5px, 1vh, 8px);
+            opacity: 0.8;
         }
 
-
+        /* --- Media Queries --- */
         @media (max-width: 600px) {
-            #loginUI h1 { font-size: clamp(18px, 5.5vw, 26px); }
-            #loginUI p { font-size: clamp(12px, 3.5vw, 15px); }
-            #loginUI input, #loginUI button {
-                font-size: clamp(12px, 3.5vw, 15px);
-                padding: 8px 12px;
+            .panel-content-wrapper {
+                max-width: calc(100% - 20px); /* Ensure padding doesn't cause overflow */
             }
-            #finalLogo h2 { font-size: clamp(16px, 6vw, 24px); }
-            #finalLogo p { font-size: clamp(13px, 3.8vw, 16px); }
-            #insigniaCanvas { max-width: 75vw; max-height: 55vh; }
-
-            #mapTitle { font-size: clamp(13px, 3.2vw, 20px); }
-            #mapDescription { font-size: clamp(10px, 2.5vw, 14px); }
-            .map-module-text { font-size: clamp(9px, 2.2vw, 12px); }
-            
-            #triviaTitle { font-size: clamp(16px, 5vw, 24px); }
-            #triviaQuestion { font-size: clamp(14px, 3.8vw, 20px); }
-            .trivia-option { font-size: clamp(12px, 3.2vw, 16px); padding: 10px 12px;}
-            #triviaConfirmButton { font-size: clamp(14px, 4vw, 18px); padding: 10px 20px;}
-
-
-            .touch-controls { padding: 6px 0; gap: 10px; }
-            .touch-controls button { font-size: clamp(16px, 4vw, 20px); padding: 8px 12px; min-width: 50px; }
-            .logo-footer { width: 50px; margin-top: 3px; margin-bottom: 3px; }
         }
-
         @media (orientation: landscape) and (max-height: 500px) {
-            #loginUI h1, #loginUI p, #loginUI input, #loginUI button,
-            #finalLogo h2, #finalLogo p { font-size: clamp(11px, 2.2vw, 14px); }
-            #loginUI p { font-size: clamp(10px, 2vw, 12px); }
-            #insigniaCanvas { max-width: 50vw; max-height: 70vh; }
-
-            #mapTitle { font-size: clamp(12px, 2vw, 18px); }
-            #mapDescription { font-size: clamp(9px, 1.6vw, 13px); }
-            .map-module-text { font-size: clamp(8px, 1.5vw, 11px); }
-
-            #triviaUI { gap: 10px; padding: 15px;}
-            #triviaTitle { font-size: clamp(16px, 4.5vw, 22px); }
-            #triviaQuestion { font-size: clamp(13px, 3.2vw, 18px); margin-bottom: 5px;}
-            .trivia-option { font-size: clamp(11px, 2.8vw, 15px); padding: 8px 10px;}
-            #triviaConfirmButton { font-size: clamp(13px, 3.5vw, 17px); padding: 8px 18px;}
-
-
-            .touch-controls { padding: 5px 0; }
-            .touch-controls button { font-size: clamp(14px, 3.5vw, 16px); padding: 6px 10px; }
-            #loginUI img { margin-bottom: 3px; max-width: 18%; }
-            #loginUI, #finalLogo { gap: 8px; }
-            .logo-footer { width: 45px; margin-top: 2px; margin-bottom: 2px;}
+            /* Adjustments for small landscape screens */
+            .panel-content-wrapper {
+                max-width: 500px; /* Or a percentage */
+                padding: clamp(15px, 3vw, 25px); /* Reduced padding */
+                gap: clamp(10px, 2vh, 15px);    /* Reduced gap */
+            }
+            #mapHeader {
+                padding: clamp(6px, 1vh, 10px) 10px;
+            }
+            .touch-controls button {
+                 padding: clamp(6px, 1.5vh, 8px) clamp(10px, 2vw, 14px);
+                 font-size: clamp(14px, 3.5vw, 18px);
+            }
         }
     </style>
 </head>
 <body>
-<div id="phaser-game">
-    </div>
+    <div id="phaser-game"></div>
 
-<div id="loginUI">
-    <img src="assets/logo-pichincha.png" alt="Banco Pichincha">
-    <h1>¡Bienvenido a la Feria de Ciberseguridad! 5</h1>
-    <p>Demuestra tu conocimiento Ciberguardián en protección digital. Supera los retos, responde las trivias y conquista la galaxia de la ciberseguridad.</p>
-    <input type="text" id="usernameInput" placeholder="Ingresa tu nombre">
-    <button onclick="startGame()">Comenzar misión</button>
-</div>
-
-<div id="mapHeader">
-    <div id="mapTitle"></div>
-    <div id="mapDescription"></div>
-</div>
-<div id="mapModuleTextsContainer">
-    </div>
-
-
-<div id="triviaUI">
-    <div id="triviaTitle"></div>
-    <div id="triviaQuestion"></div>
-    <div id="triviaOptionsContainer">
+    <div id="loginUI">
+        <div class="animated-lines">
+            <div class="line horizontal"></div> <div class="line horizontal"></div> <div class="line horizontal"></div> <div class="line horizontal"></div> <div class="line horizontal"></div>
+            <div class="line vertical"></div>   <div class="line vertical"></div>   <div class="line vertical"></div>   <div class="line vertical"></div>   <div class="line vertical"></div>
         </div>
-    <button id="triviaConfirmButton">Responder</button>
-    <div id="triviaIncorrectMessage"></div>
-</div>
-
-
-<div id="finalLogo">
-    <div style="text-align: center; color: white;">
-        <h2 style="color: #FFD700;">¡MISIÓN CUMPLIDA!</h2>
-        <p style="color: #ffffff;">Has superado todos los desafíos y obtuviste tu insignia Ciberguardián ⭐</p>
+        <div id="holographicPanel">
+            <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha" class="holo-logo">
+            <h1 class="holo-title">Conexión Segura</h1>
+            <p class="holo-subtitle">Autentique sus credenciales de Ciberguardián.</p>
+            <div class="holo-input-group"> <input type="text" id="usernameInput" placeholder="Identificador de Agente" aria-label="Identificador de Agente">
+            </div>
+            <button id="loginButton">Acceder</button>
+        </div>
     </div>
-    <canvas id="insigniaCanvas"></canvas> 
-</div>
 
-<div id="bottomBarContainer">
-    <div class="touch-controls" id="touchControls">
-        <button onclick="moveLeft()">⬅️</button>
-        <button onclick="enterScene()">🚀</button>
-        <button onclick="moveRight()">➡️</button>
+    <div id="mapHeader" class="hidden">
+        <div id="mapTitle"></div>
+        <div id="mapDescription"></div>
     </div>
-    <img src="assets/logo-pichincha.png" alt="Banco Pichincha" class="logo-footer" id="logoFooter">
-</div>
+    <div id="mapModuleTextsContainer" class="hidden"></div>
 
+    <div id="triviaUI" class="fullscreen-ui-panel hidden">
+        <div class="panel-content-wrapper">
+            <h2 id="triviaTitle" class="panel-header-title">Desafío de Ciberseguridad</h2>
+            <p id="triviaQuestion" class="panel-text">Cargando pregunta...</p>
+            <div id="triviaOptionsContainer"></div>
+            <button id="triviaConfirmButton" class="panel-button hidden">Responder</button>
+            <p id="triviaIncorrectMessage" class="hidden"></p>
+        </div>
+    </div>
+
+    <div id="finalLogo" class="fullscreen-ui-panel hidden">
+         <div class="panel-content-wrapper">
+            <h2 class="panel-header-title">¡MISIÓN CUMPLIDA!</h2>
+            <p class="panel-text">Has superado todos los desafíos y obtuviste tu insignia Ciberguardián ⭐</p>
+            <canvas id="insigniaCanvas" aria-label="Insignia de Ciberguardián completada"></canvas>
+        </div>
+    </div>
+
+    <div id="bottomBarContainer" class="hidden">
+        <div class="touch-controls" id="touchControls">
+            <button id="moveLeftButton" aria-label="Mover a la izquierda">⬅️</button>
+            <button id="enterSceneButton" aria-label="Acceder a misión">🚀</button>
+            <button id="moveRightButton" aria-label="Mover a la derecha">➡️</button>
+        </div>
+        <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha pie de página" class="logo-footer" id="logoFooter">
+    </div>
 
 <script>
-let userSession = {
-    username: '',
-    completedStages: [false, false, false] 
+// --- Constants and Global State ---
+const GLOBAL_CONFIG = {
+    FONT_FAMILY_HTML: 'Segoe UI, Arial, sans-serif', // Used by BadgeScene for canvas text
+    MODULE_COUNT: 3,
+    ASSETS_PATH: 'assets/' // Centralized asset path
 };
 
+let userSession = {
+    username: '',
+    completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
+};
 let gameInstance = null;
-let currentMapScene = null;
+let currentMapSceneRef = null; // More descriptive name
 
-const GLOBAL_FONT_FAMILY_HTML = 'Segoe UI, Arial, sans-serif'; 
-const MODULE_COUNT = 3; 
+// --- DOM Element References ---
+// Grouped DOM element caching for better organization
+const DOM_ELEMENTS = {
+    loginUI: null, usernameInput: null, loginButton: null, usernameErrorContainer: null, // holographicPanel is parent of error
+    mapHeader: null, mapTitle: null, mapDescription: null, mapModuleTextsContainer: null,
+    triviaUI: null, triviaTitle: null, triviaQuestion: null, triviaOptionsContainer: null, triviaConfirmButton: null, triviaIncorrectMessage: null,
+    finalLogoUI: null, insigniaCanvas: null,
+    bottomBar: null, touchControls: { left: null, enter: null, right: null },
+    phaserGameContainer: null
+};
 
-// Elementos HTML de la UI del Mapa
-let mapHeaderDiv, mapTitleDiv, mapDescriptionDiv, mapModuleTextsContainerDiv;
-// Elementos HTML de la UI de Trivia
-let triviaUIDiv, triviaTitleDiv, triviaQuestionDiv, triviaOptionsContainerDiv, triviaConfirmButton, triviaIncorrectMessageDiv;
+// --- Utility Functions ---
+/**
+ * Shows specified HTML elements and hides others from a predefined list of main UI containers.
+ * @param {string[]} elementsToShow - Array of element IDs to show.
+ */
+function manageUIContainersVisibility(elementsToShow = []) {
+    const ALL_MAIN_UI_IDS = ['loginUI', 'mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogoUI', 'bottomBarContainer'];
+    ALL_MAIN_UI_IDS.forEach(id => {
+        const element = DOM_ELEMENTS[id] || document.getElementById(id); // Fallback for elements not in DOM_ELEMENTS yet
+        if (element) {
+            if (elementsToShow.includes(id)) {
+                element.style.display = (id === 'loginUI' || id === 'triviaUI' || id === 'finalLogoUI' || id === 'bottomBarContainer') ? 'flex' : 'block';
+                element.classList.remove('hidden');
+            } else {
+                // element.style.display = 'none'; // Class .hidden handles this
+                element.classList.add('hidden');
+            }
+        }
+    });
+}
 
+/**
+ * Creates a standard background for scenes like Trivia and Badge.
+ * @param {Phaser.Scene} scene - The Phaser scene instance.
+ */
+function createStandardSceneBackground(scene) {
+    if (scene.bgStandard) scene.bgStandard.destroy();
+    if (scene.overlayStandard) scene.overlayStandard.destroy();
 
-function createSceneBackground(scene) {
-    scene.bg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+    scene.bgStandard = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
         .setDisplaySize(scene.scale.width, scene.scale.height)
-        .setDepth(-1); 
-
-    scene.overlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
+        .setDepth(-1);
+    scene.overlayStandard = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
         .setOrigin(0)
-        .setDepth(-0.5); 
+        .setDepth(-0.5); // Between background and other scene elements
+
+    // Handle resize for this specific background
+    const resizeHandler = () => {
+        if (scene.bgStandard && scene.bgStandard.active) {
+            scene.bgStandard.setPosition(scene.scale.width / 2, scene.scale.height / 2)
+                           .setDisplaySize(scene.scale.width, scene.scale.height);
+        }
+        if (scene.overlayStandard && scene.overlayStandard.active) {
+            scene.overlayStandard.setSize(scene.scale.width, scene.scale.height);
+        }
+    };
+    scene.scale.on('resize', resizeHandler, scene);
+    // Store handler to remove it on shutdown
+    scene.sys.events.once('shutdown', () => {
+        scene.scale.off('resize', resizeHandler, scene);
+        if (scene.bgStandard) { scene.bgStandard.destroy(); scene.bgStandard = null; }
+        if (scene.overlayStandard) { scene.overlayStandard.destroy(); scene.overlayStandard = null; }
+    }, scene);
 }
 
-function resizeSceneBackground(scene) {
-    if (scene.bg) {
-        scene.bg.setPosition(scene.scale.width / 2, scene.scale.height / 2)
-                 .setDisplaySize(scene.scale.width, scene.scale.height);
-    }
-    if (scene.overlay) {
-        scene.overlay.setSize(scene.scale.width, scene.scale.height);
-    }
+/**
+ * Creates a focused background for the Map Scene.
+ * @param {Phaser.Scene} scene - The Phaser scene instance.
+ */
+function createMapFocusedBackground(scene) {
+    if (scene.mapFocusedBg) scene.mapFocusedBg.destroy();
+    if (scene.mapFocusedOverlay) scene.mapFocusedOverlay.destroy();
+
+    scene.mapFocusedBg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+        .setDisplaySize(scene.scale.width, scene.scale.height)
+        .setDepth(-2) // Deepest layer in Phaser scene
+        .setTint(0x333333); // Dark tint
+
+    scene.mapFocusedOverlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x03060A, 0.6) // --body-bg color with opacity
+        .setOrigin(0)
+        .setDepth(-1); // Above background, below modules
+
+    const resizeHandler = () => {
+        if (scene.mapFocusedBg && scene.mapFocusedBg.active) {
+            scene.mapFocusedBg.setPosition(scene.scale.width / 2, scene.scale.height / 2)
+                              .setDisplaySize(scene.scale.width, scene.scale.height);
+        }
+        if (scene.mapFocusedOverlay && scene.mapFocusedOverlay.active) {
+            scene.mapFocusedOverlay.setSize(scene.scale.width, scene.scale.height);
+        }
+    };
+    scene.scale.on('resize', resizeHandler, scene);
+    scene.sys.events.once('shutdown', () => {
+        scene.scale.off('resize', resizeHandler, scene);
+        if (scene.mapFocusedBg) { scene.mapFocusedBg.destroy(); scene.mapFocusedBg = null; }
+        if (scene.mapFocusedOverlay) { scene.mapFocusedOverlay.destroy(); scene.mapFocusedOverlay = null; }
+    }, scene);
 }
 
+// --- Phaser Scenes ---
 class MapScene extends Phaser.Scene {
-    constructor() { 
+    constructor() {
         super('MapScene');
-        this.moduleSprites = []; 
-        this.htmlModuleTextElements = []; // Para los divs de texto HTML
+        this.moduleSprites = []; // Array of {icon: Phaser.Image, textDiv: HTMLElement, originalScaleX: number, originalScaleY: number}
+        this.htmlModuleTextElements = []; // References to the HTML text divs
+        this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
+        this.character = null;
+        this.currentNode = 0; // Index of the currently selected module
+        this.modulePositions = []; // Calculated positions for modules
+        this.isLandscape = false;
+        this.cursors = null;
+        this.enterKey = null;
     }
 
     preload() {
-        this.load.image('background', 'assets/background.jpg');
-        this.load.image('module', 'assets/module.png'); 
-        this.load.image('module-complete', 'assets/module-green.png'); 
-        this.load.image('character', 'assets/jedi.png'); 
+        this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
+        this.load.image('module', `${GLOBAL_CONFIG.ASSETS_PATH}module.png`);
+        this.load.image('module-complete', `${GLOBAL_CONFIG.ASSETS_PATH}module-green.png`);
+        this.load.image('character', `${GLOBAL_CONFIG.ASSETS_PATH}jedi.png`);
     }
 
     create() {
-        currentMapScene = this;
-        this.hideAllHtmlUI(); 
-        
-        mapHeaderDiv = document.getElementById('mapHeader');
-        mapTitleDiv = document.getElementById('mapTitle');
-        mapDescriptionDiv = document.getElementById('mapDescription');
-        mapModuleTextsContainerDiv = document.getElementById('mapModuleTextsContainer');
-        
-        const bottomBarContainer = document.getElementById('bottomBarContainer');
-        if (bottomBarContainer) bottomBarContainer.style.display = 'flex'; 
-        if (mapHeaderDiv) mapHeaderDiv.style.display = 'block';
-        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'block';
+        currentMapSceneRef = this;
+        manageUIContainersVisibility(['mapHeader', 'mapModuleTextsContainer', 'bottomBarContainer']);
 
+        createMapFocusedBackground(this);
 
-        createSceneBackground(this); 
+        this.activeModuleEffects.border = this.add.graphics().setDepth(1);
+        this.activeModuleEffects.scanline = this.add.graphics().setDepth(3); // Above character
 
-        this.drawSceneElements(); 
+        this.drawSceneElements(); // Initial draw
         this.cursors = this.input.keyboard.createCursorKeys();
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
         this.scale.on('resize', this.handleResize, this);
-        this.updateModuleTextPositions(); // Posicionar textos HTML
-        this.updateActiveModuleVisuals(); 
-    }
-
-    hideAllHtmlUI() {
-        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogo'];
-        elementsToHide.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
+        // Initial update of text positions and visuals after elements are drawn
+        this.updateModuleTextPositions();
+        this.updateActiveModuleVisuals();
     }
 
     handleResize() {
-        resizeSceneBackground(this);
-        this.moduleSprites.forEach(spriteGroup => { 
-            if(spriteGroup.icon) spriteGroup.icon.destroy();
-            // No necesitamos destruir el texto de Phaser si ya no lo usamos
-        });
+        // Clear existing Phaser-drawn elements that depend on screen size
+        this.moduleSprites.forEach(spriteGroup => { if (spriteGroup.icon) spriteGroup.icon.destroy(); });
         this.moduleSprites = [];
-        this.htmlModuleTextElements.forEach(textDiv => textDiv.remove());
+
+        if (DOM_ELEMENTS.mapModuleTextsContainer) DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
         this.htmlModuleTextElements = [];
 
+
         if (this.character) this.character.destroy();
-        
-        this.drawSceneElements(); 
-        this.updateModuleTextPositions();
+        if (this.activeModuleEffects.border) this.activeModuleEffects.border.clear();
+        if (this.activeModuleEffects.scanline) this.activeModuleEffects.scanline.clear();
+        if (this.activeModuleEffects.scanlineTween && this.activeModuleEffects.scanlineTween.isPlaying()) {
+            this.activeModuleEffects.scanlineTween.stop();
+        }
+
+        this.drawSceneElements();
+        this.updateModuleTextPositions(); 
         this.updateActiveModuleVisuals(); 
     }
 
-    drawSceneElements() { 
-        const width = this.scale.width;
-        const height = this.scale.height;
+    drawSceneElements() {
+        const { width, height } = this.scale;
         this.isLandscape = width > height;
 
-        mapTitleDiv.textContent = `Hola ${userSession.username.split(' ')[0]}, Ciberguardián`;
-        mapDescriptionDiv.textContent = `Supera las misiones y demuestra tu destreza.`;
-        
-        const headerHeightPercentage = this.isLandscape ? 0.14 : 0.11; 
-        mapHeaderDiv.style.paddingTop = `${height * headerHeightPercentage * 0.15}px`;
-        mapHeaderDiv.style.paddingBottom = `${height * headerHeightPercentage * 0.15}px`;
-        
-        const baseIconSize = this.isLandscape ? Math.min(width * 0.055, 42) : Math.min(width * 0.1, 48); // Ligeramente más pequeños
-        
-        this.modulePositions = []; 
-        const headerActualHeight = mapHeaderDiv.offsetHeight || height * headerHeightPercentage;
+        if (DOM_ELEMENTS.mapTitle && userSession.username) {
+            DOM_ELEMENTS.mapTitle.textContent = `Agente ${userSession.username.split(' ')[0]}, bienvenido.`;
+        }
+        if (DOM_ELEMENTS.mapDescription) {
+            DOM_ELEMENTS.mapDescription.textContent = `Seleccione su próxima misión de ciberseguridad.`;
+        }
 
+        const headerHeightPercentage = this.isLandscape ? 0.1 : 0.08;
+        const headerActualHeight = DOM_ELEMENTS.mapHeader ? (DOM_ELEMENTS.mapHeader.offsetHeight || height * headerHeightPercentage) : height * headerHeightPercentage;
+        const bottomBarActualHeight = DOM_ELEMENTS.bottomBar && DOM_ELEMENTS.bottomBar.style.display !== 'none' ? DOM_ELEMENTS.bottomBar.offsetHeight : 0;
+
+        const baseIconSize = this.isLandscape ? Math.min(width * 0.07, 56) : Math.min(width * 0.14, 60);
+        const verticalAvailableHeight = height - headerActualHeight - bottomBarActualHeight - (this.isLandscape ? 20 : 40); 
+
+        this.modulePositions = [];
         if (this.isLandscape) {
-            const moduleAreaY = headerActualHeight + (height - headerActualHeight) * 0.65; 
-            const totalModuleWidth = width * 0.45; // Más compactos
-            const moduleSpacingX = totalModuleWidth / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1); 
-            let currentX = (width - (moduleSpacingX * (MODULE_COUNT - 1))) / 2;
-            for (let i = 0; i < MODULE_COUNT; i++) {
+            const moduleAreaY = headerActualHeight + verticalAvailableHeight * 0.5; 
+            const totalModuleWidth = width * 0.6; 
+            const moduleSpacingX = GLOBAL_CONFIG.MODULE_COUNT > 1 ? totalModuleWidth / (GLOBAL_CONFIG.MODULE_COUNT - 1) : 0;
+            let currentX = (width - (moduleSpacingX * (GLOBAL_CONFIG.MODULE_COUNT - 1))) / 2; 
+            for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: currentX, y: moduleAreaY });
                 currentX += moduleSpacingX;
             }
-        } else { 
+        } else { // Portrait
             const moduleAreaX = width / 2;
-            const moduleGroupHeight = (height - headerActualHeight) * 0.45; 
-            const startY = headerActualHeight + (height - headerActualHeight) * 0.3;
-            const moduleSpacingY = moduleGroupHeight / (MODULE_COUNT > 1 ? MODULE_COUNT -1 : 1) * 0.85;
-            for (let i = 0; i < MODULE_COUNT; i++) {
+            const moduleGroupHeight = verticalAvailableHeight * 0.75; 
+            const startY = headerActualHeight + (verticalAvailableHeight - moduleGroupHeight) / 2 + (baseIconSize/2); 
+            const moduleSpacingY = GLOBAL_CONFIG.MODULE_COUNT > 1 ? moduleGroupHeight / (GLOBAL_CONFIG.MODULE_COUNT -1) : 0; // Corrected: MODULE_COUNT - 1
+            for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
                 this.modulePositions.push({ x: moduleAreaX, y: startY + (i * moduleSpacingY) });
             }
         }
-        
-        this.currentNode = this.currentNode !== undefined ? this.currentNode : 0;
 
-        mapModuleTextsContainerDiv.innerHTML = ''; // Limpiar textos HTML anteriores
-        this.htmlModuleTextElements = [];
+        this.currentNode = Math.max(0, Math.min(this.currentNode, GLOBAL_CONFIG.MODULE_COUNT - 1));
 
         this.moduleSprites = this.modulePositions.map((pos, i) => {
-            const isComplete = userSession.completedStages?.[i];
+            const isComplete = userSession.completedStages[i];
             const iconKey = isComplete ? 'module-complete' : 'module';
-            
-            const icon = this.add.image(pos.x, pos.y, iconKey).setDepth(1)
-                .setDisplaySize(baseIconSize, baseIconSize).setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => { this.currentNode = i; this.moveCharacter(); });
-            
-            // Crear el div HTML para el texto del módulo
+            const icon = this.add.image(pos.x, pos.y, iconKey)
+                .setDepth(2)
+                .setDisplaySize(baseIconSize, baseIconSize)
+                .setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => {
+                    this.currentNode = i;
+                    this.moveCharacterAndVisuals();
+                });
+
             const textDiv = document.createElement('div');
             textDiv.className = 'map-module-text';
-            mapModuleTextsContainerDiv.appendChild(textDiv);
-            this.htmlModuleTextElements.push(textDiv);
-            
-            return { icon: icon, textDiv: textDiv, originalScale: icon.scaleX };
+            if (DOM_ELEMENTS.mapModuleTextsContainer) DOM_ELEMENTS.mapModuleTextsContainer.appendChild(textDiv);
+            this.htmlModuleTextElements[i] = textDiv; 
+
+            return { icon: icon, textDiv: textDiv, originalScaleX: icon.scaleX, originalScaleY: icon.scaleY };
         });
-        
-        const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.045, 38) : Math.min(width * 0.08, 45);
-        const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3;
+
+        const baseCharacterSizeWidth = this.isLandscape ? Math.min(width * 0.035, 30) : Math.min(width * 0.065, 36);
+        const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3; 
 
         if (this.moduleSprites[this.currentNode]?.icon) {
             const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
-            this.character = this.add.image(activeModuleIcon.x, 
-                activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.4, 
-                'character').setDepth(2).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
+            this.character = this.add.image(
+                activeModuleIcon.x,
+                activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.5, 
+                'character'
+            ).setDepth(3).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
         }
     }
 
     updateModuleTextPositions() {
-        if (!mapModuleTextsContainerDiv) return;
-        const gameCanvas = this.game.canvas;
+        if (!DOM_ELEMENTS.mapModuleTextsContainer || this.htmlModuleTextElements.length !== this.moduleSprites.length) return;
 
         this.moduleSprites.forEach((spriteGroup, i) => {
-            if (spriteGroup.icon && spriteGroup.icon.active && spriteGroup.textDiv) {
+            if (spriteGroup.icon && spriteGroup.icon.active && this.htmlModuleTextElements[i]) {
                 const icon = spriteGroup.icon;
-                const textDiv = spriteGroup.textDiv;
-                
-                // Convertir coordenadas del mundo de Phaser a coordenadas del viewport
-                const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.5 + 5); // 5px de offset hacia abajo
-                
+                const textDiv = this.htmlModuleTextElements[i];
+                const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.6 + 10); 
                 textDiv.style.left = `${pt.x}px`;
                 textDiv.style.top = `${pt.y}px`;
 
-                let moduleLabel = `Fase ${i + 1}`;
-                const isComplete = userSession.completedStages?.[i];
+                let moduleLabel = `Misión ${i + 1}`;
+                const isComplete = userSession.completedStages[i];
                 textDiv.classList.remove('completed', 'active');
-
                 if (isComplete) {
                     textDiv.classList.add('completed');
-                    moduleLabel += " ⭐";
+                    moduleLabel += " ✓";
                 }
                 if (i === this.currentNode) {
                     textDiv.classList.add('active');
@@ -611,272 +796,465 @@ class MapScene extends Phaser.Scene {
             }
         });
     }
-    
+
     updateActiveModuleVisuals() {
+        this.activeModuleEffects.border.clear();
+        this.activeModuleEffects.scanline.clear();
+        if (this.activeModuleEffects.scanlineTween && this.activeModuleEffects.scanlineTween.isPlaying()) {
+            this.activeModuleEffects.scanlineTween.stop();
+            this.activeModuleEffects.scanlineTween = null; 
+        }
+
         this.moduleSprites.forEach((spriteGroup, index) => {
             if (spriteGroup.icon && spriteGroup.icon.active) {
-                spriteGroup.icon.clearTint().setScale(spriteGroup.originalScale);
+                spriteGroup.icon.clearTint().setScale(spriteGroup.originalScaleX, spriteGroup.originalScaleY);
+                const icon = spriteGroup.icon;
+                const baseRect = {
+                    x: icon.x - icon.displayWidth / 2,
+                    y: icon.y - icon.displayHeight / 2,
+                    width: icon.displayWidth,
+                    height: icon.displayHeight
+                };
+
                 if (index === this.currentNode) {
-                    this.activeModuleSpriteIcon = spriteGroup.icon;
-                    this.activeModuleSpriteIcon.setTint(0xFFFF99).setScale(spriteGroup.originalScale * 1.05);
+                    icon.setScale(spriteGroup.originalScaleX * 1.1, spriteGroup.originalScaleY * 1.1);
+
+                    this.activeModuleEffects.border.lineStyle(3, 0xFFD700, 0.8)
+                        .strokeRoundedRect(baseRect.x - 3, baseRect.y - 3, baseRect.width + 6, baseRect.height + 6, 5);
+                    this.activeModuleEffects.border.lineStyle(1.5, 0xFFFFFF, 0.5) 
+                        .strokeRoundedRect(baseRect.x - 1, baseRect.y - 1, baseRect.width + 2, baseRect.height + 2, 4);
+
+                    const scanlineWidth = icon.displayWidth * 0.8;
+                    const scanlineStartX = icon.x - scanlineWidth / 2;
+                    let scanlineCurrentY = icon.y - icon.displayHeight / 2; 
+
+                    this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, 0.2).fillRect(scanlineStartX, scanlineCurrentY, scanlineWidth, 2);
+
+                    this.activeModuleEffects.scanlineTween = this.tweens.add({
+                        targets: { y: scanlineCurrentY, alpha: 0.2 }, 
+                        y: icon.y + icon.displayHeight / 2 - 2, 
+                        alpha: 0.05,
+                        ease: 'Linear',
+                        duration: 1500,
+                        repeat: -1,
+                        yoyo: true,
+                        onUpdate: (tween, target) => {
+                            this.activeModuleEffects.scanline.clear();
+                            this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, target.alpha);
+                            this.activeModuleEffects.scanline.fillRect(scanlineStartX, target.y, scanlineWidth, 2);
+                        }
+                    });
+
+                } else if (userSession.completedStages[index]) {
+                    icon.setTint(0xDDDDDD); 
+                     this.activeModuleEffects.border.lineStyle(2, 0x60FF60, 0.5) 
+                        .strokeRoundedRect(baseRect.x - 2, baseRect.y - 2, baseRect.width + 4, baseRect.height + 4, 4);
+                } else { 
+                    this.activeModuleEffects.border.lineStyle(1.5, 0x00D2FF, 0.3) 
+                        .strokeRoundedRect(baseRect.x - 1, baseRect.y - 1, baseRect.width + 2, baseRect.height + 2, 3);
                 }
             }
         });
-        this.updateModuleTextPositions(); // Asegurar que los textos HTML también se actualicen
+        this.updateModuleTextPositions(); 
     }
 
     update() {
-        if (!this.cursors) return;
+        if (!this.cursors || !this.input.keyboard.enabled) return;
         let moved = false;
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.right) && this.currentNode < (MODULE_COUNT - 1)) {
-            this.currentNode++; moved = true;
-        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.left) && this.currentNode > 0) {
-            this.currentNode--; moved = true;
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
+            if (this.currentNode > 0) {
+                this.currentNode--;
+                moved = true;
+            }
+        } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
+            if (this.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) {
+                this.currentNode++;
+                moved = true;
+            }
         }
-        if(moved) this.moveCharacter();
-        if (Phaser.Input.Keyboard.JustDown(this.enterKey)) enterScene();
+
+        if (moved) {
+            this.moveCharacterAndVisuals();
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+            this.attemptEnterScene();
+        }
     }
 
-    moveCharacter(animate = true) {
+    moveCharacterAndVisuals(animate = true) {
         this.updateActiveModuleVisuals(); 
-        const activeModuleIcon = this.moduleSprites?.[this.currentNode]?.icon;
+        const activeModuleIcon = this.moduleSprites[this.currentNode]?.icon;
         if (activeModuleIcon && this.character && this.character.active) {
             const targetX = activeModuleIcon.x;
-            const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * activeModuleIcon.scaleY / 2 - this.character.displayHeight * 0.4; 
+            const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * 0.5 - this.character.displayHeight * 0.5;
             if (animate) {
                 this.tweens.add({ targets: this.character, x: targetX, y: targetY, ease: 'Sine.easeInOut', duration: 250 });
             } else {
-                this.character.x = targetX; this.character.y = targetY;
+                this.character.x = targetX;
+                this.character.y = targetY;
             }
         }
     }
+
+    attemptEnterScene() {
+        if (!this.scene.isActive()) return; 
+        const targetStageIndex = this.currentNode;
+        const isUnlocked = targetStageIndex === 0 || userSession.completedStages[targetStageIndex - 1];
+
+        if (isUnlocked) {
+            this.scene.start('TriviaScene', { stageIndex: targetStageIndex }); 
+        } else {
+            console.log(`Module ${targetStageIndex + 1} is locked.`);
+        }
+    }
+
     shutdown() {
         this.scale.off('resize', this.handleResize, this);
-        if (mapHeaderDiv) mapHeaderDiv.style.display = 'none';
-        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'none';
+        // this.input.keyboard.disableGlobalCapture(); // Consider if you need to re-enable this based on broader application structure
+
+        if (this.activeModuleEffects.scanlineTween && this.activeModuleEffects.scanlineTween.isPlaying()) {
+            this.activeModuleEffects.scanlineTween.stop();
+        }
+        this.activeModuleEffects.scanlineTween = null;
+        if (this.activeModuleEffects.border) this.activeModuleEffects.border.destroy();
+        if (this.activeModuleEffects.scanline) this.activeModuleEffects.scanline.destroy();
+        this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
+
+        if (this.character) this.character.destroy();
+        this.character = null;
+        this.moduleSprites.forEach(spriteGroup => { if (spriteGroup.icon) spriteGroup.icon.destroy(); });
+        this.moduleSprites = [];
+
+        if (DOM_ELEMENTS.mapModuleTextsContainer) DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
+        this.htmlModuleTextElements = [];
+
+        currentMapSceneRef = null; 
+        console.log("MapScene shutdown complete");
     }
 }
 
-class TriviaScene extends Phaser.Scene { // Mantenemos UI HTML para Trivia
-    constructor() { super('TriviaScene'); }
-    init(data) {
-        this.stage = data.stage; this.selectedOptionIndex = -1; 
+class TriviaScene extends Phaser.Scene {
+    constructor() {
+        super('TriviaScene');
+        this.currentStageIndex = 0;
+        this.selectedOptionIndex = -1;
         this.htmlOptionElements = [];
+        this.currentTriviaData = null;
     }
-    preload() {
-        if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
-    }
-    create() {
-        this.hideAllHtmlUI();
-        triviaUIDiv = document.getElementById('triviaUI');
-        triviaTitleDiv = document.getElementById('triviaTitle');
-        triviaQuestionDiv = document.getElementById('triviaQuestion');
-        triviaOptionsContainerDiv = document.getElementById('triviaOptionsContainer');
-        triviaConfirmButton = document.getElementById('triviaConfirmButton');
-        triviaIncorrectMessageDiv = document.getElementById('triviaIncorrectMessage');
 
-        if(triviaUIDiv) triviaUIDiv.style.display = 'flex';
-        const bottomBarContainer = document.getElementById('bottomBarContainer');
-        if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
-        
-        createSceneBackground(this); 
-        this.drawTriviaUI(); 
-    }
-    hideAllHtmlUI() {
-        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI', 'finalLogo'];
-        elementsToHide.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-    }
-    drawTriviaUI() {
-        triviaTitleDiv.textContent = `Trivia Fase ${this.stage}`;
-        triviaQuestionDiv.textContent = '¿Qué es phishing?'; 
-        const opciones = ['Una técnica para pescar', 'Un intento de engañar a usuarios para robar datos', 'Un software antivirus'];
-        triviaOptionsContainerDiv.innerHTML = ''; 
+    init(data) {
+        this.currentStageIndex = data.stageIndex;
+        this.selectedOptionIndex = -1;
         this.htmlOptionElements = [];
-        opciones.forEach((opcionTexto, index) => {
+    }
+
+    preload() {
+        if (!this.textures.exists('background')) {
+            this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
+        }
+    }
+
+    create() {
+        manageUIContainersVisibility(['triviaUI']);
+        createStandardSceneBackground(this);
+        this.loadAndDisplayTrivia();
+    }
+
+    loadAndDisplayTrivia() {
+        const TRIVIA_QUESTIONS = [
+            { question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?", options: ["Verdadero", "Falso"], correctAnswerIndex: 0 },
+            { question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?", options: ["123456", "P@$$wOrd2025!"], correctAnswerIndex: 1 },
+            { question: "Actualizar el software de tus dispositivos regularmente ayuda a protegerte de vulnerabilidades. ¿Verdadero o Falso?", options: ["Verdadero", "Falso"], correctAnswerIndex: 0 }
+        ];
+        this.currentTriviaData = TRIVIA_QUESTIONS[this.currentStageIndex] || TRIVIA_QUESTIONS[0];
+
+        if (!this.currentTriviaData || !DOM_ELEMENTS.triviaTitle || !DOM_ELEMENTS.triviaQuestion || !DOM_ELEMENTS.triviaOptionsContainer || !DOM_ELEMENTS.triviaConfirmButton || !DOM_ELEMENTS.triviaIncorrectMessage) {
+            console.error("Trivia UI elements or data missing.");
+            this.goBackToMap();
+            return;
+        }
+
+        DOM_ELEMENTS.triviaTitle.textContent = `Desafío de Ciberseguridad ${this.currentStageIndex + 1}`;
+        DOM_ELEMENTS.triviaQuestion.textContent = this.currentTriviaData.question;
+
+        DOM_ELEMENTS.triviaOptionsContainer.innerHTML = '';
+        this.htmlOptionElements = [];
+
+        this.currentTriviaData.options.forEach((optionText, index) => {
             const optionDiv = document.createElement('div');
             optionDiv.className = 'trivia-option';
-            optionDiv.textContent = opcionTexto;
-            optionDiv.onclick = () => this.seleccionarOpcion(index);
-            triviaOptionsContainerDiv.appendChild(optionDiv);
+            optionDiv.textContent = optionText;
+            optionDiv.onclick = () => this.selectOption(index);
+            DOM_ELEMENTS.triviaOptionsContainer.appendChild(optionDiv);
             this.htmlOptionElements.push(optionDiv);
         });
-        triviaConfirmButton.onclick = () => this.validarRespuesta();
-        triviaConfirmButton.style.display = 'none'; 
-        triviaIncorrectMessageDiv.style.display = 'none'; 
-        this.selectedOptionIndex = -1; 
+
+        DOM_ELEMENTS.triviaConfirmButton.onclick = () => this.validateAnswer();
+        DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
+        DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
+        
+        this.selectedOptionIndex = -1;
     }
-    seleccionarOpcion(index) {
+
+    selectOption(index) {
         this.selectedOptionIndex = index;
         this.htmlOptionElements.forEach((div, i) => div.classList.toggle('selected', i === index));
-        triviaConfirmButton.style.display = 'block';
-        triviaIncorrectMessageDiv.style.display = 'none';
+        
+        if (DOM_ELEMENTS.triviaConfirmButton) {
+            DOM_ELEMENTS.triviaConfirmButton.classList.remove('hidden');
+        }
+        if (DOM_ELEMENTS.triviaIncorrectMessage) {
+            DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
+        }
     }
-    validarRespuesta() {
-        if (this.selectedOptionIndex === -1) return;
-        const opcionSeleccionadaTexto = this.htmlOptionElements[this.selectedOptionIndex].textContent;
-        if (opcionSeleccionadaTexto.includes('engañar a usuarios para robar datos')) { 
-            userSession.completedStages[this.stage - 1] = true; 
-            const todasCompletadas = userSession.completedStages.every(e => e === true);
-            this.scene.start(todasCompletadas ? 'BadgeScene' : 'MapScene');
+
+    validateAnswer() {
+        if (this.selectedOptionIndex === -1 || !this.currentTriviaData) return;
+
+        const isCorrect = this.selectedOptionIndex === this.currentTriviaData.correctAnswerIndex;
+
+        if (isCorrect) {
+            userSession.completedStages[this.currentStageIndex] = true;
+            const allStagesCompleted = userSession.completedStages.every(status => status === true);
+            if (allStagesCompleted) {
+                this.scene.start('BadgeScene');
+            } else {
+                this.goBackToMap();
+            }
         } else {
-            triviaIncorrectMessageDiv.textContent = '❌ Respuesta incorrecta. Intenta otra vez.';
-            triviaIncorrectMessageDiv.style.display = 'block';
+            if (DOM_ELEMENTS.triviaIncorrectMessage) {
+                DOM_ELEMENTS.triviaIncorrectMessage.textContent = 'Respuesta incorrecta. ¡Intenta de nuevo o repasa tus conocimientos!';
+                DOM_ELEMENTS.triviaIncorrectMessage.classList.remove('hidden');
+            }
             this.htmlOptionElements.forEach(div => div.classList.remove('selected'));
             this.selectedOptionIndex = -1;
-            triviaConfirmButton.style.display = 'none';
+            if (DOM_ELEMENTS.triviaConfirmButton) {
+                DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
+            }
         }
     }
+
+    goBackToMap() {
+        this.scene.start('MapScene');
+    }
+
     shutdown() {
-        if(triviaUIDiv) triviaUIDiv.style.display = 'none';
+        if (DOM_ELEMENTS.triviaConfirmButton) DOM_ELEMENTS.triviaConfirmButton.onclick = null;
+        this.htmlOptionElements.forEach(div => div.onclick = null);
+        this.htmlOptionElements = [];
+        console.log("TriviaScene shutdown complete");
     }
 }
 
-class BadgeScene extends Phaser.Scene { 
+class BadgeScene extends Phaser.Scene {
     constructor() { super('BadgeScene'); }
+
     preload() {
-        if (!this.textures.exists('background')) this.load.image('background', 'assets/background.jpg');
-        this.load.image('insigniaBP', 'assets/insigniaBP.png');
-    }
-    create() {
-        this.hideAllHtmlUI();
-        document.getElementById('finalLogo').style.display = 'flex';
-        const bottomBarContainer = document.getElementById('bottomBarContainer');
-        if (bottomBarContainer) bottomBarContainer.style.display = 'none'; 
-        createSceneBackground(this);
-        this.drawDynamicInsignia(userSession.username);
-    }
-    hideAllHtmlUI() {
-        const elementsToHide = ['mapHeader', 'mapModuleTextsContainer', 'triviaUI'];
-        elementsToHide.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-    }
-    drawDynamicInsignia(nombre) {
-        const canvas = document.getElementById('insigniaCanvas'); if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const imgTexture = this.textures.get('insigniaBP');
-        if (!imgTexture || imgTexture.key === '__MISSING') {
-            console.error("Textura insignia no cargada."); canvas.width = 200; canvas.height = 50;
-            ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="red"; ctx.font=`14px ${GLOBAL_FONT_FAMILY_HTML}`;
-            ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("Error Insignia",canvas.width/2,canvas.height/2); return;
+        if (!this.textures.exists('background')) {
+            this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
         }
-        const img = imgTexture.getSourceImage(); 
-        canvas.width = img.naturalWidth || img.width; canvas.height = img.naturalHeight || img.height;
-        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        const fontSize = Math.max(8, canvas.width * 0.05); 
-        ctx.font = `bold ${fontSize}px ${GLOBAL_FONT_FAMILY_HTML}`; ctx.fillStyle = '#000000'; 
-        ctx.textAlign = 'center'; ctx.fillText(nombre.toUpperCase(), canvas.width/2, canvas.height * 0.735); 
+        this.load.image('insigniaBP', `${GLOBAL_CONFIG.ASSETS_PATH}insigniaBP.png`);
     }
-    shutdown() {}
+
+    create() {
+        manageUIContainersVisibility(['finalLogoUI']);
+        createStandardSceneBackground(this);
+        this.drawDynamicInsignia(userSession.username || "Agente");
+    }
+
+    drawDynamicInsignia(agentName) {
+        const canvas = DOM_ELEMENTS.insigniaCanvas;
+        if (!canvas) {
+            console.error("Insignia canvas element not found.");
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        const insigniaTexture = this.textures.get('insigniaBP');
+
+        if (!insigniaTexture || insigniaTexture.key === '__MISSING' || insigniaTexture.key === '__DEFAULT') {
+            console.error("Insignia texture not loaded or missing. Displaying error on canvas.");
+            canvas.width = 200; canvas.height = 60;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "red";
+            ctx.font = `12px ${GLOBAL_CONFIG.FONT_FAMILY_HTML}`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("Error: Insignia no disponible", canvas.width / 2, canvas.height / 2);
+            return;
+        }
+
+        const img = insigniaTexture.getSourceImage();
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const fontSize = Math.max(10, Math.round(canvas.width * 0.055));
+        ctx.font = `bold ${fontSize}px ${GLOBAL_CONFIG.FONT_FAMILY_HTML}`;
+        ctx.fillStyle = '#0A1625'; 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle'; 
+        
+        // --- AJUSTE DE POSICIÓN DEL TEXTO ---
+        // El valor original era 0.76, luego 0.735. 0.74 es un punto intermedio.
+        // Ajusta este multiplicador (e.g., 0.73, 0.74, 0.75) para centrar el texto
+        // perfectamente en la franja dorada de tu insignia específica.
+        ctx.fillText(agentName.toUpperCase(), canvas.width / 2, canvas.height * 0.725); 
+    }
+
+    shutdown() {
+        console.log("BadgeScene shutdown complete");
+    }
 }
 
-function moveLeft() {
-    if (currentMapScene && currentMapScene.sys.isActive() && currentMapScene.currentNode > 0) {
-        currentMapScene.currentNode--; currentMapScene.moveCharacter();
-    }
-}
-function moveRight() {
-    if (currentMapScene && currentMapScene.sys.isActive() && currentMapScene.currentNode < (MODULE_COUNT - 1)) {
-        currentMapScene.currentNode++; currentMapScene.moveCharacter();
-    }
-}
-function enterScene() {
-    if (currentMapScene && currentMapScene.sys.isActive()) {
-        const index = currentMapScene.currentNode;
-        const unlocked = index === 0 || userSession?.completedStages?.[index - 1];
-        if (unlocked && currentMapScene.scene.key === 'MapScene') {
-            currentMapScene.scene.start('TriviaScene', { stage: index + 1 });
+
+// --- Global Game Control Functions ---
+function handleMoveLeft() {
+    if (currentMapSceneRef && currentMapSceneRef.scene.isActive()) {
+         if (currentMapSceneRef.currentNode > 0) {
+            currentMapSceneRef.currentNode--;
+            currentMapSceneRef.moveCharacterAndVisuals();
         }
+    }
+}
+function handleMoveRight() {
+    if (currentMapSceneRef && currentMapSceneRef.scene.isActive()) {
+        if (currentMapSceneRef.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) {
+            currentMapSceneRef.currentNode++;
+            currentMapSceneRef.moveCharacterAndVisuals();
+        }
+    }
+}
+function handleEnterScene() {
+    if (currentMapSceneRef && currentMapSceneRef.scene.isActive()) {
+        currentMapSceneRef.attemptEnterScene();
     }
 }
 
 function startGame() {
-    const usernameInput = document.getElementById('usernameInput');
-    const username = usernameInput.value.trim();
-    if (username === '') {
-        usernameInput.style.border = "2px solid red";
-        let errorMsg = document.getElementById('usernameError');
-        if (!errorMsg) {
-            errorMsg = document.createElement('p'); errorMsg.id = 'usernameError';
-            errorMsg.textContent = '¡El nombre no puede estar vacío!'; errorMsg.style.color = 'red';
-            errorMsg.style.fontSize = 'clamp(12px, 3vw, 14px)';
-            usernameInput.parentNode.insertBefore(errorMsg, usernameInput.nextSibling);
-        } return;
-    }
-    const existingError = document.getElementById('usernameError');
-    if (existingError) existingError.remove();
-    usernameInput.style.border = "none";
-    userSession.username = username;
-    userSession.completedStages = Array(MODULE_COUNT).fill(false); 
-    document.getElementById('loginUI').style.display = 'none';
+    const username = DOM_ELEMENTS.usernameInput.value.trim();
+    const usernameErrorDiv = document.getElementById('usernameError'); 
 
-    const config = {
+    if (username === '') {
+        DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-error-text)";
+        DOM_ELEMENTS.usernameInput.style.boxShadow = "0 0 8px rgba(255, 112, 112, 0.5)";
+
+        let errorMsgElement = usernameErrorDiv;
+        if (!errorMsgElement) { 
+            errorMsgElement = document.createElement('p');
+            errorMsgElement.id = 'usernameError';
+            const holographicPanel = document.getElementById('holographicPanel');
+            if (holographicPanel && DOM_ELEMENTS.loginButton) {
+                holographicPanel.insertBefore(errorMsgElement, DOM_ELEMENTS.loginButton);
+            }
+        }
+        errorMsgElement.textContent = 'El Identificador de Agente es obligatorio.';
+        errorMsgElement.className = ''; 
+        errorMsgElement.classList.add('visible');
+        return;
+    }
+
+    if (usernameErrorDiv) {
+        usernameErrorDiv.classList.remove('visible');
+        DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-panel-border)";
+        DOM_ELEMENTS.usernameInput.style.boxShadow = "none";
+    }
+
+    userSession.username = username;
+    userSession.completedStages.fill(false);
+
+    manageUIContainersVisibility([]); 
+
+    const phaserConfig = {
         type: Phaser.AUTO,
         width: window.innerWidth,
         height: window.innerHeight,
-        resolution: window.devicePixelRatio || 1, 
-        parent: 'phaser-game', 
-        transparent: true, 
+        resolution: window.devicePixelRatio || 1,
+        parent: 'phaser-game',
+        transparent: true,
         scale: {
             mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH
         },
         scene: [MapScene, TriviaScene, BadgeScene],
-        render: { antialias: true, pixelArt: false },
-        pipeline: { PostFX: true }
+        render: {
+            antialias: true,
+            pixelArt: false
+        },
+        input: { 
+            keyboard: {
+                capture: [ Phaser.Input.Keyboard.KeyCodes.LEFT, Phaser.Input.Keyboard.KeyCodes.RIGHT, Phaser.Input.Keyboard.KeyCodes.ENTER, Phaser.Input.Keyboard.KeyCodes.SPACE ]
+            }
+        }
     };
 
     if (gameInstance) {
         gameInstance.scene.getScenes(true).forEach(scene => {
-            if (scene.sys.isActive() && scene.shutdown) scene.shutdown();
+            if (scene.sys.isActive() && typeof scene.shutdown === 'function') {
+                scene.shutdown(); 
+            }
+            if(scene.sys.isActive()) { 
+                 gameInstance.scene.stop(scene.scene.key);
+            }
         });
-        gameInstance.destroy(true); gameInstance = null;
+        gameInstance.destroy(true); 
+        gameInstance = null;
     }
-    gameInstance = new Phaser.Game(config);
+    gameInstance = new Phaser.Game(phaserConfig);
 }
 
-window.addEventListener('resize', () => { 
-    if (gameInstance && gameInstance.scene.isActive('MapScene')) {
-        // Forzar una actualización de las posiciones del texto HTML si la escena del mapa está activa
-        // Esto es un poco un hack, idealmente el listener de resize de la escena se encargaría
-        const mapScene = gameInstance.scene.getScene('MapScene');
-        if (mapScene && typeof mapScene.updateModuleTextPositions === 'function') {
-            // Pequeño delay para asegurar que el reescalado de Phaser haya terminado
-            setTimeout(() => mapScene.updateModuleTextPositions(), 50);
-        }
-    }
-});
+// --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
-    const existingError = document.getElementById('usernameError');
-    if (existingError) existingError.remove();
-    
-    mapHeaderDiv = document.getElementById('mapHeader');
-    mapTitleDiv = document.getElementById('mapTitle');
-    mapDescriptionDiv = document.getElementById('mapDescription');
-    mapModuleTextsContainerDiv = document.getElementById('mapModuleTextsContainer');
-    
-    triviaUIDiv = document.getElementById('triviaUI');
-    triviaTitleDiv = document.getElementById('triviaTitle');
-    triviaQuestionDiv = document.getElementById('triviaQuestion');
-    triviaOptionsContainerDiv = document.getElementById('triviaOptionsContainer');
-    triviaConfirmButton = document.getElementById('triviaConfirmButton');
-    triviaIncorrectMessageDiv = document.getElementById('triviaIncorrectMessage');
+    // Cache DOM elements
+    DOM_ELEMENTS.phaserGameContainer = document.getElementById('phaser-game');
+    DOM_ELEMENTS.loginUI = document.getElementById('loginUI');
+    DOM_ELEMENTS.usernameInput = document.getElementById('usernameInput');
+    DOM_ELEMENTS.loginButton = document.getElementById('loginButton');
+    DOM_ELEMENTS.usernameErrorContainer = document.getElementById('holographicPanel'); 
 
-    const bottomBar = document.getElementById('bottomBarContainer');
-    
-    if (document.getElementById('loginUI').style.display !== 'none') {
-        if (bottomBar) bottomBar.style.display = 'none';
-        if (mapHeaderDiv) mapHeaderDiv.style.display = 'none';
-        if (mapModuleTextsContainerDiv) mapModuleTextsContainerDiv.style.display = 'none';
-        if (triviaUIDiv) triviaUIDiv.style.display = 'none';
+    DOM_ELEMENTS.mapHeader = document.getElementById('mapHeader');
+    DOM_ELEMENTS.mapTitle = document.getElementById('mapTitle');
+    DOM_ELEMENTS.mapDescription = document.getElementById('mapDescription');
+    DOM_ELEMENTS.mapModuleTextsContainer = document.getElementById('mapModuleTextsContainer');
+
+    DOM_ELEMENTS.triviaUI = document.getElementById('triviaUI');
+    DOM_ELEMENTS.triviaTitle = document.getElementById('triviaTitle');
+    DOM_ELEMENTS.triviaQuestion = document.getElementById('triviaQuestion');
+    DOM_ELEMENTS.triviaOptionsContainer = document.getElementById('triviaOptionsContainer');
+    DOM_ELEMENTS.triviaConfirmButton = document.getElementById('triviaConfirmButton');
+    DOM_ELEMENTS.triviaIncorrectMessage = document.getElementById('triviaIncorrectMessage');
+
+    DOM_ELEMENTS.finalLogoUI = document.getElementById('finalLogo');
+    DOM_ELEMENTS.insigniaCanvas = document.getElementById('insigniaCanvas');
+
+    DOM_ELEMENTS.bottomBar = document.getElementById('bottomBarContainer');
+    DOM_ELEMENTS.touchControls.left = document.getElementById('moveLeftButton');
+    DOM_ELEMENTS.touchControls.enter = document.getElementById('enterSceneButton');
+    DOM_ELEMENTS.touchControls.right = document.getElementById('moveRightButton');
+
+    manageUIContainersVisibility(['loginUI']);
+
+    if (DOM_ELEMENTS.loginButton) {
+        DOM_ELEMENTS.loginButton.onclick = startGame;
+    }
+    if (DOM_ELEMENTS.touchControls.left) {
+        DOM_ELEMENTS.touchControls.left.onclick = handleMoveLeft;
+    }
+    if (DOM_ELEMENTS.touchControls.enter) {
+        DOM_ELEMENTS.touchControls.enter.onclick = handleEnterScene;
+    }
+    if (DOM_ELEMENTS.touchControls.right) {
+        DOM_ELEMENTS.touchControls.right.onclick = handleMoveRight;
+    }
+
+    const preExistingError = document.getElementById('usernameError');
+    if (preExistingError) {
+        preExistingError.classList.remove('visible');
     }
 });
 
 </script>
-
 </body>
 </html>
