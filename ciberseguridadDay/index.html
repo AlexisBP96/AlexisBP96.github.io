@@ -1061,19 +1061,6 @@ function startGame() {
         DOM_ELEMENTS.usernameInput.style.boxShadow = "none";
     }
 
-    // ✅ Enviar a Google Sheets
-    fetch('https://script.google.com/macros/s/AKfycbxLN_VzNgMhpDXGBwo7YTuk4gDwGIA2_kX9tFGknLnWYS-NuUnfLyxy0O8MUKXU6TbO/exec', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            nombre: username,
-            correo: email
-        })
-    })
-    .then(response => response.json())
-    .then(data => console.log('Registro enviado:', data))
-    .catch(error => console.error('Error al enviar a Google Sheets:', error));
-
     // ✅ Continuar con el juego
     userSession.username = username;
     userSession.completedStages.fill(false);
@@ -1151,5 +1138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+
+
+
 </body>
 </html>
