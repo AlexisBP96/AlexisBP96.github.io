@@ -481,8 +481,16 @@
             <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha" class="holo-logo">
             <h1 class="holo-title">Conexión Segura</h1>
             <p class="holo-subtitle">Autentique sus credenciales de Ciberguardián.</p>
-            <div class="holo-input-group"> <input type="text" id="usernameInput" placeholder="Identificador de Agente" aria-label="Identificador de Agente">
+            <div class="holo-input-group"> <input type="text" id="usernameInput" placeholder="Identificador de Agente" aria-label="Identificador de Agente" required>
             </div>
+
+            <div class="holo-input-group">
+                <input type="email" id="emailInput" placeholder="Correo Electrónico" aria-label="Correo Electrónico" required
+                    style="width: 100%; padding: clamp(12px, 2.5vh, 15px) 18px; font-size: clamp(14px, 3vw, 16px); border-radius: 6px;
+                    border: 1px solid var(--holo-panel-border); background-color: rgba(5, 10, 20, 0.7); color: var(--holo-text-primary);
+                    box-sizing: border-box; outline: none; transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;" required type="email">
+            </div>
+
             <button id="loginButton">Acceder</button>
         </div>
     </div>
@@ -1014,43 +1022,97 @@ function handleEnterScene() {
 
 function startGame() {
     const username = DOM_ELEMENTS.usernameInput.value.trim();
+    const email = document.getElementById('emailInput').value.trim();
     const usernameErrorDiv = document.getElementById('usernameError'); 
+    let hasError = false;
+
     if (username === '') {
         DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-error-text)";
         DOM_ELEMENTS.usernameInput.style.boxShadow = "0 0 8px rgba(255, 112, 112, 0.5)";
-        let errorMsgElement = usernameErrorDiv;
-        if (!errorMsgElement) { 
-            errorMsgElement = document.createElement('p'); errorMsgElement.id = 'usernameError';
-            const holographicPanel = document.getElementById('holographicPanel');
-            if (holographicPanel && DOM_ELEMENTS.loginButton) {
-                holographicPanel.insertBefore(errorMsgElement, DOM_ELEMENTS.loginButton);
-            }
+        if (!usernameErrorDiv) {
+            const errorElement = document.createElement('p');
+            errorElement.id = 'usernameError';
+            errorElement.textContent = 'El Identificador de Agente es obligatorio.';
+            errorElement.className = 'visible';
+            document.getElementById('holographicPanel').insertBefore(errorElement, DOM_ELEMENTS.loginButton);
+        } else {
+            usernameErrorDiv.textContent = 'El Identificador de Agente es obligatorio.';
+            usernameErrorDiv.classList.add('visible');
         }
-        errorMsgElement.textContent = 'El Identificador de Agente es obligatorio.';
-        errorMsgElement.className = ''; errorMsgElement.classList.add('visible'); return;
+        hasError = true;
     }
+
+    const emailInput = document.getElementById('emailInput');
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailPattern.test(email)) {
+        emailInput.style.borderColor = "var(--holo-error-text)";
+        emailInput.style.boxShadow = "0 0 8px rgba(255, 112, 112, 0.5)";
+        hasError = true;
+    } else {
+        emailInput.style.borderColor = "var(--holo-panel-border)";
+        emailInput.style.boxShadow = "none";
+    }
+
+    if (hasError) return;
+
     if (usernameErrorDiv) {
         usernameErrorDiv.classList.remove('visible');
         DOM_ELEMENTS.usernameInput.style.borderColor = "var(--holo-panel-border)";
         DOM_ELEMENTS.usernameInput.style.boxShadow = "none";
     }
-    userSession.username = username; userSession.completedStages.fill(false);
-    manageUIContainersVisibility([]); 
+
+    // ✅ Enviar a Google Sheets
+    fetch('https://script.google.com/macros/s/AKfycbwBSFH5oROGsFZNGT8B4VYmuCWzVV1rNtiPIIevftgUc-NhxX482yA_mhhn-jvxLhdj/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            nombre: username,
+            correo: email
+        })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Registro enviado:', data))
+    .catch(error => console.error('Error al enviar a Google Sheets:', error));
+
+    // ✅ Continuar con el juego
+    userSession.username = username;
+    userSession.completedStages.fill(false);
+    manageUIContainersVisibility([]);
+
     const phaserConfig = {
-        type: Phaser.AUTO, width: window.innerWidth, height: window.innerHeight,
-        resolution: window.devicePixelRatio || 1, parent: 'phaser-game', transparent: true,
-        scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
+        resolution: window.devicePixelRatio || 1,
+        parent: 'phaser-game',
+        transparent: true,
+        scale: {
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
         scene: [MapScene, TriviaScene, BadgeScene],
         render: { antialias: true, pixelArt: false },
-        input: { keyboard: { capture: [ Phaser.Input.Keyboard.KeyCodes.LEFT, Phaser.Input.Keyboard.KeyCodes.RIGHT, Phaser.Input.Keyboard.KeyCodes.ENTER, Phaser.Input.Keyboard.KeyCodes.SPACE ]}}
+        input: {
+            keyboard: {
+                capture: [
+                    Phaser.Input.Keyboard.KeyCodes.LEFT,
+                    Phaser.Input.Keyboard.KeyCodes.RIGHT,
+                    Phaser.Input.Keyboard.KeyCodes.ENTER,
+                    Phaser.Input.Keyboard.KeyCodes.SPACE
+                ]
+            }
+        }
     };
+
     if (gameInstance) {
         gameInstance.scene.getScenes(true).forEach(scene => {
             if (scene.sys.isActive() && typeof scene.shutdown === 'function') scene.shutdown();
-            if(scene.sys.isActive()) gameInstance.scene.stop(scene.scene.key);
+            if (scene.sys.isActive()) gameInstance.scene.stop(scene.scene.key);
         });
-        gameInstance.destroy(true); gameInstance = null;
+        gameInstance.destroy(true);
+        gameInstance = null;
     }
+
     gameInstance = new Phaser.Game(phaserConfig);
 }
 
