@@ -527,14 +527,15 @@
             box-sizing: border-box;
         }
 
+        /* --- Module Info UI - Versión Corregida --- */
         #moduleInfoUI .panel-content-wrapper {
             background: var(--holo-panel-bg);
             padding: clamp(25px, 4vw, 35px);
             border-radius: 10px;
-            border: 1px solid var(--holo-panel-border);
+            border: 1px solid var(--holo-panel-border); /* Borde azul */
             box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 
                         0 0 15px rgba(0, 180, 255, 0.1) inset;
-            width: 100%;
+            width: calc(100% - 40px); /* Ajuste para padding */
             max-width: 600px;
             display: flex;
             flex-direction: column;
@@ -542,6 +543,11 @@
             gap: clamp(18px, 3vh, 22px);
             animation: fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
             transform-style: preserve-3d;
+            /* Corrección de centrado: */
+            margin: 0 auto;
+            position: relative;
+            left: 0;
+            transform: none;
         }
 
         #moduleInfoTitle {
@@ -606,7 +612,7 @@
         /* Media Queries IDÉNTICOS a los de trivia */
         @media (max-width: 600px) {
             #moduleInfoUI .panel-content-wrapper {
-                max-width: calc(100% - 20px);
+                max-width: calc(100% - 40px);
                 padding: clamp(20px, 5vw, 25px);
             }
             #moduleInfoTitle {
