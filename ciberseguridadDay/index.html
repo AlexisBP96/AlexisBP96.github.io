@@ -512,7 +512,7 @@
             opacity: 0.8;
         }
 
-                /* --- Module Info UI --- */
+        /* --- Module Info UI (ESTILOS IDÉNTICOS A TRIVIA) --- */
         #moduleInfoUI {
             position: absolute;
             top: 0;
@@ -532,29 +532,27 @@
             padding: clamp(25px, 4vw, 35px);
             border-radius: 10px;
             border: 1px solid var(--holo-panel-border);
-            box-shadow: 0 0 25px rgba(0, 180, 255, 0.1), 
-                        0 0 10px rgba(0, 180, 255, 0.05) inset;
+            box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 
+                        0 0 15px rgba(0, 180, 255, 0.1) inset;
             width: 100%;
             max-width: 600px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: clamp(15px, 2.5vh, 20px);
-            animation: fadeInHoloPanel 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
-            opacity: 0;
-            margin: 0 auto;
+            gap: clamp(18px, 3vh, 22px);
+            animation: fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            transform-style: preserve-3d;
         }
 
         #moduleInfoTitle {
             color: var(--banco-pichincha-gold);
-            font-size: clamp(18px, 4.5vw, 22px);
+            font-size: clamp(20px, 5vw, 24px);
             font-weight: 600;
-            margin: 0;
-            text-shadow: 0 0 10px var(--banco-pichincha-gold-glow);
+            margin: 0 0 clamp(5px, 1.5vh, 10px) 0;
+            text-shadow: 0 0 12px var(--banco-pichincha-gold-glow);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-align: center;
-            width: 100%;
         }
 
         #moduleInfoDescription {
@@ -563,17 +561,28 @@
             line-height: 1.6;
             text-align: center;
             width: 100%;
+            max-width: 90%;
             margin: 0;
-            padding: 0 15px;
+            padding: 0 clamp(10px, 2vw, 15px);
             box-sizing: border-box;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
+        }
+
+        .module-info-divider {
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    var(--holo-panel-border) 20%, 
+                    var(--holo-panel-border) 80%, 
+                    transparent 100%);
+            margin: clamp(5px, 1vh, 10px) 0;
         }
 
         #startTriviaButton {
-            padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 25px);
-            font-size: clamp(14px, 3vw, 15px);
+            width: 100%;
+            max-width: 450px;
+            padding: clamp(12px, 2.5vh, 15px) 20px;
+            font-size: clamp(15px, 3.2vw, 16px);
             border-radius: 6px;
             border: 1px solid var(--banco-pichincha-gold);
             background: var(--banco-pichincha-gold);
@@ -581,44 +590,41 @@
             font-weight: 600;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             transition: all 0.25s ease-in-out;
-            box-shadow: 0 2px 6px rgba(255, 215, 0, 0.15);
-            margin-top: 10px;
-            width: auto;
-            min-width: 180px;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+            text-align: center;
         }
 
         #startTriviaButton:hover {
             background: #FFDF30;
-            box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
-            transform: translateY(-1px);
+            box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 
+                        0 0 10px var(--banco-pichincha-gold);
+            transform: translateY(-2px) scale(1.02);
         }
 
+        /* Media Queries IDÉNTICOS a los de trivia */
         @media (max-width: 600px) {
             #moduleInfoUI .panel-content-wrapper {
-                max-width: 95%;
-                padding: clamp(20px, 4vw, 25px);
+                max-width: calc(100% - 20px);
+                padding: clamp(20px, 5vw, 25px);
             }
-            
+            #moduleInfoTitle {
+                font-size: clamp(18px, 5vw, 22px);
+            }
             #moduleInfoDescription {
-                font-size: clamp(13px, 3.5vw, 15px);
-                padding: 0 10px;
+                font-size: clamp(13px, 3vw, 15px);
+            }
+            #startTriviaButton {
+                font-size: clamp(14px, 3.2vw, 15px);
             }
         }
 
-        /* Ajustes para landscape en móviles */
         @media (orientation: landscape) and (max-height: 500px) {
             #moduleInfoUI .panel-content-wrapper {
-                max-width: 80%;
-                padding: clamp(15px, 3vw, 20px);
-            }
-            
-            #moduleInfoDescription {
-                font-size: clamp(12px, 2.5vw, 14px);
-                line-height: 1.5;
-                max-height: 40vh;
-                overflow-y: auto;
+                max-width: 500px;
+                padding: clamp(15px, 3vw, 25px);
+                gap: clamp(10px, 2vh, 15px);
             }
         }
 
@@ -704,10 +710,11 @@
     <div id="moduleInfoUI" class="fullscreen-ui-panel hidden">
         <div class="panel-content-wrapper">
             <h2 id="moduleInfoTitle" class="panel-header-title">PHISHING</h2>
-            <div class="panel-text-container">
+            <div class="panel-text-content">
                 <p id="moduleInfoDescription" class="panel-text">
                     El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.
                 </p>
+                <div class="module-info-divider"></div>
             </div>
             <button id="startTriviaButton" class="panel-button">INICIAR TRIVIA</button>
         </div>
@@ -1319,21 +1326,31 @@
                 manageUIContainersVisibility(['moduleInfoUI']);
                 createStandardSceneBackground(this);
 
-                // Asegurar que el contenido se ajuste correctamente
-                const descriptionElement = document.getElementById('moduleInfoDescription');
-                if (descriptionElement) {
-                    descriptionElement.style.maxHeight = 'none';
-                    descriptionElement.style.overflowY = 'visible';
+                // Aplicar estilos IDÉNTICOS a trivia
+                const panelWrapper = document.querySelector('#moduleInfoUI .panel-content-wrapper');
+                if (panelWrapper) {
+                    panelWrapper.style.maxHeight = '90vh';
+                    panelWrapper.style.overflowY = 'auto';
                 }
 
-                // Configurar el contenido
+                // Configurar contenido
                 document.getElementById('moduleInfoTitle').textContent = this.currentTriviaData.title;
                 document.getElementById('moduleInfoDescription').textContent = this.currentTriviaData.description;
 
-                // Configurar botón
-                document.getElementById('startTriviaButton').onclick = () => {
-                    this.showTrivia();
-                };
+                // Botón con mismos handlers que trivia
+                const startButton = document.getElementById('startTriviaButton');
+                if (startButton) {
+                    startButton.onclick = () => {
+                        startButton.style.transform = 'translateY(0) scale(1)';
+                        this.showTrivia();
+                    };
+                    startButton.onmousedown = () => {
+                        startButton.style.transform = 'translateY(1px) scale(0.99)';
+                    };
+                    startButton.onmouseup = () => {
+                        startButton.style.transform = 'translateY(-2px) scale(1.02)';
+                    };
+                }
             }
 
             showTrivia() {
