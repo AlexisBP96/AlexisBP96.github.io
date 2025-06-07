@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ciberseguridad Day - Banco Pichincha</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <style>
+        :root {
+            --banco-pichincha-gold: #FFD700;
+            --banco-pichincha-gold-glow: rgba(255, 215, 0, 0.5);
+            --holo-panel-bg: rgba(15, 22, 38, 0.9);
+            --holo-panel-bg-header: rgba(15, 22, 38, 0.85);
+            --holo-panel-border: rgba(0, 220, 255, 0.35);
+            --holo-panel-border-focus: rgba(255, 215, 0, 0.7);
+            --holo-text-primary: #EAEFF5;
+            --holo-text-secondary: #A0B0C5;
+            --holo-error-text: #FF7070;
+            --holo-error-bg: rgba(255, 80, 80, 0.15);
+            --holo-button-text: #0A1625;
+            --sans-serif-font: 'Segoe UI', 'Roboto', Arial, Helvetica, sans-serif;
+            --body-bg: #03060A;
+        }
+
+        /* --- Global Resets & Base Styles --- */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--body-bg);
+            font-family: var(--sans-serif-font);
+            touch-action: none;
+            color: var(--holo-text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #phaser-game {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #phaser-game canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* --- Utility Classes --- */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Animated Background Lines --- */
+        .animated-lines {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .animated-lines .line {
+            position: absolute;
+            background-color: rgba(0, 150, 200, 0.1);
+            opacity: 0;
+            animation: moveLine 15s infinite linear;
+        }
+
+        .animated-lines .line.horizontal:nth-child(1) { height: 1px; width: 200%; left: -100%; top: 10%; animation-delay: 0s; animation-duration: 10s; }
+        .animated-lines .line.horizontal:nth-child(2) { height: 2px; width: 150%; left: -50%; top: 30%; animation-delay: 2s; animation-duration: 12s; }
+        .animated-lines .line.horizontal:nth-child(3) { height: 1px; width: 250%; left: -150%; top: 50%; animation-delay: 4s; animation-duration: 8s;  }
+        .animated-lines .line.horizontal:nth-child(4) { height: 1px; width: 180%; left: -80%; top: 70%; animation-delay: 1s; animation-duration: 15s; }
+        .animated-lines .line.horizontal:nth-child(5) { height: 2px; width: 220%; left: -120%; top: 90%; animation-delay: 3s; animation-duration: 11s; }
+
+        .animated-lines .line.vertical:nth-child(6)  { width: 1px; height: 200%; top: -100%; left: 10%; animation-name: moveLineVertical; animation-delay: 0.5s; animation-duration: 13s; }
+        .animated-lines .line.vertical:nth-child(7)  { width: 2px; height: 150%; top: -50%; left: 30%; animation-name: moveLineVertical; animation-delay: 2.5s; animation-duration: 9s;  }
+        .animated-lines .line.vertical:nth-child(8)  { width: 1px; height: 250%; top: -150%; left: 50%; animation-name: moveLineVertical; animation-delay: 4.5s; animation-duration: 14s; }
+        .animated-lines .line.vertical:nth-child(9)  { width: 1px; height: 180%; top: -80%; left: 70%; animation-name: moveLineVertical; animation-delay: 1.5s; animation-duration: 10s; }
+        .animated-lines .line.vertical:nth-child(10) { width: 2px; height: 220%; top: -120%; left: 90%; animation-name: moveLineVertical; animation-delay: 3.5s; animation-duration: 12s; }
+
+        @keyframes moveLine {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        @keyframes moveLineVertical {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100%); opacity: 0; }
+        }
+        @keyframes fadeInHoloPanel {
+            from { opacity: 0; transform: perspective(1000px) rotateY(-5deg) scale(0.9); }
+            to { opacity: 1; transform: perspective(1000px) rotateY(0deg) scale(1); }
+        }
+
+        /* --- Login UI --- */
+        #loginUI {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            box-sizing: border-box;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        #holographicPanel {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(145deg, rgba(10, 22, 38, 0.9), rgba(20, 32, 58, 0.95));
+            padding: clamp(30px, 5vw, 40px);
+            border-radius: 10px;
+            border: 1px solid var(--holo-panel-border);
+            box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 0 0 15px rgba(0,180,255,0.1) inset;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(18px, 3vh, 22px);
+            animation: fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            transform-style: preserve-3d;
+        }
+
+        .holo-logo {
+            width: clamp(100px, 18vw, 120px);
+            height: auto;
+            margin-bottom: clamp(5px, 1.5vh, 10px);
+        }
+
+        .holo-title {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 0 12px var(--banco-pichincha-gold-glow);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .holo-subtitle {
+            color: var(--holo-text-secondary);
+            font-size: clamp(13px, 2.5vw, 15px);
+            max-width: 90%;
+            margin: -12px 0 0 0;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+                /* Estilo para la insignia alternativa */
+        .alternative-badge {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .badge-shape {
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0A1625, #1A2A3A);
+            border: 4px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .badge-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .badge-text {
+            color: #FFD700;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 18px;
+        }
+
+        .holo-input-group {
+            width: 100%;
+            position: relative;
+        }
+
+        #grupoInput,
+        #emailInput,
+        #passwordInput {
+            width: 100%;
+            padding: clamp(12px, 2.5vh, 15px) 18px;
+            font-size: clamp(14px, 3vw, 16px);
+            border-radius: 6px;
+            border: 1px solid var(--holo-panel-border);
+            background-color: rgba(5, 10, 20, 0.7);
+            color: var(--holo-text-primary);
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        #grupoInput::placeholder,
+        #emailInput::placeholder,
+        #passwordInput::placeholder {
+            color: var(--holo-text-secondary);
+            opacity: 0.7;
+        }
+
+        #grupoInput:focus,
+        #emailInput:focus,
+        #passwordInput:focus {
+            border-color: var(--holo-panel-border-focus);
+            box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
+        }
+
+        #loginButton {
+            width: 100%;
+            padding: clamp(12px, 2.5vh, 15px) 20px;
+            font-size: clamp(15px, 3.2vw, 16px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 2px 8px rgba(255,215,0,0.2);
+        }
+
+        #loginButton:hover {
+            background: #FFDF30;
+            box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 0 0 10px var(--banco-pichincha-gold);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        #loginButton:active {
+            transform: translateY(0px) scale(1);
+            box-shadow: 0 1px 4px rgba(255,215,0,0.15);
+        }
+
+        #loginError {
+            color: var(--holo-error-text);
+            font-size: clamp(12px, 2.2vw, 14px);
+            background-color: var(--holo-error-bg);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: -10px;
+            margin-bottom: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            border: 1px solid var(--holo-error-text);
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+        }
+
+        #loginError.visible {
+            opacity: 1;
+            max-height: 100px;
+        }
+
+        /* --- Fullscreen UI Panel (Base for Trivia, Final Badge) --- */
+        .fullscreen-ui-panel {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: var(--body-bg);
+        }
+
+        .panel-content-wrapper {
+            background: var(--holo-panel-bg);
+            padding: clamp(25px, 4vw, 35px);
+            border-radius: 10px;
+            border: 1px solid var(--holo-panel-border);
+            box-shadow: 0 0 25px rgba(0, 180, 255, 0.1), 0 0 10px rgba(0,180,255,0.05) inset;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(15px, 2.5vh, 20px);
+            animation: fadeInHoloPanel 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s forwards;
+            opacity: 0;
+        }
+
+        .panel-content-wrapper .panel-header-title {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(18px, 4.5vw, 22px);
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px var(--banco-pichincha-gold-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .panel-content-wrapper .panel-text {
+            color: var(--holo-text-primary);
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
+            text-align: center;
+            max-width: 90%;
+        }
+
+        .panel-button {
+            padding: clamp(10px, 2vh, 12px) clamp(20px, 4vw, 25px);
+            font-size: clamp(14px, 3vw, 15px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 2px 6px rgba(255,215,0,0.15);
+        }
+
+        .panel-button:hover {
+            background: #FFDF30;
+            box-shadow: 0 0 15px var(--banco-pichincha-gold-glow);
+            transform: translateY(-1px);
+        }
+
+        /* --- Map Specific UI --- */
+        #mapHeader {
+            position: absolute; top: 0; left: 0;
+            width: 100%;
+            padding: clamp(8px, 1.5vh, 12px) 15px;
+            box-sizing: border-box;
+            text-align: center;
+            z-index: 10;
+            background: var(--holo-panel-bg-header);
+            border-bottom: 1px solid var(--holo-panel-border);
+            box-shadow: 0 2px 15px rgba(0, 150, 200, 0.1);
+        }
+
+        #mapTitle {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(14px, 2.5vw, 18px);
+            font-weight: 600;
+            margin: 0 0 2px 0;
+            text-shadow: 0 0 8px var(--banco-pichincha-gold-glow);
+        }
+
+        #mapDescription {
+            color: var(--holo-text-secondary);
+            font-size: clamp(11px, 2vw, 13px);
+            margin: 0;
+        }
+
+        #mapModuleTextsContainer {
+            position: absolute; top:0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .map-module-text {
+            position: absolute;
+            transform: translateX(-50%);
+            color: var(--holo-text-secondary);
+            font-size: clamp(9px, 1.8vw, 11px);
+            text-align: center;
+            padding: 3px 6px;
+            background-color: rgba(10, 22, 38, 0.7);
+            border-radius: 3px;
+            text-shadow: 0 0 3px #000;
+            border: 1px solid rgba(0, 150, 200, 0.15);
+        }
+
+        .map-module-text.completed { color: #60FF60; }
+        .map-module-text.active    { color: var(--banco-pichincha-gold); font-weight: 600; }
+
+        /* --- Trivia UI Specifics --- */
+        #triviaOptionsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .trivia-option {
+            font-size: clamp(13px, 2.8vw, 15px);
+            color: var(--holo-text-primary);
+            background-color: rgba(25, 40, 65, 0.7);
+            padding: clamp(10px, 2vh, 14px) 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--holo-panel-border);
+            transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+            text-align: left;
+        }
+
+        .trivia-option:hover {
+            background-color: rgba(35, 50, 80, 0.8);
+            border-color: var(--banco-pichincha-gold);
+            transform: scale(1.02);
+        }
+
+        .trivia-option.selected {
+            background-color: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            border-color: var(--banco-pichincha-gold);
+        }
+
+        #triviaIncorrectMessage {
+            font-size: clamp(13px, 2.5vw, 14px);
+            color: var(--holo-error-text);
+            background-color: var(--holo-error-bg);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid var(--holo-error-text);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* --- Final Badge/Logo UI Specifics --- */
+        #insigniaCanvas {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* --- Bottom Bar / Touch Controls --- */
+        #bottomBarContainer {
+            position: fixed; bottom: 0; left: 0;
+            width: 100%;
+            background-color: rgba(10, 22, 38, 0.9);
+            z-index: 25;
+            flex-direction: column;
+            align-items: center;
+            border-top: 1px solid var(--holo-panel-border);
+            box-shadow: 0 -2px 15px rgba(0, 150, 200, 0.1);
+        }
+
+        .touch-controls {
+            width: 100%;
+            box-sizing: border-box;
+            padding: clamp(8px, 1.5vh, 10px) 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .insignia-img {
+            display: block;
+            max-width: 80%;
+            max-height: 60%;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .touch-controls button {
+            padding: clamp(8px, 1.8vh, 10px) clamp(12px, 2.5vw, 16px);
+            font-size: clamp(16px, 4vw, 20px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background-color: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(255,215,0,0.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .touch-controls button:hover {
+            background-color: #FFDF30;
+            box-shadow: 0 0 10px var(--banco-pichincha-gold-glow);
+            transform: scale(1.05);
+        }
+
+        .touch-controls button:active {
+            transform: scale(1);
+        }
+
+        .logo-footer {
+            width: clamp(45px, 10vw, 50px);
+            height: auto;
+            margin-top: 5px;
+            margin-bottom: clamp(5px, 1vh, 8px);
+            opacity: 0.8;
+        }
+
+        /* --- Module Info UI (ESTILOS IDÉNTICOS A TRIVIA) --- */
+        #moduleInfoUI {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* --- Module Info UI - Versión Corregida --- */
+        #moduleInfoUI .panel-content-wrapper {
+            background: var(--holo-panel-bg);
+            padding: clamp(25px, 4vw, 35px);
+            border-radius: 10px;
+            border: 1px solid var(--holo-panel-border); /* Borde azul */
+            box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 
+                        0 0 15px rgba(0, 180, 255, 0.1) inset;
+            width: calc(100% - 40px); /* Ajuste para padding */
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(18px, 3vh, 22px);
+            animation: fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            transform-style: preserve-3d;
+            /* Corrección de centrado: */
+            margin: 0 auto;
+            position: relative;
+            left: 0;
+            transform: none;
+        }
+
+        #moduleInfoTitle {
+            color: var(--banco-pichincha-gold);
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 600;
+            margin: 0 0 clamp(5px, 1.5vh, 10px) 0;
+            text-shadow: 0 0 12px var(--banco-pichincha-gold-glow);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: center;
+        }
+
+        #moduleInfoDescription {
+            color: var(--holo-text-primary);
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
+            text-align: center;
+            width: 100%;
+            max-width: 90%;
+            margin: 0;
+            padding: 0 clamp(10px, 2vw, 15px);
+            box-sizing: border-box;
+        }
+
+        .module-info-divider {
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                    transparent 0%, 
+                    var(--holo-panel-border) 20%, 
+                    var(--holo-panel-border) 80%, 
+                    transparent 100%);
+            margin: clamp(5px, 1vh, 10px) 0;
+        }
+
+        #startTriviaButton {
+            width: 100%;
+            max-width: 450px;
+            padding: clamp(12px, 2.5vh, 15px) 20px;
+            font-size: clamp(15px, 3.2vw, 16px);
+            border-radius: 6px;
+            border: 1px solid var(--banco-pichincha-gold);
+            background: var(--banco-pichincha-gold);
+            color: var(--holo-button-text);
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.25s ease-in-out;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+            text-align: center;
+        }
+
+        #startTriviaButton:hover {
+            background: #FFDF30;
+            box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 
+                        0 0 10px var(--banco-pichincha-gold);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        /* Media Queries IDÉNTICOS a los de trivia */
+        @media (max-width: 600px) {
+            #moduleInfoUI .panel-content-wrapper {
+                max-width: calc(100% - 40px);
+                padding: clamp(20px, 5vw, 25px);
+            }
+            #moduleInfoTitle {
+                font-size: clamp(18px, 5vw, 22px);
+            }
+            #moduleInfoDescription {
+                font-size: clamp(13px, 3vw, 15px);
+            }
+            #startTriviaButton {
+                font-size: clamp(14px, 3.2vw, 15px);
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            #moduleInfoUI .panel-content-wrapper {
+                max-width: 500px;
+                padding: clamp(15px, 3vw, 25px);
+                gap: clamp(10px, 2vh, 15px);
+            }
+        }
+
+        /* --- Media Queries --- */
+        @media (max-width: 600px) {
+            .panel-content-wrapper {
+                max-width: calc(100% - 20px); 
+            }
+            
+            .holo-title { font-size: clamp(18px, 5vw, 22px); }
+            .holo-subtitle { font-size: clamp(12px, 2.5vw, 14px); }
+            #grupoInput, #emailInput, #passwordInput { font-size: clamp(13px, 3vw, 15px); }
+            #loginButton { font-size: clamp(14px, 3.2vw, 15px); }
+            .map-module-text { font-size: clamp(8px, 1.8vw, 10px); }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .panel-content-wrapper {
+                max-width: 500px; 
+                padding: clamp(15px, 3vw, 25px); 
+                gap: clamp(10px, 2vh, 15px);    
+            }
+            #mapHeader {
+                padding: clamp(6px, 1vh, 10px) 10px;
+            }
+            .touch-controls button {
+                 padding: clamp(6px, 1.5vh, 8px) clamp(10px, 2vw, 14px);
+                 font-size: clamp(14px, 3.5vw, 18px);
+            }
+        }
+
+        @media (max-height: 700px) and (orientation: portrait) {
+            .touch-controls { padding: clamp(5px, 1vh, 8px) 0; }
+            .logo-footer { width: clamp(35px, 8vw, 40px); margin-bottom: clamp(3px, 0.5vh, 5px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="phaser-game"></div>
+
+    <div id="loginUI">
+        <div class="animated-lines">
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+        </div>
+        <div id="holographicPanel">
+            <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha" class="holo-logo">
+            <h1 class="holo-title">Conexión Segura</h1>
+            <p class="holo-subtitle">Autentique sus credenciales de Ciberguardián.</p>
+
+            <div class="holo-input-group">
+                <input type="number" id="grupoInput" placeholder="Grupo (número)" aria-label="Grupo" min="1" required>
+            </div>
+
+            <div class="holo-input-group">
+                <input type="email" id="emailInput" placeholder="Correo Electrónico" aria-label="Correo Electrónico" required>
+            </div>
+
+            <div class="holo-input-group">
+                <input type="password" id="passwordInput" placeholder="Contraseña" aria-label="Contraseña" required>
+            </div>
+
+            <p id="loginError" style="display: none; color: var(--holo-error-text); text-align: center; font-size: 0.9rem;"></p>
+
+            <button id="loginButton">Acceder</button>
+        </div>
+    </div>
+
+    <div id="mapHeader" class="hidden">
+        <div id="mapTitle"></div>
+        <div id="mapDescription"></div>
+    </div>
+    <div id="mapModuleTextsContainer" class="hidden"></div>
+    
+    <div id="moduleInfoUI" class="fullscreen-ui-panel hidden">
+        <div class="panel-content-wrapper">
+            <h2 id="moduleInfoTitle" class="panel-header-title">PHISHING</h2>
+            <div class="panel-text-content">
+                <p id="moduleInfoDescription" class="panel-text">
+                    El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.
+                </p>
+                <div class="module-info-divider"></div>
+            </div>
+            <button id="startTriviaButton" class="panel-button">INICIAR TRIVIA</button>
+        </div>
+    </div>
+
+    <div id="triviaUI" class="fullscreen-ui-panel hidden">
+        <div class="panel-content-wrapper">
+            <h2 id="triviaTitle" class="panel-header-title">Desafío de Ciberseguridad</h2>
+            <p id="triviaQuestion" class="panel-text">Cargando pregunta...</p>
+            <div id="triviaOptionsContainer"></div>
+            <button id="triviaConfirmButton" class="panel-button hidden">Responder</button>
+            <p id="triviaIncorrectMessage" class="hidden"></p>
+        </div>
+    </div>
+
+    <div id="finalLogo" class="fullscreen-ui-panel hidden">
+         <div class="panel-content-wrapper">
+            <h2 class="panel-header-title">¡MISIÓN CUMPLIDA!</h2>
+            <p class="panel-text">Has superado todos los desafíos y obtuviste tu insignia Ciberguardián ⭐</p>
+             <img id="insigniaImage" class="insignia-img" alt="Insignia de Ciberguardián completada">
+        </div>
+    </div>
+
+    <div id="bottomBarContainer" class="hidden">
+        <div class="touch-controls" id="touchControls">
+            <button id="moveLeftButton" aria-label="Mover a la izquierda">⬅️</button>
+            <button id="enterSceneButton" aria-label="Acceder a misión">🚀</button>
+            <button id="moveRightButton" aria-label="Mover a la derecha">➡️</button>
+        </div>
+        <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha pie de página" class="logo-footer" id="logoFooter">
+    </div>
+
+
+    <script>
+        // ==================== CONSTANTS AND CONFIGURATION ====================
+        const GLOBAL_CONFIG = {
+            FONT_FAMILY_HTML: 'Segoe UI, Arial, sans-serif',
+            MODULE_COUNT: 3,
+            ASSETS_PATH: 'assets/',
+            TRIVIA_QUESTIONS: [
+            {
+                title: "Phishing",
+                description: "El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.",
+                question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?",
+                options: ["Verdadero", "Falso"],
+                correctAnswerIndex: 0
+            },
+            {
+                title: "Contraseñas Seguras",
+                description: "Una contraseña segura debe combinar mayúsculas, minúsculas, números y símbolos, evitando información personal o patrones simples.",
+                question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
+                options: ["123456", "P@$$wOrd2025!"],
+                correctAnswerIndex: 1
+            },
+            {
+                title: "Actualizaciones de Software",
+                description: "Las actualizaciones de software contienen parches de seguridad que corrigen vulnerabilidades conocidas, protegiendo tus dispositivos de posibles ataques.",
+                question: "Actualizar el software de tus dispositivos regularmente ayuda a protegerte de vulnerabilidades. ¿Verdadero o Falso?",
+                options: ["Verdadero", "Falso"],
+                correctAnswerIndex: 0
+            }
+        ],
+            GOOGLE_SHEETS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxp8p0CJDDpkWvPIZboo3BTM09e93VkTo0icH1f0nwG46uI9GaqvdX99UqxEGQaZC55/exec'
+        };
+
+        // ==================== GLOBAL STATE ====================
+        const state = {
+            gameInstance: null,
+            currentMapSceneRef: null,
+            startTime: Date.now(),
+            userSession: {
+                email: '',
+                grupo: '',
+                completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
+            }
+        };
+
+        // ==================== DOM ELEMENTS ====================
+        const DOM_ELEMENTS = {
+            phaserGameContainer: document.getElementById('phaser-game'),
+            loginUI: document.getElementById('loginUI'),
+            grupoInput: document.getElementById('grupoInput'),
+            emailInput: document.getElementById('emailInput'),
+            passwordInput: document.getElementById('passwordInput'),
+            loginButton: document.getElementById('loginButton'),
+            loginError: document.getElementById('loginError'),
+            mapHeader: document.getElementById('mapHeader'),
+            mapTitle: document.getElementById('mapTitle'),
+            mapDescription: document.getElementById('mapDescription'),
+            mapModuleTextsContainer: document.getElementById('mapModuleTextsContainer'),
+            triviaUI: document.getElementById('triviaUI'),
+            triviaTitle: document.getElementById('triviaTitle'),
+            triviaQuestion: document.getElementById('triviaQuestion'),
+            triviaOptionsContainer: document.getElementById('triviaOptionsContainer'),
+            triviaConfirmButton: document.getElementById('triviaConfirmButton'),
+            triviaIncorrectMessage: document.getElementById('triviaIncorrectMessage'),
+            finalLogoUI: document.getElementById('finalLogo'),
+            insigniaCanvas: document.getElementById('insigniaCanvas'),
+            bottomBarContainer: document.getElementById('bottomBarContainer'),
+            moveLeftButton: document.getElementById('moveLeftButton'),
+            enterSceneButton: document.getElementById('enterSceneButton'),
+            moveRightButton: document.getElementById('moveRightButton')
+        };
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function manageUIContainersVisibility(elementsToShow = []) {
+            const ALL_MAIN_UI_IDS = ['loginUI', 'mapHeader', 'mapModuleTextsContainer', 
+                            'triviaUI', 'finalLogoUI', 'bottomBarContainer', 'moduleInfoUI'];
+            ALL_MAIN_UI_IDS.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (elementsToShow.includes(id)) {
+                        element.style.display = (id === 'loginUI' || id === 'triviaUI' || id === 'finalLogoUI' || id === 'bottomBarContainer') ? 'flex' : 'block';
+                        element.classList.remove('hidden');
+                    } else {
+                        element.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        function createStandardSceneBackground(scene) {
+            if (scene.bgStandard) scene.bgStandard.destroy();
+            if (scene.overlayStandard) scene.overlayStandard.destroy();
+
+            scene.bgStandard = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+                .setDisplaySize(scene.scale.width, scene.scale.height)
+                .setDepth(-1);
+            
+            scene.overlayStandard = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
+                .setOrigin(0)
+                .setDepth(-0.5);
+
+            const resizeHandler = () => {
+                if (scene.bgStandard?.active) {
+                    scene.bgStandard.setPosition(scene.scale.width / 2, scene.scale.height / 2)
+                                   .setDisplaySize(scene.scale.width, scene.scale.height);
+                }
+                if (scene.overlayStandard?.active) {
+                    scene.overlayStandard.setSize(scene.scale.width, scene.scale.height);
+                }
+            };
+            
+            scene.scale.on('resize', resizeHandler, scene);
+            scene.sys.events.once('shutdown', () => {
+                scene.scale.off('resize', resizeHandler, scene);
+                if (scene.bgStandard) { scene.bgStandard.destroy(); scene.bgStandard = null; }
+                if (scene.overlayStandard) { scene.overlayStandard.destroy(); scene.overlayStandard = null; }
+            }, scene);
+        }
+
+        function createMapFocusedBackground(scene) {
+            if (scene.mapFocusedBg) scene.mapFocusedBg.destroy();
+            if (scene.mapFocusedOverlay) scene.mapFocusedOverlay.destroy();
+
+            scene.mapFocusedBg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+                .setDisplaySize(scene.scale.width, scene.scale.height)
+                .setDepth(-2)
+                .setTint(0x333333);
+
+            scene.mapFocusedOverlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x03060A, 0.6)
+                .setOrigin(0)
+                .setDepth(-1);
+
+            const resizeHandler = () => {
+                if (scene.mapFocusedBg?.active) {
+                    scene.mapFocusedBg.setPosition(scene.scale.width / 2, scene.scale.height / 2)
+                                      .setDisplaySize(scene.scale.width, scene.scale.height);
+                }
+                if (scene.mapFocusedOverlay?.active) {
+                    scene.mapFocusedOverlay.setSize(scene.scale.width, scene.scale.height);
+                }
+            };
+            
+            scene.scale.on('resize', resizeHandler, scene);
+            scene.sys.events.once('shutdown', () => {
+                scene.scale.off('resize', resizeHandler, scene);
+                if (scene.mapFocusedBg) { scene.mapFocusedBg.destroy(); scene.mapFocusedBg = null; }
+                if (scene.mapFocusedOverlay) { scene.mapFocusedOverlay.destroy(); scene.mapFocusedOverlay = null; }
+            }, scene);
+        }
+
+        // ==================== SCENE CLASSES ====================
+        class MapScene extends Phaser.Scene {
+            constructor() {
+                super('MapScene');
+                this.moduleSprites = [];
+                this.htmlModuleTextElements = [];
+                this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
+                this.character = null;
+                this.currentNode = 0;
+                this.modulePositions = [];
+                this.isLandscape = false;
+                this.cursors = null;
+                this.enterKey = null;
+            }
+
+            preload() {
+                this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
+                this.load.image('module', `${GLOBAL_CONFIG.ASSETS_PATH}module.png`);
+                this.load.image('module-complete', `${GLOBAL_CONFIG.ASSETS_PATH}module-green.png`);
+                this.load.image('character', `${GLOBAL_CONFIG.ASSETS_PATH}jedi.png`);
+            }
+
+            create() {
+                state.currentMapSceneRef = this;
+                manageUIContainersVisibility(['mapHeader', 'mapModuleTextsContainer', 'bottomBarContainer']);
+                createMapFocusedBackground(this);
+
+                this.activeModuleEffects.border = this.add.graphics().setDepth(1);
+                this.activeModuleEffects.scanline = this.add.graphics().setDepth(3);
+
+                this.drawSceneElements();
+                this.cursors = this.input.keyboard.createCursorKeys();
+                this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
+                this.scale.on('resize', this.handleResize, this);
+                this.updateModuleTextPositions();
+                this.updateActiveModuleVisuals();
+            }
+
+            handleResize() {
+                this.moduleSprites.forEach(spriteGroup => { 
+                    if (spriteGroup.icon) spriteGroup.icon.destroy(); 
+                });
+                this.moduleSprites = [];
+                
+                if (DOM_ELEMENTS.mapModuleTextsContainer) {
+                    DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
+                }
+                this.htmlModuleTextElements = [];
+
+                if (this.character) this.character.destroy();
+                if (this.activeModuleEffects.border) this.activeModuleEffects.border.clear();
+                if (this.activeModuleEffects.scanline) this.activeModuleEffects.scanline.clear();
+                
+                if (this.activeModuleEffects.scanlineTween?.isPlaying()) {
+                    this.activeModuleEffects.scanlineTween.stop();
+                }
+                
+                this.drawSceneElements();
+                this.updateModuleTextPositions();
+                this.updateActiveModuleVisuals();
+            }
+
+            drawSceneElements() {
+                const { width, height } = this.scale;
+                this.isLandscape = width > height;
+
+                if (DOM_ELEMENTS.mapTitle && state.userSession.email) {
+                    DOM_ELEMENTS.mapTitle.textContent = `Agente ${state.userSession.email.split('@')[0]}, bienvenido.`;
+                }
+                
+                if (DOM_ELEMENTS.mapDescription) {
+                    DOM_ELEMENTS.mapDescription.textContent = `Seleccione su próxima misión de ciberseguridad.`;
+                }
+
+                const headerHeightPercentage = this.isLandscape ? 0.1 : 0.08;
+                const headerActualHeight = DOM_ELEMENTS.mapHeader ? 
+                    (DOM_ELEMENTS.mapHeader.offsetHeight || height * headerHeightPercentage) : 
+                    height * headerHeightPercentage;
+                
+                const bottomBarActualHeight = DOM_ELEMENTS.bottomBarContainer && 
+                    DOM_ELEMENTS.bottomBarContainer.style.display !== 'none' ? 
+                    DOM_ELEMENTS.bottomBarContainer.offsetHeight : 0;
+                
+                const baseIconSize = this.isLandscape ? 
+                    Math.min(width * 0.07, 56) : 
+                    Math.min(width * 0.16, 50);
+                
+                const verticalMargin = this.isLandscape ? 20 : height * 0.12;
+                const verticalAvailableHeight = height - headerActualHeight - bottomBarActualHeight - verticalMargin;
+
+                this.modulePositions = [];
+                
+                if (this.isLandscape) {
+                    const moduleAreaY = headerActualHeight + verticalAvailableHeight * 0.5;
+                    const totalModuleWidth = width * 0.6;
+                    const moduleSpacingX = GLOBAL_CONFIG.MODULE_COUNT > 1 ? 
+                        totalModuleWidth / (GLOBAL_CONFIG.MODULE_COUNT - 1) : 0;
+                    
+                    let currentX = (width - (moduleSpacingX * (GLOBAL_CONFIG.MODULE_COUNT - 1))) / 2;
+                    
+                    for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
+                        this.modulePositions.push({ x: currentX, y: moduleAreaY });
+                        currentX += moduleSpacingX;
+                    }
+                } else {
+                    const moduleAreaX = width / 2;
+                    const moduleGroupHeight = verticalAvailableHeight * 0.7;
+                    const startY = headerActualHeight + (verticalAvailableHeight - moduleGroupHeight) / 2 + 
+                                  (baseIconSize/2) + (height * 0.02);
+                    
+                    const moduleSpacingY = GLOBAL_CONFIG.MODULE_COUNT > 1 ? 
+                        moduleGroupHeight / (GLOBAL_CONFIG.MODULE_COUNT -1) : 0;
+                    
+                    for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
+                        this.modulePositions.push({ x: moduleAreaX, y: startY + (i * moduleSpacingY) });
+                    }
+                }
+
+                this.currentNode = Math.max(0, Math.min(this.currentNode, GLOBAL_CONFIG.MODULE_COUNT - 1));
+
+                this.moduleSprites = this.modulePositions.map((pos, i) => {
+                    const isComplete = state.userSession.completedStages[i];
+                    const iconKey = isComplete ? 'module-complete' : 'module';
+                    
+                    const icon = this.add.image(pos.x, pos.y, iconKey)
+                        .setDepth(2)
+                        .setDisplaySize(baseIconSize, baseIconSize)
+                        .setInteractive({ useHandCursor: true })
+                        .on('pointerdown', () => {
+                            this.currentNode = i;
+                            this.moveCharacterAndVisuals();
+                        });
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'map-module-text';
+                    
+                    if (DOM_ELEMENTS.mapModuleTextsContainer) {
+                        DOM_ELEMENTS.mapModuleTextsContainer.appendChild(textDiv);
+                    }
+                    
+                    this.htmlModuleTextElements[i] = textDiv;
+
+                    return { 
+                        icon: icon, 
+                        textDiv: textDiv, 
+                        originalScaleX: icon.scaleX, 
+                        originalScaleY: icon.scaleY 
+                    };
+                });
+
+                const baseCharacterSizeWidth = this.isLandscape ? 
+                    Math.min(width * 0.035, 30) : 
+                    Math.min(width * 0.08, 30);
+                
+                const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3;
+
+                if (this.moduleSprites[this.currentNode]?.icon) {
+                    const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
+                    this.character = this.add.image(
+                        activeModuleIcon.x,
+                        activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.5,
+                        'character'
+                    ).setDepth(3).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
+                }
+            }
+
+            updateModuleTextPositions() {
+                if (!this.cameras || !this.cameras.main || !DOM_ELEMENTS.mapModuleTextsContainer || 
+                    this.htmlModuleTextElements.length !== this.moduleSprites.length) {
+                    return;
+                }
+
+                this.moduleSprites.forEach((spriteGroup, i) => {
+                    if (!spriteGroup.icon || !spriteGroup.icon.active || !this.htmlModuleTextElements[i]) {
+                        return;
+                    }
+
+                    const icon = spriteGroup.icon;
+                    const textDiv = this.htmlModuleTextElements[i];
+                    
+                    try {
+                        const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.6 + (this.isLandscape ? 10 : 5));
+                        textDiv.style.left = `${pt.x}px`;
+                        textDiv.style.top = `${pt.y}px`;
+                        
+                        let moduleLabel = `Misión ${i + 1}`;
+                        const isComplete = state.userSession.completedStages[i];
+                        
+                        textDiv.classList.remove('completed', 'active');
+                        
+                        if (isComplete) {
+                            textDiv.classList.add('completed');
+                            moduleLabel += " ✓";
+                        }
+                        
+                        if (i === this.currentNode) {
+                            textDiv.classList.add('active');
+                        }
+                        
+                        textDiv.textContent = moduleLabel;
+                    } catch (error) {
+                        console.error("Error al actualizar posición del texto:", error);
+                    }
+                });
+            }
+
+            updateActiveModuleVisuals() {
+                this.activeModuleEffects.border.clear();
+                this.activeModuleEffects.scanline.clear();
+                
+                if (this.activeModuleEffects.scanlineTween?.isPlaying()) {
+                    this.activeModuleEffects.scanlineTween.stop();
+                    this.activeModuleEffects.scanlineTween = null;
+                }
+
+                this.moduleSprites.forEach((spriteGroup, index) => {
+                    if (spriteGroup.icon?.active) {
+                        spriteGroup.icon.clearTint().setScale(spriteGroup.originalScaleX, spriteGroup.originalScaleY);
+                        const icon = spriteGroup.icon;
+                        const baseRect = {
+                            x: icon.x - icon.displayWidth / 2,
+                            y: icon.y - icon.displayHeight / 2,
+                            width: icon.displayWidth,
+                            height: icon.displayHeight
+                        };
+                        
+                        if (index === this.currentNode) {
+                            icon.setScale(spriteGroup.originalScaleX * 1.1, spriteGroup.originalScaleY * 1.1);
+                            
+                            this.activeModuleEffects.border.lineStyle(3, 0xFFD700, 0.8)
+                                .strokeRoundedRect(
+                                    baseRect.x - 3, 
+                                    baseRect.y - 3, 
+                                    baseRect.width + 6, 
+                                    baseRect.height + 6, 
+                                    5
+                                );
+                            
+                            this.activeModuleEffects.border.lineStyle(1.5, 0xFFFFFF, 0.5)
+                                .strokeRoundedRect(
+                                    baseRect.x - 1, 
+                                    baseRect.y - 1, 
+                                    baseRect.width + 2, 
+                                    baseRect.height + 2, 
+                                    4
+                                );
+                            
+                            const scanlineWidth = icon.displayWidth * 0.8;
+                            const scanlineStartX = icon.x - scanlineWidth / 2;
+                            let scanlineCurrentY = icon.y - icon.displayHeight / 2;
+                            
+                            this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, 0.2)
+                                .fillRect(scanlineStartX, scanlineCurrentY, scanlineWidth, 2);
+                            
+                            this.activeModuleEffects.scanlineTween = this.tweens.add({
+                                targets: { y: scanlineCurrentY, alpha: 0.2 },
+                                y: icon.y + icon.displayHeight / 2 - 2,
+                                alpha: 0.05,
+                                ease: 'Linear',
+                                duration: 1500,
+                                repeat: -1,
+                                yoyo: true,
+                                onUpdate: (tween, target) => {
+                                    this.activeModuleEffects.scanline.clear();
+                                    this.activeModuleEffects.scanline.fillStyle(0xFFFFFF, target.alpha);
+                                    this.activeModuleEffects.scanline.fillRect(scanlineStartX, target.y, scanlineWidth, 2);
+                                }
+                            });
+                        } else if (state.userSession.completedStages[index]) {
+                            icon.setTint(0xDDDDDD);
+                            this.activeModuleEffects.border.lineStyle(2, 0x60FF60, 0.5)
+                                .strokeRoundedRect(
+                                    baseRect.x - 2, 
+                                    baseRect.y - 2, 
+                                    baseRect.width + 4, 
+                                    baseRect.height + 4, 
+                                    4
+                                );
+                        } else {
+                            this.activeModuleEffects.border.lineStyle(1.5, 0x00D2FF, 0.3)
+                                .strokeRoundedRect(
+                                    baseRect.x - 1, 
+                                    baseRect.y - 1, 
+                                    baseRect.width + 2, 
+                                    baseRect.height + 2, 
+                                    3
+                                );
+                        }
+                    }
+                });
+                
+                this.updateModuleTextPositions();
+            }
+
+            update() {
+                if (!this.cursors || !this.input.keyboard.enabled) return;
+                
+                let moved = false;
+                
+                if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
+                    if (this.currentNode > 0) { 
+                        this.currentNode--; 
+                        moved = true; 
+                    }
+                } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
+                    if (this.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) { 
+                        this.currentNode++; 
+                        moved = true; 
+                    }
+                }
+                
+                if (moved) this.moveCharacterAndVisuals();
+                
+                if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+                    this.attemptEnterScene();
+                }
+            }
+
+            moveCharacterAndVisuals(animate = true) {
+                this.updateActiveModuleVisuals();
+                const activeModuleIcon = this.moduleSprites[this.currentNode]?.icon;
+                
+                if (activeModuleIcon && this.character?.active) {
+                    const targetX = activeModuleIcon.x;
+                    const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * 0.5 - 
+                                    this.character.displayHeight * 0.5;
+                    
+                    if (animate) {
+                        this.tweens.add({
+                            targets: this.character,
+                            x: targetX,
+                            y: targetY,
+                            ease: 'Sine.easeInOut',
+                            duration: 250
+                        });
+                    } else {
+                        this.character.x = targetX;
+                        this.character.y = targetY;
+                    }
+                }
+            }
+
+            attemptEnterScene() {
+                if (!this.scene.isActive()) return;
+                
+                const targetStageIndex = this.currentNode;
+                const isUnlocked = targetStageIndex === 0 || 
+                                state.userSession.completedStages[targetStageIndex - 1];
+                
+                if (isUnlocked) {
+                    this.scene.start('TriviaScene', { stageIndex: targetStageIndex });
+                } else {
+                    console.log(`Module ${targetStageIndex + 1} is locked.`);
+                }
+            }
+
+            shutdown() {
+                this.scale.off('resize', this.handleResize, this);
+                
+                if (this.activeModuleEffects.scanlineTween?.isPlaying()) {
+                    this.activeModuleEffects.scanlineTween.stop();
+                }
+                
+                this.activeModuleEffects.scanlineTween = null;
+                
+                if (this.activeModuleEffects.border) this.activeModuleEffects.border.destroy();
+                if (this.activeModuleEffects.scanline) this.activeModuleEffects.scanline.destroy();
+                
+                this.activeModuleEffects = { border: null, scanline: null, scanlineTween: null };
+                
+                if (this.character) this.character.destroy();
+                this.character = null;
+                
+                this.moduleSprites.forEach(spriteGroup => { 
+                    if (spriteGroup.icon) spriteGroup.icon.destroy(); 
+                });
+                
+                this.moduleSprites = [];
+                
+                if (DOM_ELEMENTS.mapModuleTextsContainer) {
+                    DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
+                }
+                
+                this.htmlModuleTextElements = [];
+                state.currentMapSceneRef = null;
+            }
+        }
+
+        class TriviaScene extends Phaser.Scene {
+            constructor() {
+                super('TriviaScene');
+                this.currentStageIndex = 0;
+                this.selectedOptionIndex = -1;
+                this.htmlOptionElements = [];
+                this.currentTriviaData = null;
+                this.moduleInfoUI = null;
+                this.startTriviaButton = null;
+            }
+
+            init(data) {
+                this.currentStageIndex = data.stageIndex;
+                this.selectedOptionIndex = -1;
+                this.htmlOptionElements = [];
+            }
+
+            preload() {
+                if (!this.textures.exists('background')) {
+                    this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
+                }
+            }
+
+            create() {
+                // Obtener los datos de la trivia actual
+                this.currentTriviaData = GLOBAL_CONFIG.TRIVIA_QUESTIONS[this.currentStageIndex] || 
+                                    GLOBAL_CONFIG.TRIVIA_QUESTIONS[0];
+                
+                // Configurar elementos del DOM
+                this.moduleInfoUI = document.getElementById('moduleInfoUI');
+                this.startTriviaButton = document.getElementById('startTriviaButton');
+                
+                // Mostrar primero la información del módulo
+                this.showModuleInfo();
+            }
+
+            showModuleInfo() {
+                manageUIContainersVisibility(['moduleInfoUI']);
+                createStandardSceneBackground(this);
+
+                // Aplicar estilos IDÉNTICOS a trivia
+                const panelWrapper = document.querySelector('#moduleInfoUI .panel-content-wrapper');
+                if (panelWrapper) {
+                    panelWrapper.style.maxHeight = '90vh';
+                    panelWrapper.style.overflowY = 'auto';
+                }
+
+                // Configurar contenido
+                document.getElementById('moduleInfoTitle').textContent = this.currentTriviaData.title;
+                document.getElementById('moduleInfoDescription').textContent = this.currentTriviaData.description;
+
+                // Botón con mismos handlers que trivia
+                const startButton = document.getElementById('startTriviaButton');
+                if (startButton) {
+                    startButton.onclick = () => {
+                        startButton.style.transform = 'translateY(0) scale(1)';
+                        this.showTrivia();
+                    };
+                    startButton.onmousedown = () => {
+                        startButton.style.transform = 'translateY(1px) scale(0.99)';
+                    };
+                    startButton.onmouseup = () => {
+                        startButton.style.transform = 'translateY(-2px) scale(1.02)';
+                    };
+                }
+            }
+
+            showTrivia() {
+                manageUIContainersVisibility(['triviaUI']);
+                
+                // Validar que existan los elementos necesarios
+                if (!this.currentTriviaData || !DOM_ELEMENTS.triviaTitle || 
+                    !DOM_ELEMENTS.triviaQuestion || !DOM_ELEMENTS.triviaOptionsContainer || 
+                    !DOM_ELEMENTS.triviaConfirmButton || !DOM_ELEMENTS.triviaIncorrectMessage) {
+                    console.error("Elementos de trivia faltantes.");
+                    this.goBackToMap();
+                    return;
+                }
+                
+                // Configurar el contenido de la trivia
+                DOM_ELEMENTS.triviaTitle.textContent = `Desafío de Ciberseguridad ${this.currentStageIndex + 1}`;
+                DOM_ELEMENTS.triviaQuestion.textContent = this.currentTriviaData.question;
+                DOM_ELEMENTS.triviaOptionsContainer.innerHTML = '';
+                this.htmlOptionElements = [];
+                
+                // Crear las opciones de respuesta
+                this.currentTriviaData.options.forEach((optionText, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'trivia-option';
+                    optionDiv.textContent = optionText;
+                    optionDiv.onclick = () => this.selectOption(index);
+                    DOM_ELEMENTS.triviaOptionsContainer.appendChild(optionDiv);
+                    this.htmlOptionElements.push(optionDiv);
+                });
+                
+                // Configurar botones y mensajes
+                DOM_ELEMENTS.triviaConfirmButton.onclick = () => this.validateAnswer();
+                DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
+                DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
+                this.selectedOptionIndex = -1;
+            }
+
+            selectOption(index) {
+                this.selectedOptionIndex = index;
+                
+                // Resaltar la opción seleccionada
+                this.htmlOptionElements.forEach((div, i) => {
+                    div.classList.toggle('selected', i === index);
+                });
+                
+                // Mostrar el botón de confirmar si hay una selección
+                if (DOM_ELEMENTS.triviaConfirmButton) {
+                    DOM_ELEMENTS.triviaConfirmButton.classList.remove('hidden');
+                }
+                
+                // Ocultar mensaje de error previo
+                if (DOM_ELEMENTS.triviaIncorrectMessage) {
+                    DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
+                }
+            }
+
+            validateAnswer() {
+                if (this.selectedOptionIndex === -1 || !this.currentTriviaData) return;
+                
+                const isCorrect = this.selectedOptionIndex === this.currentTriviaData.correctAnswerIndex;
+                
+                if (isCorrect) {
+                    // Marcar módulo como completado
+                    state.userSession.completedStages[this.currentStageIndex] = true;
+                    
+                    // Verificar si todos los módulos están completos
+                    const allStagesCompleted = state.userSession.completedStages.every(status => status === true);
+                    
+                    if (allStagesCompleted) {
+                        // Ir a la pantalla de insignia final
+                        this.scene.start('BadgeScene');
+                    } else {
+                        // Volver al mapa
+                        this.goBackToMap();
+                    }
+                } else {
+                    // Mostrar mensaje de error
+                    if (DOM_ELEMENTS.triviaIncorrectMessage) {
+                        DOM_ELEMENTS.triviaIncorrectMessage.textContent = 
+                            'Respuesta incorrecta. ¡Intenta de nuevo o repasa tus conocimientos!';
+                        DOM_ELEMENTS.triviaIncorrectMessage.classList.remove('hidden');
+                    }
+                    
+                    // Reiniciar selección
+                    this.htmlOptionElements.forEach(div => div.classList.remove('selected'));
+                    this.selectedOptionIndex = -1;
+                    
+                    // Ocultar botón de confirmar
+                    if (DOM_ELEMENTS.triviaConfirmButton) {
+                        DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
+                    }
+                }
+            }
+
+            cleanupBeforeTransition() {
+                // Limpiar event listeners
+                if (this.startTriviaButton) {
+                    this.startTriviaButton.onclick = null;
+                }
+                
+                if (DOM_ELEMENTS.triviaConfirmButton) {
+                    DOM_ELEMENTS.triviaConfirmButton.onclick = null;
+                }
+                
+                this.htmlOptionElements.forEach(div => div.onclick = null);
+            }
+
+            goBackToMap() {
+                this.cleanupBeforeTransition();
+                this.scene.start('MapScene');
+            }
+
+            shutdown() {
+                this.cleanupBeforeTransition();
+                this.htmlOptionElements = [];
+                this.moduleInfoUI = null;
+                this.startTriviaButton = null;
+            }
+        }
+
+        class BadgeScene extends Phaser.Scene {
+            constructor() {
+                super('BadgeScene');
+            }
+
+            create() {
+                // 1. Mostrar el panel principal
+                const finalLogoPanel = document.getElementById('finalLogo');
+                finalLogoPanel.classList.remove('hidden');
+                finalLogoPanel.style.display = 'flex';
+
+                // 2. Configurar la imagen de insignia
+                const insigniaImage = document.getElementById('insigniaImage');
+                
+                // 3. Intentar cargar la imagen principal
+                this.loadInsigniaImage(insigniaImage);
+            }
+
+            loadInsigniaImage(imgElement) {
+                // Ruta completa a la imagen
+                const imagePath = `${GLOBAL_CONFIG.ASSETS_PATH}insigniaBP.png?t=${Date.now()}`;
+                
+                // Crear nueva imagen para prueba de carga
+                const testImage = new Image();
+                
+                testImage.onload = () => {
+                    // Si carga correctamente, asignar al elemento real
+                    imgElement.src = imagePath;
+                    console.log('Insignia cargada correctamente:', imagePath);
+                };
+
+                testImage.onerror = () => {
+                    console.error('Error al cargar insignia:', imagePath);
+                    this.showAlternativeBadge(imgElement);
+                };
+
+                // Iniciar la carga
+                testImage.src = imagePath;
+            }
+
+            showAlternativeBadge(imgElement) {
+                // 1. Ocultar imagen fallida
+                imgElement.style.display = 'none';
+                
+                // 2. Crear elemento alternativo
+                const badgeContainer = document.createElement('div');
+                badgeContainer.className = 'alternative-badge';
+                
+                // 3. Contenido alternativo
+                badgeContainer.innerHTML = `
+                    <div class="badge-shape">
+                        <span class="badge-icon">🛡️</span>
+                        <span class="badge-text">${state.userSession.email?.split('@')[0] || 'Agente'}</span>
+                    </div>
+                `;
+                
+                // 4. Insertar después del mensaje
+                const panelText = document.querySelector('.panel-text');
+                panelText.insertAdjacentElement('afterend', badgeContainer);
+                
+                console.log('Mostrando insignia alternativa');
+            }
+        }
+
+        // ==================== EVENT HANDLERS ====================
+        function handleMoveLeft() {
+            if (state.currentMapSceneRef?.scene.isActive()) {
+                if (state.currentMapSceneRef.currentNode > 0) {
+                    state.currentMapSceneRef.currentNode--;
+                    state.currentMapSceneRef.moveCharacterAndVisuals();
+                }
+            }
+        }
+
+        function handleMoveRight() {
+            if (state.currentMapSceneRef?.scene.isActive()) {
+                if (state.currentMapSceneRef.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) {
+                    state.currentMapSceneRef.currentNode++;
+                    state.currentMapSceneRef.moveCharacterAndVisuals();
+                }
+            }
+        }
+
+        function handleEnterScene() {
+            if (state.currentMapSceneRef?.scene.isActive()) {
+                state.currentMapSceneRef.attemptEnterScene();
+            }
+        }
+
+        // ==================== VALIDATION FUNCTIONS ====================
+        function validatePassword(password) {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_#])[A-Za-z\d@$!%*?&\-_#]{8,}$/;
+            return regex.test(password);
+        }
+
+        function validateEmail(email) {
+            const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return regex.test(email);
+        }
+
+        // ==================== MAIN GAME FUNCTIONS ====================
+        function logAccessToGoogleSheets(email, grupo, elapsedSeconds) {
+            fetch(GLOBAL_CONFIG.GOOGLE_SHEETS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    correo: email,
+                    grupo: grupo,
+                    tiempo: elapsedSeconds
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).catch(error => {
+                console.error('Error al enviar datos a Google Sheets:', error);
+            });
+        }
+
+        function startGame() {
+            const email = DOM_ELEMENTS.emailInput.value.trim();
+            const grupo = DOM_ELEMENTS.grupoInput.value.trim();
+            const password = DOM_ELEMENTS.passwordInput.value.trim();
+            
+            // Validaciones
+            if (!grupo || isNaN(grupo)) {
+                DOM_ELEMENTS.loginError.textContent = 'Debe ingresar un número de grupo válido.';
+                DOM_ELEMENTS.loginError.style.display = 'block';
+                return;
+            }
+
+            if (!email) {
+                DOM_ELEMENTS.loginError.textContent = 'El email es obligatorio.';
+                DOM_ELEMENTS.loginError.style.display = 'block';
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                DOM_ELEMENTS.loginError.textContent = 'Ingrese un correo electrónico válido.';
+                DOM_ELEMENTS.loginError.style.display = 'block';
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                DOM_ELEMENTS.loginError.textContent = 
+                    'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.';
+                DOM_ELEMENTS.loginError.style.display = 'block';
+                return;
+            }
+            state.userSession = {
+                email: email,
+                grupo: grupo,
+                completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
+            };
+
+            DOM_ELEMENTS.loginError.style.display = 'none';
+
+            // Registrar acceso
+            const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
+            logAccessToGoogleSheets(email, grupo, elapsedSeconds);
+
+            // Configurar sesión de usuario
+            state.userSession.email = email;
+            state.userSession.grupo = grupo;
+            state.userSession.completedStages.fill(false);
+
+            // Iniciar juego Phaser
+            initializePhaserGame();
+        }
+
+        function initializePhaserGame() {
+            manageUIContainersVisibility([]);
+
+            const phaserConfig = {
+                type: Phaser.AUTO,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                resolution: window.devicePixelRatio || 1,
+                parent: 'phaser-game',
+                transparent: true,
+                scale: {
+                    mode: Phaser.Scale.RESIZE,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                },
+                scene: [MapScene, TriviaScene, BadgeScene],
+                render: { antialias: true, pixelArt: false },
+                input: {
+                    keyboard: {
+                        capture: [
+                            Phaser.Input.Keyboard.KeyCodes.LEFT,
+                            Phaser.Input.Keyboard.KeyCodes.RIGHT,
+                            Phaser.Input.Keyboard.KeyCodes.ENTER,
+                            Phaser.Input.Keyboard.KeyCodes.SPACE
+                        ]
+                    }
+                }
+            };
+
+            // Limpiar instancia anterior si existe
+            if (state.gameInstance) {
+                state.gameInstance.scene.getScenes(true).forEach(scene => {
+                    if (scene.sys.isActive() && typeof scene.shutdown === 'function') {
+                        scene.shutdown();
+                    }
+                    if (scene.sys.isActive()) {
+                        state.gameInstance.scene.stop(scene.scene.key);
+                    }
+                });
+                state.gameInstance.destroy(true);
+                state.gameInstance = null;
+            }
+
+            state.gameInstance = new Phaser.Game(phaserConfig);
+        }
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            manageUIContainersVisibility(['loginUI']);
+
+            // Configurar event listeners
+            if (DOM_ELEMENTS.loginButton) {
+                DOM_ELEMENTS.loginButton.onclick = startGame;
+            }
+            
+            if (DOM_ELEMENTS.moveLeftButton) {
+                DOM_ELEMENTS.moveLeftButton.onclick = handleMoveLeft;
+            }
+            
+            if (DOM_ELEMENTS.enterSceneButton) {
+                DOM_ELEMENTS.enterSceneButton.onclick = handleEnterScene;
+            }
+            
+            if (DOM_ELEMENTS.moveRightButton) {
+                DOM_ELEMENTS.moveRightButton.onclick = handleMoveRight;
+            }
+        });
+    </script>
+</body>
+</html>
