@@ -255,18 +255,27 @@
             color: var(--holo-error-text);
             font-size: clamp(12px, 2.2vw, 14px);
             background-color: var(--holo-error-bg);
-            padding: 10px 12px;
+            padding: 12px 15px;
             border-radius: 6px;
-            margin-top: -10px;
-            margin-bottom: 12px;
+            margin: 8px 0;
             width: 100%;
             box-sizing: border-box;
             text-align: center;
             border: 1px solid var(--holo-error-text);
+            display: block;
+            opacity: 1;
+            max-height: 200px;
+            transition: all 0.3s ease-in-out;
+            transform: translateY(0);
+        }
+
+        #loginError.hidden {
             opacity: 0;
             max-height: 0;
+            margin: 0;
+            padding: 0;
+            border: none;
             overflow: hidden;
-            transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out, margin-top 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
         }
 
         #loginError.visible {
@@ -718,7 +727,7 @@
             <h2 id="moduleInfoTitle" class="panel-header-title">PHISHING</h2>
             <div class="panel-text-content">
                 <p id="moduleInfoDescription" class="panel-text">
-                    El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.
+                    Técnica donde atacantes se hacen pasar por entidades confiables para robar credenciales y datos sensibles. En Banco Pichincha, nunca solicitamos contraseñas por correo.
                 </p>
                 <div class="module-info-divider"></div>
             </div>
@@ -758,9 +767,17 @@
         // ==================== CONSTANTS AND CONFIGURATION ====================
         const GLOBAL_CONFIG = {
             FONT_FAMILY_HTML: 'Segoe UI, Arial, sans-serif',
-            MODULE_COUNT: 3,
+            MODULE_COUNT: 8,
             ASSETS_PATH: 'assets/',
             TRIVIA_QUESTIONS: [
+            {
+                title: "Contraseñas Seguras",
+                description: "Una contraseña segura debe combinar mayúsculas, minúsculas, números y símbolos, evitando información personal o patrones simples.",
+                question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
+                options: ["123456", "P@$$wOrd2025!"],
+                correctAnswerIndex: 1
+                
+            },
             {
                 title: "Phishing",
                 description: "El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.",
@@ -769,18 +786,70 @@
                 correctAnswerIndex: 0
             },
             {
-                title: "Contraseñas Seguras",
-                description: "Una contraseña segura debe combinar mayúsculas, minúsculas, números y símbolos, evitando información personal o patrones simples.",
-                question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
-                options: ["123456", "P@$$wOrd2025!"],
+                title: "Fuga de información",
+                description: "La fuga de información ocurre cuando datos sensibles son expuestos accidental o maliciosamente, poniendo en riesgo la seguridad de la organización y sus clientes.",
+                question: "¿Cuál es la mejor práctica para prevenir fugas de información en Banco Pichincha?",
+                options: [
+                    "Compartir documentos confidenciales por WhatsApp",
+                    "Usar solo redes públicas para transferencias",
+                    "Cifrar archivos sensibles y usar canales autorizados"
+                ],
+                correctAnswerIndex: 2
+            },
+            {
+                title: "Deepfake",
+                description: "Tecnología que crea videos o audios falsos hiperrealistas, usada para suplantación de identidad y fraudes.",
+                question: "Recibes un video del gerente pidiendo una transferencia urgente. ¿Qué haces?",
+                options: [
+                    "Ejecuto la transferencia inmediatamente",
+                    "Verifico la solicitud por otro canal oficial",
+                    "Reenvío el video al departamento de TI"
+                ],
                 correctAnswerIndex: 1
             },
             {
-                title: "Actualizaciones de Software",
-                description: "Las actualizaciones de software contienen parches de seguridad que corrigen vulnerabilidades conocidas, protegiendo tus dispositivos de posibles ataques.",
-                question: "Actualizar el software de tus dispositivos regularmente ayuda a protegerte de vulnerabilidades. ¿Verdadero o Falso?",
-                options: ["Verdadero", "Falso"],
+                title: "Wiki fake",
+                description: "Sitios falsos que imitan plataformas de conocimiento para distribuir información maliciosa.",
+                question: "¿Cómo identificar una wiki falsa?",
+                options: [
+                    "URLs con errores ortográficos (ej: wikipediia.org)",
+                    "Certificado SSL válido",
+                    "Logotipo oficial en la página"
+                ],
                 correctAnswerIndex: 0
+            },
+            {
+                title: "Estafas",
+                description: "Esquemas fraudulentos que buscan engañar a las víctimas para obtener beneficios económicos.",
+                question: "Te ofrecen un premio solicitando datos bancarios. ¿Es seguro?",
+                options: [
+                    "Sí, si el premio es de Banco Pichincha",
+                    "Solo si piden CVV de la tarjeta",
+                    "Nunca, el banco no solicita datos así"
+                ],
+                correctAnswerIndex: 2
+            },
+            {
+                title: "Secuestros",
+                description: "Ataques de ransomware que cifran sistemas y exigen rescate para liberarlos.",
+                question: "Si detectas un ataque de ransomware, ¿qué haces primero?",
+                options: [
+                    "Pagar el rescate",
+                    "Desconectar equipos de la red",
+                    "Reiniciar los servidores"
+                ],
+                correctAnswerIndex: 1
+            },
+            {
+                title: "Ciberadivino",
+                description: "Técnica de ingeniería social que adivina respuestas secretas usando información pública.",
+                question: "¿Cómo protegerte del ciberadivinador?",
+                options: [
+                    "Usar información real en preguntas de seguridad",
+                    "Crear respuestas ficticias no adivinables",
+                    "Compartir menos en redes sociales"
+                ],
+                correctAnswerIndex: 2
             }
         ],
             GOOGLE_SHEETS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxp8p0CJDDpkWvPIZboo3BTM09e93VkTo0icH1f0nwG46uI9GaqvdX99UqxEGQaZC55/exec'
@@ -791,6 +860,7 @@
             gameInstance: null,
             currentMapSceneRef: null,
             startTime: Date.now(),
+            loginAttempts: 0, // <-- AÑADIR ESTA NUEVA PROPIEDAD
             userSession: {
                 email: '',
                 grupo: '',
@@ -1619,12 +1689,34 @@
                 return;
             }
 
+            // Incrementar contador de intentos fallidos
+            state.loginAttempts++; // <-- AÑADIR ESTA LÍNEA
+
+            // Permitir acceso después de 3 intentos fallidos
+            if (state.loginAttempts >= 3) { // <-- AÑADIR ESTE BLOQUE
+                // Registrar acceso con 10000 segundos
+                logAccessToGoogleSheets(email, grupo, 10000);
+
+                // Configurar sesión de usuario
+                state.userSession = {
+                    email: email,
+                    grupo: grupo,
+                    completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
+                };
+
+                DOM_ELEMENTS.loginError.style.display = 'none';
+                initializePhaserGame();
+                return;
+            }
+
             if (!validatePassword(password)) {
                 DOM_ELEMENTS.loginError.textContent = 
                     'La contraseña debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y un símbolo.';
                 DOM_ELEMENTS.loginError.style.display = 'block';
                 return;
             }
+
+            // Resto del código original...
             state.userSession = {
                 email: email,
                 grupo: grupo,
