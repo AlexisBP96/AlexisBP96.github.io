@@ -636,6 +636,18 @@
     <div id="mapModuleTextsContainer" class="hidden"></div>
     
     <div id="moduleInfoUI" class="fullscreen-ui-panel hidden">
+        <div class="animated-lines">
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+        </div>
         <div class="panel-content-wrapper">
             <h2 id="moduleInfoTitle" class="panel-header-title">PHISHING</h2>
             <div class="panel-text-content">
@@ -649,6 +661,18 @@
     </div>
 
     <div id="triviaUI" class="fullscreen-ui-panel hidden">
+        <div class="animated-lines">
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+        </div>
         <div class="panel-content-wrapper">
             <h2 id="triviaTitle" class="panel-header-title">Desafío de Ciberseguridad</h2>
             <p id="triviaQuestion" class="panel-text">Cargando pregunta...</p>
@@ -659,6 +683,18 @@
     </div>
 
     <div id="finalLogo" class="fullscreen-ui-panel hidden">
+        <div class="animated-lines">
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+        </div>
          <div class="panel-content-wrapper">
             <h2 class="panel-header-title">¡MISIÓN CUMPLIDA!</h2>
             <p class="panel-text">Has superado todos los desafíos y obtuviste tu insignia Ciberguardián ⭐</p>
@@ -778,7 +814,10 @@
                 email: '',
                 grupo: '',
                 completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
-            }
+            },
+            triviaStartTimes: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(0),
+            triviaResponseTimes: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(0),
+            totalTriviaTime: 0
         };
 
         // ==================== DOM ELEMENTS ====================
@@ -902,7 +941,7 @@
                 this.connectionGraphics = null;
                 this.letterConnections = [
                     [0,1], [1,2], [2,3],   // C
-                    [4,5], [5,6], [6,7]    // S
+                    [3,4], [4,5], [5,6]    // S
                 ];
             }
 
@@ -989,21 +1028,22 @@
                 // Calcular centro de la pantalla
                 const centerX = width * 0.5;
                 const centerY = height * 0.5;
-                
-                // Radio de la forma de las letras
+
+                // Radio
                 const radius = Math.min(width, height) * 0.25;
-                
-                // Posiciones para la letra C (4 módulos)
+
+                // Posiciones para la letra C (3 módulos)
                 this.modulePositions.push({ x: centerX - radius, y: centerY - radius }); // Top-left
                 this.modulePositions.push({ x: centerX - radius * 1.5, y: centerY });    // Middle-left
                 this.modulePositions.push({ x: centerX - radius, y: centerY + radius }); // Bottom-left
+
+                // Posiciones para la letra S (5 módulos)
                 this.modulePositions.push({ x: centerX, y: centerY + radius });          // Bottom-center
-                
-                // Posiciones para la letra S (4 módulos)
-                this.modulePositions.push({ x: centerX, y: centerY + radius });          // Bottom-center (conecta con C)
                 this.modulePositions.push({ x: centerX + radius, y: centerY + radius }); // Bottom-right
                 this.modulePositions.push({ x: centerX + radius * 1.5, y: centerY });    // Middle-right
                 this.modulePositions.push({ x: centerX + radius, y: centerY - radius }); // Top-right
+                this.modulePositions.push({ x: centerX, y: centerY - radius });          // Top-center (nuevo)
+
 
                 this.currentNode = Math.max(0, Math.min(this.currentNode, GLOBAL_CONFIG.MODULE_COUNT - 1));
 
@@ -1391,6 +1431,7 @@
                 DOM_ELEMENTS.triviaConfirmButton.classList.add('hidden');
                 DOM_ELEMENTS.triviaIncorrectMessage.classList.add('hidden');
                 this.selectedOptionIndex = -1;
+                state.triviaStartTimes[this.currentStageIndex] = Date.now();
             }
 
             selectOption(index) {
@@ -1415,6 +1456,10 @@
                 const isCorrect = this.selectedOptionIndex === this.currentTriviaData.correctAnswerIndex;
                 
                 if (isCorrect) {
+                    // Calcular tiempo de respuesta
+                    const endTime = Date.now();
+                    const startTime = state.triviaStartTimes[this.currentStageIndex];
+                    state.triviaResponseTimes[this.currentStageIndex] = endTime - startTime;
                     state.userSession.completedStages[this.currentStageIndex] = true;
                     
                     const allStagesCompleted = state.userSession.completedStages.every(status => status === true);
@@ -1477,6 +1522,32 @@
 
                 const insigniaImage = document.getElementById('insigniaImage');
                 this.loadInsigniaImage(insigniaImage);
+                // Calcular tiempo total
+                state.totalTriviaTime = state.triviaResponseTimes.reduce((sum, time) => sum + time, 0);
+                // Enviar resultados finales
+                this.sendFinalResults();
+            }
+
+            sendFinalResults() {
+                const email = state.userSession.email;
+                const grupo = state.userSession.grupo;
+                const totalTime = state.totalTriviaTime/1000;
+                console.log('tiempo trivia:', totalTime);
+                fetch(GLOBAL_CONFIG.GOOGLE_SHEETS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        correo: email,
+                        grupo: grupo,
+                        tiempo: totalTime,
+                        tipo: 'final'
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(error => {
+                    console.error('Error al enviar resultados finales:', error);
+                });
             }
 
             loadInsigniaImage(imgElement) {
@@ -1561,7 +1632,8 @@
                 body: JSON.stringify({
                     correo: email,
                     grupo: grupo,
-                    tiempo: elapsedSeconds
+                    tiempo: elapsedSeconds,
+                    tipo: 'login'
                 }),
                 headers: {
                     'Content-Type': 'application/json'
@@ -1622,6 +1694,11 @@
                 grupo: grupo,
                 completedStages: Array(GLOBAL_CONFIG.MODULE_COUNT).fill(false)
             };
+
+            // Reiniciar tiempos al iniciar sesión
+            state.triviaStartTimes = Array(GLOBAL_CONFIG.MODULE_COUNT).fill(0);
+            state.triviaResponseTimes = Array(GLOBAL_CONFIG.MODULE_COUNT).fill(0);
+            state.totalTriviaTime = 0;
 
             DOM_ELEMENTS.loginError.style.display = 'none';
 
