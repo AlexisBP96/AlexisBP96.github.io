@@ -270,12 +270,12 @@
             position: absolute; top: 0; left: 0;
             width: 100%;
             padding: clamp(8px, 1.5vh, 12px) 15px;
-            box-sizing: border-box;
+            /*box-sizing: border-box;*/
             text-align: center;
             z-index: 10;
             background: var(--holo-panel-bg-header);
             border-bottom: 1px solid var(--holo-panel-border);
-            box-shadow: 0 2px 15px rgba(0, 150, 200, 0.1);
+            /*box-shadow: 0 2px 15px rgba(0, 150, 200, 0.1);*/
         }
 
         #mapTitle {
@@ -453,8 +453,8 @@
         #moduleInfoUI .panel-content-wrapper {
             background: var(--holo-panel-bg);
             padding: clamp(25px, 4vw, 35px);
-            border-radius: 10px;
-            border: 1px solid var(--holo-panel-border); /* Borde azul */
+            border-radius: 0px;
+            border: 0px solid var(--holo-panel-border); /* Borde azul */
             box-shadow: 0 0 35px rgba(0, 180, 255, 0.1), 
                         0 0 15px rgba(0, 180, 255, 0.1) inset;
             width: calc(100% - 40px); /* Ajuste para padding */
@@ -523,7 +523,7 @@
             box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
             text-align: center;
         }
-
+        #loginButton:hover,
         #startTriviaButton:hover {
             background: #FFDF30;
             box-shadow: 0 0 20px var(--banco-pichincha-gold-glow), 
@@ -947,7 +947,14 @@
 
             preload() {
                 this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
-                this.load.image('module', `${GLOBAL_CONFIG.ASSETS_PATH}module.png`);
+                this.load.image('module0', `${GLOBAL_CONFIG.ASSETS_PATH}module0.png`);
+                this.load.image('module1', `${GLOBAL_CONFIG.ASSETS_PATH}module1.png`);
+                this.load.image('module2', `${GLOBAL_CONFIG.ASSETS_PATH}module2.png`);
+                this.load.image('module3', `${GLOBAL_CONFIG.ASSETS_PATH}module3.png`);
+                this.load.image('module4', `${GLOBAL_CONFIG.ASSETS_PATH}module4.png`);
+                this.load.image('module5', `${GLOBAL_CONFIG.ASSETS_PATH}module5.png`);
+                this.load.image('module6', `${GLOBAL_CONFIG.ASSETS_PATH}module6.png`);
+                this.load.image('module7', `${GLOBAL_CONFIG.ASSETS_PATH}module7.png`);
                 this.load.image('module-complete', `${GLOBAL_CONFIG.ASSETS_PATH}module-green.png`);
                 this.load.image('character', `${GLOBAL_CONFIG.ASSETS_PATH}jedi.png`);
             }
@@ -957,7 +964,7 @@
                 manageUIContainersVisibility(['mapHeader', 'mapModuleTextsContainer', 'bottomBarContainer']);
                 createMapFocusedBackground(this);
 
-                this.activeModuleEffects.border = this.add.graphics().setDepth(1);
+                //this.activeModuleEffects.border = this.add.graphics().setDepth(1);
                 this.activeModuleEffects.scanline = this.add.graphics().setDepth(3);
                 this.connectionGraphics = this.add.graphics().setDepth(0);
 
@@ -1049,7 +1056,7 @@
 
                 this.moduleSprites = this.modulePositions.map((pos, i) => {
                     const isComplete = state.userSession.completedStages[i];
-                    const iconKey = isComplete ? 'module-complete' : 'module';
+                    const iconKey = `module${i}`;
                     
                     const icon = this.add.image(pos.x, pos.y, iconKey)
                         .setDepth(2)
@@ -1158,7 +1165,7 @@
             }
 
             updateActiveModuleVisuals() {
-                this.activeModuleEffects.border.clear();
+                //this.activeModuleEffects.border.clear();
                 this.activeModuleEffects.scanline.clear();
                 
                 if (this.activeModuleEffects.scanlineTween?.isPlaying()) {
@@ -1179,24 +1186,6 @@
                         
                         if (index === this.currentNode) {
                             icon.setScale(spriteGroup.originalScaleX * 1.1, spriteGroup.originalScaleY * 1.1);
-                            
-                            this.activeModuleEffects.border.lineStyle(3, 0xFFD700, 0.8)
-                                .strokeRoundedRect(
-                                    baseRect.x - 3, 
-                                    baseRect.y - 3, 
-                                    baseRect.width + 6, 
-                                    baseRect.height + 6, 
-                                    5
-                                );
-                            
-                            this.activeModuleEffects.border.lineStyle(1.5, 0xFFFFFF, 0.5)
-                                .strokeRoundedRect(
-                                    baseRect.x - 1, 
-                                    baseRect.y - 1, 
-                                    baseRect.width + 2, 
-                                    baseRect.height + 2, 
-                                    4
-                                );
                             
                             const scanlineWidth = icon.displayWidth * 0.8;
                             const scanlineStartX = icon.x - scanlineWidth / 2;
@@ -1221,24 +1210,8 @@
                             });
                         } else if (state.userSession.completedStages[index]) {
                             icon.setTint(0xDDDDDD);
-                            this.activeModuleEffects.border.lineStyle(2, 0x60FF60, 0.5)
-                                .strokeRoundedRect(
-                                    baseRect.x - 2, 
-                                    baseRect.y - 2, 
-                                    baseRect.width + 4, 
-                                    baseRect.height + 4, 
-                                    4
-                                );
-                        } else {
-                            this.activeModuleEffects.border.lineStyle(1.5, 0x00D2FF, 0.3)
-                                .strokeRoundedRect(
-                                    baseRect.x - 1, 
-                                    baseRect.y - 1, 
-                                    baseRect.width + 2, 
-                                    baseRect.height + 2, 
-                                    3
-                                );
-                        }
+                            
+                        } 
                     }
                 });
                 
