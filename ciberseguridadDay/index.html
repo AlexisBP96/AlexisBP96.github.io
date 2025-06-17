@@ -1252,29 +1252,24 @@
                                     this.character.displayHeight * 0.5;
                     
                     if (animate) {
-                        const midX = (this.character.x + targetX) / 2 + 30; // desviación leve en X
-                        const midY = (this.character.y + targetY) / 2 - 40; // desviación leve en Y
-
-                        // Movimiento curvo en dos tramos
                         this.tweens.timeline({
                             targets: this.character,
                             tweens: [
                                 {
-                                    x: midX,
-                                    y: midY,
-                                    ease: 'Sine.easeOut',
-                                    duration: 800
-                                },
-                                {
                                     x: targetX,
                                     y: targetY,
-                                    ease: 'Sine.easeIn',
-                                    duration: 400,
+                                    ease: 'Sine.easeOut',
+                                    duration: 1000,
+                                    alpha: { from: 0.7, to: 1 },
                                     onStart: () => {
-                                        this.character.setTint(0x66ffcc);
-                                    },
+                                        this.character.setTint(0x66ffcc); // brillo al inicio
+                                    }
+                                },
+                                {
+                                    ease: 'Expo.easeOut',
+                                    duration: 800,
                                     onComplete: () => {
-                                        this.character.clearTint();
+                                        this.character.clearTint(); // quitar brillo
                                     }
                                 }
                             ]
