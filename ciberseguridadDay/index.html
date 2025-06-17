@@ -1252,14 +1252,35 @@
                                     this.character.displayHeight * 0.5;
                     
                     if (animate) {
-                        this.tweens.add({
+                        const midX = (this.character.x + targetX) / 2 + 30; // desviación leve en X
+                        const midY = (this.character.y + targetY) / 2 - 40; // desviación leve en Y
+
+                        // Movimiento curvo en dos tramos
+                        this.tweens.timeline({
                             targets: this.character,
-                            x: targetX,
-                            y: targetY,
-                            ease: 'Sine.easeInOut',
-                            duration: 250
+                            tweens: [
+                                {
+                                    x: midX,
+                                    y: midY,
+                                    ease: 'Sine.easeOut',
+                                    duration: 1500
+                                },
+                                {
+                                    x: targetX,
+                                    y: targetY,
+                                    ease: 'Sine.easeIn',
+                                    duration: 1000,
+                                    onStart: () => {
+                                        this.character.setTint(0x66ffcc);
+                                    },
+                                    onComplete: () => {
+                                        this.character.clearTint();
+                                    }
+                                }
+                            ]
                         });
-                    } else {
+                    }
+                    else {
                         this.character.x = targetX;
                         this.character.y = targetY;
                     }
