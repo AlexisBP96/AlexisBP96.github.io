@@ -4,11 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Geolocalización - Banco Pichincha</title>
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous"/>
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
   <style>
     :root {
@@ -58,26 +55,24 @@
     }
 
     @media (max-width: 768px) {
-    /* Pasa de 4 columnas a 1 sola */
+    /* dispositivo movil filtros */
     #filterForm {
         grid-template-columns: 1fr;
         gap: 10px;
     }
 
-    /* Asegura que label + input queden en columna */
     #filterForm > div {
         display: flex;
         flex-direction: column;
     }
 
-    /* Un pequeño margen entre label e input */
     #filterForm label {
         margin-bottom: 6px;
     }
-        /* Apilar cada tarjeta a 100% de ancho */
+
     .metrics {
         flex-direction: column;
-        gap: 15px;    /* ajusta el espacio vertical */
+        gap: 15px; 
     }
     .metric-card {
         flex: 1 1 100%;
@@ -199,7 +194,6 @@
 </head>
 <body>
   <header>
-    <!-- Logo de alta resolución (SVG/PNG) -->
     <img src="assets/logo.png" alt="Banco Pichincha" />
   </header>
 
@@ -331,7 +325,7 @@
 
       document.getElementById('map').style.display = 'block';
 
-      // Esperar a que el mapa sea redimensionado antes de renderizar todo
+      // renderizado, wait render del mapa
       setTimeout(() => {
         map.invalidateSize();
         updateMetrics(filtered, ced);
