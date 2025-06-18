@@ -56,6 +56,26 @@
       gap: 20px;
       align-items: end;
     }
+
+    @media (max-width: 768px) {
+    /* Pasa de 4 columnas a 1 sola */
+    #filterForm {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* Asegura que label + input queden en columna */
+    #filterForm > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Un pequeño margen entre label e input */
+    #filterForm label {
+        margin-bottom: 6px;
+    }
+    }
+
     #filterForm input,
     #filterForm button {
       padding: 12px;
