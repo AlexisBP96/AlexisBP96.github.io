@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ciberseguridad Day - Banco Pichincha</title>
+    <title>Construye tus Sueños - Banco Pichincha</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
     <style>
         :root {
@@ -608,8 +608,8 @@
         </div>
         <div id="holographicPanel">
             <img src="assets/logo-pichincha.png" alt="Logo Banco Pichincha" class="holo-logo">
-            <h1 class="holo-title">Conexión Segura</h1>
-            <p class="holo-subtitle">Autentique sus credenciales de Ciberguardián.</p>
+            <h1 class="holo-title">Protege tus Sueños</h1>
+            <p class="holo-subtitle">Tu contraseña segura es la llave que cuida tus metas, tus planes, tu futuro.</p>
 
             <div class="holo-input-group">
                 <input type="number" id="grupoInput" placeholder="Grupo (número)" aria-label="Grupo" min="1" required>
@@ -720,23 +720,23 @@
             ASSETS_PATH: 'assets/',
             TRIVIA_QUESTIONS: [
             {
-                title: "Contraseñas Seguras",
-                description: "Una contraseña segura debe combinar mayúsculas, minúsculas, números y símbolos, evitando información personal o patrones simples.",
+                title: "La llave de tus sueños",
+                description: "Una contraseña segura no solo protege tu cuenta… protege tus ahorros, tus ideas, tu futuro. Cada carácter es una barrera que aleja a quien quiera arrebatártelo.",
                 question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
                 options: ["123456", "P@$$wOrd2025!"],
                 correctAnswerIndex: 1
                 
             },
             {
-                title: "Phishing",
-                description: "El phishing es una técnica de ingeniería social donde los atacantes se hacen pasar por entidades confiables para robar información sensible como contraseñas o datos bancarios.",
+                title: "Cuidado con lo que muerdes",
+                description: "A veces, lo que brilla en tu bandeja no es una oportunidad, es un anzuelo. Y si lo muerdes, pueden robarte más que datos: tu tranquilidad.",
                 question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?",
                 options: ["Verdadero", "Falso"],
                 correctAnswerIndex: 0
             },
             {
-                title: "Fuga de información",
-                description: "La fuga de información ocurre cuando datos sensibles son expuestos accidental o maliciosamente, poniendo en riesgo la seguridad de la organización y sus clientes.",
+                title: "Gotas que vacían tu futuro",
+                description: "No todo se pierde de golpe. A veces, es gota a gota. Cada dato que entregas sin cuidado es una filtración en el barco de tus metas.",
                 question: "¿Cuál es la mejor práctica para prevenir fugas de información en Banco Pichincha?",
                 options: [
                     "Compartir documentos confidenciales por WhatsApp",
@@ -746,8 +746,8 @@
                 correctAnswerIndex: 2
             },
             {
-                title: "Deepfake",
-                description: "Tecnología que crea videos o audios falsos hiperrealistas, usada para suplantación de identidad y fraudes.",
+                title: "No todo lo que ves es real",
+                description: "Una sonrisa en video. Una voz familiar. Pero todo fue creado. Las mentiras digitales pueden poner en riesgo decisiones reales.",
                 question: "Recibes un video del gerente pidiendo una transferencia urgente. ¿Qué haces?",
                 options: [
                     "Ejecuto la transferencia inmediatamente",
@@ -757,8 +757,8 @@
                 correctAnswerIndex: 1
             },
             {
-                title: "Wiki fake",
-                description: "Sitios falsos que imitan plataformas de conocimiento para distribuir información maliciosa.",
+                title: "Verdades a medias, riesgos enteros",
+                description: "No todo lo que lees te informa. A veces, te confunde, te manipula y te aleja de lo correcto. La desinformación también es una amenaza silenciosa.",
                 question: "¿Cómo identificar una wiki falsa?",
                 options: [
                     "URLs con errores ortográficos (ej: wikipediia.org)",
@@ -768,8 +768,8 @@
                 correctAnswerIndex: 0
             },
             {
-                title: "Estafas",
-                description: "Esquemas fraudulentos que buscan engañar a las víctimas para obtener beneficios económicos.",
+                title: "Cuando la promesa es la trampa",
+                description: "El sueño de ganar rápido, de obtener más... puede ser el disfraz perfecto de una pérdida segura. Aprende a distinguir valor de engaño.",
                 question: "Te ofrecen un premio solicitando datos bancarios. ¿Es seguro?",
                 options: [
                     "Sí, si el premio es de Banco Pichincha",
@@ -779,8 +779,8 @@
                 correctAnswerIndex: 2
             },
             {
-                title: "Secuestros",
-                description: "Ataques de ransomware que cifran sistemas y exigen rescate para liberarlos.",
+                title: "Cuando el riesgo no es virtual... es real",
+                description: "Tus datos pueden llevar a alguien hasta ti. La seguridad digital es seguridad física. El daño no siempre es en línea.",
                 question: "Si detectas un ataque de ransomware, ¿qué haces primero?",
                 options: [
                     "Pagar el rescate",
@@ -790,8 +790,8 @@
                 correctAnswerIndex: 1
             },
             {
-                title: "Ciberadivino",
-                description: "Técnica de ingeniería social que adivina respuestas secretas usando información pública.",
+                title: "El futuro no se adivina, se protege",
+                description: "Las amenazas cambian. Lo que hoy parece seguro, mañana puede ser vulnerable. La mejor forma de anticiparse… es estar siempre preparado.",
                 question: "¿Cómo protegerte del ciberadivinador?",
                 options: [
                     "Usar información real en preguntas de seguridad",
@@ -1009,11 +1009,11 @@
                 this.isLandscape = width > height;
 
                 if (DOM_ELEMENTS.mapTitle && state.userSession.email) {
-                    DOM_ELEMENTS.mapTitle.textContent = `Agente ${state.userSession.email.split('@')[0]}, bienvenido.`;
+                    DOM_ELEMENTS.mapTitle.textContent = `Protege lo que construyes.`;
                 }
                 
                 if (DOM_ELEMENTS.mapDescription) {
-                    DOM_ELEMENTS.mapDescription.textContent = `Seleccione su próxima misión de ciberseguridad.`;
+                    DOM_ELEMENTS.mapDescription.textContent = `“Tus metas no viven en un mundo aislado. Cada contraseña, cada clic, cada dato… es un ladrillo más en la casa de tus sueños. Pero hay amenazas que pueden derrumbar todo si no estás atento.”`;
                 }
 
                 const headerHeightPercentage = this.isLandscape ? 0.1 : 0.08;
@@ -1026,8 +1026,8 @@
                     DOM_ELEMENTS.bottomBarContainer.offsetHeight : 0;
                 
                 const baseIconSize = this.isLandscape ? 
-                    Math.min(width * 0.07, 56) : 
-                    Math.min(width * 0.16, 50);
+                    Math.min(width * 0.10, 100) : 
+                    Math.min(width * 0.18, 80);
                 
                 // Definir posiciones para formar las letras C y S
                 this.modulePositions = [];
@@ -1085,10 +1085,10 @@
                 });
 
                 const baseCharacterSizeWidth = this.isLandscape ? 
-                    Math.min(width * 0.035, 30) : 
+                    Math.min(width * 0.35, 100) : 
                     Math.min(width * 0.08, 30);
                 
-                const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.3;
+                const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.5;
 
                 if (this.moduleSprites[this.currentNode]?.icon) {
                     const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
