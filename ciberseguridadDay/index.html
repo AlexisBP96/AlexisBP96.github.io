@@ -289,7 +289,10 @@
         #mapDescription {
             color: var(--holo-text-secondary);
             font-size: clamp(11px, 2vw, 13px);
-            margin: 0;
+            margin: 0 auto;
+            text-align: center;
+            max-width: 80%; /* evita que el texto se pegue a los bordes */
+            line-height: 1.5;
         }
 
         #mapModuleTextsContainer {
@@ -1013,7 +1016,7 @@
                 }
                 
                 if (DOM_ELEMENTS.mapDescription) {
-                    DOM_ELEMENTS.mapDescription.textContent = `“Tus metas no viven en un mundo aislado. Cada contraseña, cada clic, cada dato… es un ladrillo más en la casa de tus sueños. Pero hay amenazas que pueden derrumbar todo si no estás atento.”`;
+                    DOM_ELEMENTS.mapDescription.textContent = `Tus metas no viven en un mundo aislado. Cada contraseña, cada clic, cada dato… es un ladrillo más en la casa de tus sueños. Pero hay amenazas que pueden derrumbar todo si no estás atento.`;
                 }
 
                 const headerHeightPercentage = this.isLandscape ? 0.1 : 0.08;
@@ -1086,7 +1089,7 @@
 
                 const baseCharacterSizeWidth = this.isLandscape ? 
                     Math.min(width * 0.35, 100) : 
-                    Math.min(width * 0.35, 100);
+                    Math.min(width * 0.08, 50);
                 
                 const baseCharacterSizeHeight = baseCharacterSizeWidth * 1.5;
 
