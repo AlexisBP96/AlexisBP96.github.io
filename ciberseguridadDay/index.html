@@ -534,6 +534,53 @@
             transform: translateY(-2px) scale(1.02);
         }
 
+        #cinematicIntro {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #0a0f1f 0%, #01040a 100%);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        #cyberCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #cinematicOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 2;
+            animation: fadeInOutText 6s ease-out forwards;
+        }
+
+        #cinematicOverlay h1 {
+            font-size: clamp(24px, 6vw, 38px);
+            margin: 0;
+            text-shadow: 0 0 20px #00eaff;
+        }
+        
+        #cinematicOverlay p {
+            font-size: clamp(14px, 3.5vw, 20px);
+            margin-top: 15px;
+            color: #ccc;
+        }
+
+        @keyframes fadeInOutText {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         /* Media Queries IDÉNTICOS a los de trivia */
         @media (max-width: 600px) {
             #moduleInfoUI .panel-content-wrapper {
@@ -594,8 +641,16 @@
     </style>
 </head>
 <body>
-    <div id="phaser-game"></div>
+    <div id="cinematicIntro">
+        <canvas id="cyberCanvas"></canvas>
+        <div id="cinematicOverlay">
+            <h1>Protege lo que construyes</h1>
+            <p>Cada contraseña es un muro, cada clic una decisión.</p>
+        </div>
+    </div>
 
+    <div id="phaser-game"></div>
+    
     <div id="loginUI">
         <div class="animated-lines">
             <div class="line horizontal"></div>
@@ -1750,8 +1805,72 @@
 
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', () => {
-            manageUIContainersVisibility(['loginUI']);
+            // Oculta login de entrada
+            DOM_ELEMENTS.loginUI.style.display = 'none';
 
+            // Mostrar cinematografía y ocultar después
+            setTimeout(() => {
+            const cinematic = document.getElementById('cinematicIntro');
+            if (cinematic) cinematic.style.display = 'none';
+
+            DOM_ELEMENTS.loginUI.style.display = 'flex';
+            }, 6000);
+
+            // ANIMACIÓN canvas de líneas digitales
+            const canvas = document.getElementById('cyberCanvas');
+            const ctx = canvas.getContext('2d');
+            let lines = [];
+            const maxLines = 60;
+
+            function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            }
+            function createLines() {
+            lines = [];
+            for (let i = 0; i < maxLines; i++) {
+                lines.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 100 + 50,
+                speed: Math.random() * 1 + 0.5,
+                direction: Math.random() > 0.5 ? 'vertical' : 'horizontal',
+                alpha: Math.random() * 0.4 + 0.2
+                });
+            }
+            }
+            function drawLines() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            lines.forEach(line => {
+                ctx.strokeStyle = `rgba(0, 255, 255, ${line.alpha})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                if (line.direction === 'vertical') {
+                ctx.moveTo(line.x, line.y);
+                ctx.lineTo(line.x, line.y + line.length);
+                line.y += line.speed;
+                if (line.y > canvas.height) line.y = -line.length;
+                } else {
+                ctx.moveTo(line.x, line.y);
+                ctx.lineTo(line.x + line.length, line.y);
+                line.x += line.speed;
+                if (line.x > canvas.width) line.x = -line.length;
+                }
+                ctx.stroke();
+            });
+            requestAnimationFrame(drawLines);
+            }
+
+            window.addEventListener('resize', () => {
+            resizeCanvas();
+            createLines();
+            });
+
+            resizeCanvas();
+            createLines();
+            drawLines();
+            manageUIContainersVisibility(['loginUI']);
+                
             if (DOM_ELEMENTS.loginButton) {
                 DOM_ELEMENTS.loginButton.onclick = startGame;
             }
