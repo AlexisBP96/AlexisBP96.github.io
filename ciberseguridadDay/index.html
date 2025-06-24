@@ -79,6 +79,8 @@
             position: relative;
             width: 100%;
             height: 100%;
+            opacity: 1;
+            transition: opacity 1.2s ease;
         }
 
         #phaser-game canvas {
@@ -1462,12 +1464,20 @@
                 manageUIContainersVisibility(['moduleInfoUI']);
                 createStandardSceneBackground(this);
 
-                const panelWrapper = document.querySelector('#moduleInfoUI .panel-content-wrapper');
-                if (panelWrapper) {
-                    panelWrapper.style.maxHeight = '90vh';
-                    panelWrapper.style.overflowY = 'auto';
-                }
+                const moduleInfoUI = document.getElementById('moduleInfoUI');
+                const panelWrapper = moduleInfoUI.querySelector('.panel-content-wrapper');
 
+                // Reiniciar estilo de animación
+                panelWrapper.style.opacity = 0;
+                panelWrapper.style.animation = 'none';
+
+                // Forzar reflow para reiniciar animación
+                void panelWrapper.offsetWidth;
+
+                // Aplicar animación existente
+                panelWrapper.style.animation = 'fadeInHoloPanel 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards';
+
+                // Actualizar textos del módulo
                 document.getElementById('moduleInfoTitle').textContent = this.currentTriviaData.title;
                 document.getElementById('moduleInfoDescription').textContent = this.currentTriviaData.description;
 
