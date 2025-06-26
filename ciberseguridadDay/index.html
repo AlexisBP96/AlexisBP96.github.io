@@ -1108,7 +1108,7 @@
                 if (DOM_ELEMENTS.mapTitle && state.userSession.email) {
                     DOM_ELEMENTS.mapTitle.textContent = `Protege lo que construyes.`;
                 }
-                
+
                 if (DOM_ELEMENTS.mapDescription) {
                     DOM_ELEMENTS.mapDescription.textContent = `Tus metas no viven en un mundo aislado. Cada contraseña, cada clic, cada dato… es un ladrillo más en la casa de tus sueños. Pero hay amenazas que pueden derrumbar todo si no estás atento.`;
                 }
@@ -1117,44 +1117,43 @@
                 const headerActualHeight = DOM_ELEMENTS.mapHeader ? 
                     (DOM_ELEMENTS.mapHeader.offsetHeight || height * headerHeightPercentage) : 
                     height * headerHeightPercentage;
-                
+
                 const bottomBarActualHeight = DOM_ELEMENTS.bottomBarContainer && 
                     DOM_ELEMENTS.bottomBarContainer.style.display !== 'none' ? 
                     DOM_ELEMENTS.bottomBarContainer.offsetHeight : 0;
-                
+
                 const baseIconSize = this.isLandscape ? 
                     Math.min(width * 0.10, 200) : 
                     Math.min(width * 0.18, 100);
-                
+
+                // === 🔧 LIMPIAR textos previos para evitar duplicados ===
+                if (DOM_ELEMENTS.mapModuleTextsContainer) {
+                    DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
+                }
+                this.htmlModuleTextElements = [];
+
                 // Definir posiciones para formar las letras C y S
                 this.modulePositions = [];
-                
-                // Calcular centro de la pantalla
+
                 const centerX = width * 0.5;
                 const centerY = height * 0.5;
-
-                // Radio
                 const radius = Math.min(width, height) * 0.25;
 
-                // Posiciones para la letra C (3 módulos)
-                this.modulePositions.push({ x: centerX - radius, y: centerY - radius }); // Top-left
-                this.modulePositions.push({ x: centerX - radius * 1.5, y: centerY });    // Middle-left
-                this.modulePositions.push({ x: centerX - radius, y: centerY + radius }); // Bottom-left
-
-                // Posiciones para la letra S (5 módulos)
-                this.modulePositions.push({ x: centerX, y: centerY + radius });          // Bottom-center
-                this.modulePositions.push({ x: centerX + radius, y: centerY + radius }); // Bottom-right
-                this.modulePositions.push({ x: centerX + radius * 1.5, y: centerY });    // Middle-right
-                this.modulePositions.push({ x: centerX + radius, y: centerY - radius }); // Top-right
-                this.modulePositions.push({ x: centerX, y: centerY - radius });          // Top-center (nuevo)
-
+                this.modulePositions.push({ x: centerX - radius, y: centerY - radius });
+                this.modulePositions.push({ x: centerX - radius * 1.5, y: centerY });
+                this.modulePositions.push({ x: centerX - radius, y: centerY + radius });
+                this.modulePositions.push({ x: centerX, y: centerY + radius });
+                this.modulePositions.push({ x: centerX + radius, y: centerY + radius });
+                this.modulePositions.push({ x: centerX + radius * 1.5, y: centerY });
+                this.modulePositions.push({ x: centerX + radius, y: centerY - radius });
+                this.modulePositions.push({ x: centerX, y: centerY - radius });
 
                 this.currentNode = Math.max(0, Math.min(this.currentNode, GLOBAL_CONFIG.MODULE_COUNT - 1));
 
                 this.moduleSprites = this.modulePositions.map((pos, i) => {
                     const isComplete = state.userSession.completedStages[i];
                     const iconKey = `module${i}`;
-                    
+
                     const icon = this.add.image(pos.x, pos.y, iconKey)
                         .setDepth(2)
                         .setDisplaySize(baseIconSize, baseIconSize)
@@ -1166,32 +1165,28 @@
 
                     const textDiv = document.createElement('div');
                     textDiv.className = 'map-module-text';
-                    
-                    if (DOM_ELEMENTS.mapModuleTextsContainer) {
-                        DOM_ELEMENTS.mapModuleTextsContainer.appendChild(textDiv);
-                    }
-                    
+                    DOM_ELEMENTS.mapModuleTextsContainer.appendChild(textDiv);
                     this.htmlModuleTextElements[i] = textDiv;
 
-                    return { 
-                        icon: icon, 
-                        textDiv: textDiv, 
-                        originalScaleX: icon.scaleX, 
-                        originalScaleY: icon.scaleY 
+                    return {
+                        icon: icon,
+                        textDiv: textDiv,
+                        originalScaleX: icon.scaleX,
+                        originalScaleY: icon.scaleY
                     };
                 });
 
                 const baseCharacterSizeWidth = this.isLandscape ? 
                     Math.min(width * 0.35, 80) : 
-                    Math.min(width * 0.08, 50);
-                
-                const baseCharacterSizeHeight = baseCharacterSizeWidth * 1;
+                    Math.min(width * 0.08, 30);
+
+                const baseCharacterSizeHeight = baseCharacterSizeWidth * 2;
 
                 if (this.moduleSprites[this.currentNode]?.icon) {
                     const activeModuleIcon = this.moduleSprites[this.currentNode].icon;
                     this.character = this.add.image(
                         activeModuleIcon.x,
-                        activeModuleIcon.y - activeModuleIcon.displayHeight / 2 - baseCharacterSizeHeight * 0.5,
+                        activeModuleIcon.y + activeModuleIcon.displayHeight * -0.6,
                         'character'
                     ).setDepth(3).setDisplaySize(baseCharacterSizeWidth, baseCharacterSizeHeight);
                 }
@@ -1222,9 +1217,28 @@
             }
 
             updateModuleTextPositions() {
-                if (!this.cameras || !this.cameras.main || !DOM_ELEMENTS.mapModuleTextsContainer || 
-                    this.htmlModuleTextElements.length !== this.moduleSprites.length) {
+                if (
+                    !this.cameras || !this.cameras.main ||
+                    !DOM_ELEMENTS.mapModuleTextsContainer ||
+                    !this.moduleSprites || this.moduleSprites.length === 0
+                ) {
                     return;
+                }
+
+                // Inicializar htmlModuleTextElements si no existe o tiene longitud incorrecta
+                if (!this.htmlModuleTextElements || this.htmlModuleTextElements.length !== this.moduleSprites.length) {
+                    this.htmlModuleTextElements = [];
+
+                    // Limpiar elementos previos
+                    DOM_ELEMENTS.mapModuleTextsContainer.innerHTML = '';
+
+                    // Crear uno por cada sprite
+                    this.moduleSprites.forEach((_, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'dream-label';
+                        DOM_ELEMENTS.mapModuleTextsContainer.appendChild(div);
+                        this.htmlModuleTextElements[i] = div;
+                    });
                 }
 
                 this.moduleSprites.forEach((spriteGroup, i) => {
@@ -1234,26 +1248,30 @@
 
                     const icon = spriteGroup.icon;
                     const textDiv = this.htmlModuleTextElements[i];
-                    
+
                     try {
-                        const pt = this.cameras.main.getWorldPoint(icon.x, icon.y + icon.displayHeight * 0.6 + (this.isLandscape ? 10 : 5));
+                        const pt = this.cameras.main.getWorldPoint(
+                            icon.x,
+                            icon.y + icon.displayHeight * 0.6 + (this.isLandscape ? 10 : 5)
+                        );
+
                         textDiv.style.left = `${pt.x}px`;
                         textDiv.style.top = `${pt.y}px`;
-                        
-                        let moduleLabel = `Misión ${i + 1}`;
+
+                        let moduleLabel = `Sueño ${i + 1}`;
                         const isComplete = state.userSession.completedStages[i];
-                        
+
                         textDiv.classList.remove('completed', 'active');
-                        
+
                         if (isComplete) {
                             textDiv.classList.add('completed');
                             moduleLabel += " ✓";
                         }
-                        
+
                         if (i === this.currentNode) {
                             textDiv.classList.add('active');
                         }
-                        
+
                         textDiv.textContent = moduleLabel;
                     } catch (error) {
                         console.error("Error al actualizar posición del texto:", error);
@@ -1328,6 +1346,7 @@
                 } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
                     if (this.currentNode < GLOBAL_CONFIG.MODULE_COUNT - 1) { 
                         this.currentNode++; 
+                        this.updateModuleTextPositions();
                         moved = true; 
                     }
                 }
@@ -1341,12 +1360,12 @@
 
             moveCharacterAndVisuals(animate = true) {
                 this.updateActiveModuleVisuals();
+                this.updateModuleTextPositions();
                 const activeModuleIcon = this.moduleSprites[this.currentNode]?.icon;
                 
                 if (activeModuleIcon && this.character?.active) {
                     const targetX = activeModuleIcon.x;
-                    const targetY = activeModuleIcon.y - activeModuleIcon.displayHeight * 0.5 - 
-                                    this.character.displayHeight * 0.5;
+                    const targetY = activeModuleIcon.y + activeModuleIcon.displayHeight * -0.6;
                     
                     if (animate) {
                         this.tweens.timeline({
