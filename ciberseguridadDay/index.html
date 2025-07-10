@@ -442,13 +442,12 @@
         /* --- Module Info UI (ESTILOS IDÉNTICOS A TRIVIA) --- */
         #moduleInfoUI {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 100vw;
+            height: auto;
             z-index: 20;
             padding: 20px;
             box-sizing: border-box;
@@ -668,6 +667,60 @@
             .touch-controls { padding: clamp(5px, 1vh, 8px) 0; }
             .logo-footer { width: clamp(35px, 8vw, 40px); margin-bottom: clamp(3px, 0.5vh, 5px); }
         }
+
+        .module-speakers {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .module-speakers-title {
+            font-size: clamp(16px, 4vw, 18px);
+            color: var(--banco-pichincha-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .module-speakers-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .speaker-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 100px;
+        }
+
+        .speaker-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            border: 2px solid var(--banco-pichincha-gold);
+        }
+
+        .speaker-name {
+            color: var(--holo-text-primary);
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .speaker-role {
+            color: var(--holo-text-secondary);
+            font-size: 12px;
+        }
+
     </style>
 </head>
 <body>
@@ -746,12 +799,14 @@
             <div class="line vertical"></div>
         </div>
         <div class="panel-content-wrapper">
-            <h2 id="moduleInfoTitle" class="panel-header-title">PHISHING</h2>
+            <h2 id="moduleInfoTitle" class="panel-header-title"></h2>
             <div class="panel-text-content">
-                <p id="moduleInfoDescription" class="panel-text">
-                    Técnica donde atacantes se hacen pasar por entidades confiables para robar credenciales y datos sensibles. En Banco Pichincha, nunca solicitamos contraseñas por correo.
-                </p>
+                <p id="moduleInfoDescription" class="panel-text"></p>
                 <div class="module-info-divider"></div>
+            </div>
+            <div id="moduleSpeakersContainer" class="module-speakers hidden">
+                <h3 class="module-speakers-title">Expositores</h3>
+                <div class="module-speakers-list" id="speakersList"></div>
             </div>
             <button id="startTriviaButton" class="panel-button">INICIAR TRIVIA</button>
         </div>
@@ -816,88 +871,115 @@
             MODULE_COUNT: 8,
             ASSETS_PATH: 'assets/',
             TRIVIA_QUESTIONS: [
-            {
-                title: "La llave de tus sueños",
-                description: "Una contraseña segura no solo protege tu cuenta… protege tus ahorros, tus ideas, tu futuro. Cada carácter es una barrera que aleja a quien quiera arrebatártelo.",
-                question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
-                options: ["123456", "P@$$wOrd2025!"],
-                correctAnswerIndex: 1
-                
-            },
-            {
-                title: "Cuidado con lo que muerdes",
-                description: "A veces, lo que brilla en tu bandeja no es una oportunidad, es un anzuelo. Y si lo muerdes, pueden robarte más que datos: tu tranquilidad.",
-                question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?",
-                options: ["Verdadero", "Falso"],
-                correctAnswerIndex: 0
-            },
-            {
-                title: "Gotas que vacían tu futuro",
-                description: "No todo se pierde de golpe. A veces, es gota a gota. Cada dato que entregas sin cuidado es una filtración en el barco de tus metas.",
-                question: "¿Cuál es la mejor práctica para prevenir fugas de información en Banco Pichincha?",
-                options: [
+                {
+                    id: 0,
+                    title: "La llave de tus sueños",
+                    description: "Una contraseña segura no solo protege tu cuenta… protege tus ahorros, tus ideas, tu futuro. Cada carácter es una barrera que aleja a quien quiera arrebatártelo.",
+                    question: "¿Cuál de las siguientes es una contraseña más segura: '123456' o 'P@$$wOrd2025!'?",
+                    options: ["123456", "P@$$wOrd2025!"],
+                    correctAnswerIndex: 1,
+                    speakers: [
+                    { name: "Ana Torres", role: "Especialista en Seguridad", img: "ana.png" },
+                    { name: "Carlos Rivas", role: "Hacker Ético", img: "carlos.png" },
+                    { name: "Laura Mejía", role: "Consultora en Riesgos Digitales", img: "laura.png" }
+                    ]
+                },
+                {
+                    id: 1,
+                    title: "Cuidado con lo que muerdes",
+                    description: "A veces, lo que brilla en tu bandeja no es una oportunidad, es un anzuelo. Y si lo muerdes, pueden robarte más que datos: tu tranquilidad.",
+                    question: "El 'phishing' es un intento de adquirir información confidencial de forma fraudulenta. ¿Verdadero o Falso?",
+                    options: ["Verdadero", "Falso"],
+                    correctAnswerIndex: 0,
+                    speakers: [
+                    { name: "Javier Mendoza", role: "Analista de Ciberseguridad", img: "javier.png" }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Gotas que vacían tu futuro",
+                    description: "No todo se pierde de golpe. A veces, es gota a gota. Cada dato que entregas sin cuidado es una filtración en el barco de tus metas.",
+                    question: "¿Cuál es la mejor práctica para prevenir fugas de información en Banco Pichincha?",
+                    options: [
                     "Compartir documentos confidenciales por WhatsApp",
                     "Usar solo redes públicas para transferencias",
                     "Cifrar archivos sensibles y usar canales autorizados"
-                ],
-                correctAnswerIndex: 2
-            },
-            {
-                title: "No todo lo que ves es real",
-                description: "Una sonrisa en video. Una voz familiar. Pero todo fue creado. Las mentiras digitales pueden poner en riesgo decisiones reales.",
-                question: "Recibes un video del gerente pidiendo una transferencia urgente. ¿Qué haces?",
-                options: [
+                    ],
+                    correctAnswerIndex: 2,
+                    speakers: []
+                },
+                {
+                    id: 3,
+                    title: "No todo lo que ves es real",
+                    description: "Una sonrisa en video. Una voz familiar. Pero todo fue creado. Las mentiras digitales pueden poner en riesgo decisiones reales.",
+                    question: "Recibes un video del gerente pidiendo una transferencia urgente. ¿Qué haces?",
+                    options: [
                     "Ejecuto la transferencia inmediatamente",
                     "Verifico la solicitud por otro canal oficial",
                     "Reenvío el video al departamento de TI"
-                ],
-                correctAnswerIndex: 1
-            },
-            {
-                title: "Verdades a medias, riesgos enteros",
-                description: "No todo lo que lees te informa. A veces, te confunde, te manipula y te aleja de lo correcto. La desinformación también es una amenaza silenciosa.",
-                question: "¿Cómo identificar una wiki falsa?",
-                options: [
+                    ],
+                    correctAnswerIndex: 1,
+                    speakers: [
+                    { name: "Luisa Prado", role: "Experta en Ingeniería Social", img: "luisa.png" }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Verdades a medias, riesgos enteros",
+                    description: "No todo lo que lees te informa. A veces, te confunde, te manipula y te aleja de lo correcto. La desinformación también es una amenaza silenciosa.",
+                    question: "¿Cómo identificar una wiki falsa?",
+                    options: [
                     "URLs con errores ortográficos (ej: wikipediia.org)",
                     "Certificado SSL válido",
                     "Logotipo oficial en la página"
-                ],
-                correctAnswerIndex: 0
-            },
-            {
-                title: "Cuando la promesa es la trampa",
-                description: "El sueño de ganar rápido, de obtener más... puede ser el disfraz perfecto de una pérdida segura. Aprende a distinguir valor de engaño.",
-                question: "Te ofrecen un premio solicitando datos bancarios. ¿Es seguro?",
-                options: [
+                    ],
+                    correctAnswerIndex: 0,
+                    speakers: []
+                },
+                {
+                    id: 5,
+                    title: "Cuando la promesa es la trampa",
+                    description: "El sueño de ganar rápido, de obtener más... puede ser el disfraz perfecto de una pérdida segura. Aprende a distinguir valor de engaño.",
+                    question: "Te ofrecen un premio solicitando datos bancarios. ¿Es seguro?",
+                    options: [
                     "Sí, si el premio es de Banco Pichincha",
                     "Solo si piden CVV de la tarjeta",
                     "Nunca, el banco no solicita datos así"
-                ],
-                correctAnswerIndex: 2
-            },
-            {
-                title: "Cuando el riesgo no es virtual... es real",
-                description: "Tus datos pueden llevar a alguien hasta ti. La seguridad digital es seguridad física. El daño no siempre es en línea.",
-                question: "Si detectas un ataque de ransomware, ¿qué haces primero?",
-                options: [
+                    ],
+                    correctAnswerIndex: 2,
+                    speakers: [
+                    { name: "Marcos Ibarra", role: "Investigador de Fraudes Digitales", img: "assets/marcos.png" }
+                    ]
+                },
+                {
+                    id: 6,
+                    title: "Cuando el riesgo no es virtual... es real",
+                    description: "Tus datos pueden llevar a alguien hasta ti. La seguridad digital es seguridad física. El daño no siempre es en línea.",
+                    question: "Si detectas un ataque de ransomware, ¿qué haces primero?",
+                    options: [
                     "Pagar el rescate",
                     "Desconectar equipos de la red",
                     "Reiniciar los servidores"
-                ],
-                correctAnswerIndex: 1
-            },
-            {
-                title: "El futuro no se adivina, se protege",
-                description: "Las amenazas cambian. Lo que hoy parece seguro, mañana puede ser vulnerable. La mejor forma de anticiparse… es estar siempre preparado.",
-                question: "¿Cómo protegerte del ciberadivinador?",
-                options: [
+                    ],
+                    correctAnswerIndex: 1,
+                    speakers: []
+                },
+                {
+                    id: 7,
+                    title: "El futuro no se adivina, se protege",
+                    description: "Las amenazas cambian. Lo que hoy parece seguro, mañana puede ser vulnerable. La mejor forma de anticiparse… es estar siempre preparado.",
+                    question: "¿Cómo protegerte del ciberadivinador?",
+                    options: [
                     "Usar información real en preguntas de seguridad",
                     "Crear respuestas ficticias no adivinables",
                     "Compartir menos en redes sociales"
-                ],
-                correctAnswerIndex: 2
-            }
-        ],
+                    ],
+                    correctAnswerIndex: 2,
+                    speakers: [
+                    { name: "Diana López", role: "Consultora en Privacidad", img: "assets/diana.png" }
+                    ]
+                }
+            ],
             GOOGLE_SHEETS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxp8p0CJDDpkWvPIZboo3BTM09e93VkTo0icH1f0nwG46uI9GaqvdX99UqxEGQaZC55/exec'
         };
 
@@ -1044,14 +1126,10 @@
 
             preload() {
                 this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
-                this.load.image('module0', `${GLOBAL_CONFIG.ASSETS_PATH}module0.png`);
-                this.load.image('module1', `${GLOBAL_CONFIG.ASSETS_PATH}module1.png`);
-                this.load.image('module2', `${GLOBAL_CONFIG.ASSETS_PATH}module2.png`);
-                this.load.image('module3', `${GLOBAL_CONFIG.ASSETS_PATH}module3.png`);
-                this.load.image('module4', `${GLOBAL_CONFIG.ASSETS_PATH}module4.png`);
-                this.load.image('module5', `${GLOBAL_CONFIG.ASSETS_PATH}module5.png`);
-                this.load.image('module6', `${GLOBAL_CONFIG.ASSETS_PATH}module6.png`);
-                this.load.image('module7', `${GLOBAL_CONFIG.ASSETS_PATH}module7.png`);
+                for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
+                    const suffix = window.devicePixelRatio > 1.5 ? '@2x' : '';
+                    this.load.image(`module${i}`, `${GLOBAL_CONFIG.ASSETS_PATH}module${i}.png`);
+                }
                 this.load.image('module-complete', `${GLOBAL_CONFIG.ASSETS_PATH}module-green.png`);
                 this.load.image('character', `${GLOBAL_CONFIG.ASSETS_PATH}jedi.png`);
             }
@@ -1399,17 +1477,20 @@
             }
 
             attemptEnterScene() {
-                if (!this.scene.isActive()) return;
-                
-                const targetStageIndex = this.currentNode;
-                const isUnlocked = targetStageIndex === 0 || 
-                                state.userSession.completedStages[targetStageIndex - 1];
-                
-                if (isUnlocked) {
+                    if (!this.scene.isActive()) return;
+                    const targetStageIndex = this.currentNode; 
                     this.scene.start('TriviaScene', { stageIndex: targetStageIndex });
-                } else {
-                    console.log(`Module ${targetStageIndex + 1} is locked.`);
-                }
+                // if (!this.scene.isActive()) return;
+                
+                // const targetStageIndex = this.currentNode;
+                // const isUnlocked = targetStageIndex === 0 || 
+                //                 state.userSession.completedStages[targetStageIndex - 1];
+                
+                // if (isUnlocked) {
+                //     this.scene.start('TriviaScene', { stageIndex: targetStageIndex });
+                // } else {
+                //     console.log(`Module ${targetStageIndex + 1} is locked.`);
+                // }
             }
 
             shutdown() {
@@ -1499,6 +1580,27 @@
                 // Actualizar textos del módulo
                 document.getElementById('moduleInfoTitle').textContent = this.currentTriviaData.title;
                 document.getElementById('moduleInfoDescription').textContent = this.currentTriviaData.description;
+
+                const speakers = this.currentTriviaData.speakers || [];
+                const speakersContainer = document.getElementById('moduleSpeakersContainer');
+                const speakersList = document.getElementById('speakersList');
+
+                if (speakers.length > 0) {
+                    speakersList.innerHTML = '';
+                    speakers.forEach(({ name, role, img }) => {
+                        const card = document.createElement('div');
+                        card.className = 'speaker-card';
+                        card.innerHTML = `
+                            <img src="${GLOBAL_CONFIG.ASSETS_PATH + img}" alt="${name}" class="speaker-photo">
+                            <div class="speaker-name">${name}</div>
+                            <div class="speaker-role">${role}</div>
+                        `;
+                        speakersList.appendChild(card);
+                    });
+                    speakersContainer.classList.remove('hidden');
+                } else {
+                    speakersContainer.classList.add('hidden');
+                }
 
                 const startButton = document.getElementById('startTriviaButton');
                 if (startButton) {
