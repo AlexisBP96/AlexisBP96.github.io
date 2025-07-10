@@ -451,6 +451,7 @@
             z-index: 20;
             padding: 20px;
             box-sizing: border-box;
+            background: none;
         }
 
         /* --- Module Info UI - Versión Corregida --- */
@@ -741,7 +742,20 @@
     </div>
     </div>
 
-    <div id="phaser-game"></div>
+    <div id="phaser-game">
+        <div class="animated-lines">
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+            <div class="line vertical"></div>
+        </div>
+    </div>
     
     <div id="loginUI">
         <div class="animated-lines">
@@ -786,18 +800,6 @@
     <div id="mapModuleTextsContainer" class="hidden"></div>
     
     <div id="moduleInfoUI" class="fullscreen-ui-panel hidden">
-        <div class="animated-lines">
-            <div class="line horizontal"></div>
-            <div class="line horizontal"></div>
-            <div class="line horizontal"></div>
-            <div class="line horizontal"></div>
-            <div class="line horizontal"></div>
-            <div class="line vertical"></div>
-            <div class="line vertical"></div>
-            <div class="line vertical"></div>
-            <div class="line vertical"></div>
-            <div class="line vertical"></div>
-        </div>
         <div class="panel-content-wrapper">
             <h2 id="moduleInfoTitle" class="panel-header-title"></h2>
             <div class="panel-text-content">
@@ -1047,9 +1049,9 @@
             if (scene.bgStandard) scene.bgStandard.destroy();
             if (scene.overlayStandard) scene.overlayStandard.destroy();
 
-            scene.bgStandard = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
-                .setDisplaySize(scene.scale.width, scene.scale.height)
-                .setDepth(-1);
+            // scene.bgStandard = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+            //     .setDisplaySize(scene.scale.width, scene.scale.height)
+            //     .setDepth(-1);
             
             scene.overlayStandard = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x000000, 0.75)
                 .setOrigin(0)
@@ -1077,10 +1079,10 @@
             if (scene.mapFocusedBg) scene.mapFocusedBg.destroy();
             if (scene.mapFocusedOverlay) scene.mapFocusedOverlay.destroy();
 
-            scene.mapFocusedBg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
-                .setDisplaySize(scene.scale.width, scene.scale.height)
-                .setDepth(-2)
-                .setTint(0x333333);
+            // scene.mapFocusedBg = scene.add.image(scene.scale.width / 2, scene.scale.height / 2, 'background')
+            //     .setDisplaySize(scene.scale.width, scene.scale.height)
+            //     .setDepth(-2)
+            //     .setTint(0x333333);
 
             scene.mapFocusedOverlay = scene.add.rectangle(0, 0, scene.scale.width, scene.scale.height, 0x03060A, 0.6)
                 .setOrigin(0)
@@ -1125,12 +1127,10 @@
             }
 
             preload() {
-                this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
                 for (let i = 0; i < GLOBAL_CONFIG.MODULE_COUNT; i++) {
                     const suffix = window.devicePixelRatio > 1.5 ? '@2x' : '';
                     this.load.image(`module${i}`, `${GLOBAL_CONFIG.ASSETS_PATH}module${i}.png`);
                 }
-                this.load.image('module-complete', `${GLOBAL_CONFIG.ASSETS_PATH}module-green.png`);
                 this.load.image('character', `${GLOBAL_CONFIG.ASSETS_PATH}jedi.png`);
             }
 
@@ -1544,11 +1544,11 @@
                 this.htmlOptionElements = [];
             }
 
-            preload() {
-                if (!this.textures.exists('background')) {
-                    this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
-                }
-            }
+            // preload() {
+            //     if (!this.textures.exists('background')) {
+            //         this.load.image('background', `${GLOBAL_CONFIG.ASSETS_PATH}background.jpg`);
+            //     }
+            // }
 
             create() {
                 this.currentTriviaData = GLOBAL_CONFIG.TRIVIA_QUESTIONS[this.currentStageIndex] || 
