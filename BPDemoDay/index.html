@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ubicación y Perfil - Banco Pichincha</title>
+  <title>Ubicación, Perfil y Actividad 24/7</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
   <style>
     :root { --gap: 16px; }
-    body { font-family: 'Poppins', sans-serif; background-color: #f4f7fa; margin: 0; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7fa; margin: 0; color:#0f172a; }
     header { background-color: #002b5c; padding: 16px; text-align: center; }
     header img { height: 50px; }
-    main { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    main { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
     #searchForm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-    #searchForm input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; flex: 1; font-size: 16px; }
-    #searchForm button { background: #0071bc; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
+    #searchForm input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; flex: 1; font-size: 16px; }
+    #searchForm button { background: #0071bc; color: white; padding: 12px 20px; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; }
     #searchForm button i { margin-right: 8px; }
 
     /* Dos columnas de igual altura */
@@ -24,32 +25,34 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: var(--gap);
-      align-items: stretch; /* ambas tarjetas igualan la altura de la más alta */
+      align-items: stretch;
     }
-
-    /* La tarjeta del mapa estira su contenido (#map) para llenar toda la altura */
     .map-card { display: flex; }
     .map-card #map {
       flex: 1 1 auto;
       height: 100%;
-      min-height: 520px;   /* mínimo para pantallas pequeñas */
+      min-height: 520px;
       border-radius: 10px;
       overflow: hidden;
     }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 15px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
     th { background-color: #002b5c; color: white; }
-    tbody tr:nth-child(even) { background-color: #f0f0f0; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    tbody tr:nth-child(even) { background-color: #f8fafc; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
     .badge { display:inline-block; padding:4px 10px; border-radius: 999px; background:#eef2f7; font-size:12px; }
     .bar { height: 10px; background: #e6eef7; border-radius: 999px; overflow: hidden; }
     .bar > div { height: 100%; background: #0071bc; width: 0%; }
     .kpi { text-align:center; }
-    .kpi h2 { margin: 6px 0 0 0; }
+    .kpi h2 { margin: 6px 0 0 0; font-size: 28px; }
     .muted { color:#6b7280; font-size:12px; }
     .flex { display:flex; gap:14px; align-items:center; flex-wrap: wrap; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+
+    .charts { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap); }
+    canvas { width: 100% !important; height: 300px !important; }
 
     @media (max-width: 900px) {
       .grid-2 { grid-template-columns: 1fr; }
@@ -96,26 +99,42 @@
         <tbody></tbody>
       </table>
     </div>
+
+    <div class="card">
+      <h3 style="margin-top: 0;">Actividad 24/7</h3>
+      <div class="charts">
+        <div>
+          <h4 style="margin:0 0 8px 0">Distribución por hora (0–23)</h4>
+          <canvas id="chartHora"></canvas>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px 0">Distribución por día (L–D)</h4>
+          <canvas id="chartDow"></canvas>
+        </div>
+      </div>
+      <div class="muted" id="histMeta" style="margin-top:8px"></div>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    // ---------- Mapa ----------
     const map = L.map('map').setView([-0.22985, -78.52495], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
     const markerLayer = L.layerGroup().addTo(map);
 
+    function invalidateMapSoon() { setTimeout(() => map.invalidateSize(), 60); }
+
+    // ---------- Utilidades ----------
     async function loadJSON(url) {
       const r = await fetch(url);
       if (!r.ok) throw new Error('No se pudo cargar ' + url);
       return r.json();
     }
-
     function renderAuthBars(container, auth) {
       const entries = Object.entries(auth || {});
-      if (!entries.length) {
-        container.innerHTML = '<span class="muted">Sin datos</span>';
-        return;
-      }
+      if (!entries.length) { container.innerHTML = '<span class="muted">Sin datos</span>'; return; }
       container.innerHTML = entries.map(([k, v]) => {
         const pct = Number(v) || 0;
         return `
@@ -125,27 +144,49 @@
           </div>`;
       }).join('');
     }
-
     function fmtMoney(n) {
       if (n == null) return '—';
       try { return Number(n).toLocaleString('es-EC', { style:'currency', currency:'USD', maximumFractionDigits:2 }); }
       catch { return n; }
     }
 
-    function invalidateMapSoon() {
-      // asegura que Leaflet recalcula tamaño al igualar alturas
-      setTimeout(() => { map.invalidateSize(); }, 50);
+    // ---------- Charts ----------
+    let chartHora, chartDow;
+    function drawCharts(hist) {
+      const ctxH = document.getElementById('chartHora').getContext('2d');
+      const ctxD = document.getElementById('chartDow').getContext('2d');
+      const labelsH = Array.from({length:24}, (_,i)=>i.toString());
+      const labelsD = ['L','M','X','J','V','S','D'];
+      const dataH = hist?.hist_hora || new Array(24).fill(0);
+      const dataD = hist?.hist_dow  || new Array(7).fill(0);
+
+      if (chartHora) chartHora.destroy();
+      if (chartDow) chartDow.destroy();
+
+      chartHora = new Chart(ctxH, {
+        type: 'bar',
+        data: { labels: labelsH, datasets: [{ label: 'Eventos', data: dataH }] },
+        options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero:true } } }
+      });
+
+      chartDow = new Chart(ctxD, {
+        type: 'bar',
+        data: { labels: labelsD, datasets: [{ label: 'Eventos', data: dataD }] },
+        options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero:true } } }
+      });
     }
 
+    // ---------- Búsqueda ----------
     document.getElementById('searchForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const cedula = document.getElementById('cedula').value.trim();
       if (!cedula) return alert("Ingrese una cédula válida");
 
       try {
-        const [ubicData, perfilData] = await Promise.all([
+        const [ubicData, perfilData, histData] = await Promise.all([
           loadJSON('ubicaciones.json'),
-          loadJSON('perfil_enriquecido.json')
+          loadJSON('perfil_enriquecido.json'),
+          loadJSON('actividad_hist.json') // generado desde geolocalizacion.csv
         ]);
 
         // --- Ubicaciones (mapa + tabla) ---
@@ -185,67 +226,73 @@
           if (!isNaN(avgLat) && !isNaN(avgLon)) map.setView([avgLat, avgLon], 14);
         }
 
-        // --- Perfil enriquecido (panel derecho) ---
+        // --- Perfil enriquecido ---
         const perfil = perfilData[cedula];
         const cont = document.getElementById('perfilCliente');
         cont.innerHTML = '';
 
         if (!perfil) {
           cont.innerHTML = '<span class="muted">Sin datos de perfil para esta cédula.</span>';
-          invalidateMapSoon();
-          return;
+        } else {
+          const d = perfil.demografia || {};
+          const c = perfil.comportamiento || {};
+          const pm = (c.promedios_mensuales || {});
+          cont.innerHTML = `
+            <div class="card" style="box-shadow:none;padding:0">
+              <h4 style="margin:0 0 8px 0">Demografía</h4>
+              <div class="grid">
+                <div><div class="muted">Estado civil</div><div><strong>${d.estado_civil ?? '—'}</strong></div></div>
+                <div><div class="muted">Género</div><div><strong>${d.genero ?? '—'}</strong></div></div>
+                <div><div class="muted">Estudios</div><div><strong>${d.nivel_estudios ?? '—'}</strong></div></div>
+                <div><div class="muted">Rango de edad</div><div><strong>${d.rango_edad ?? '—'}</strong></div></div>
+              </div>
+            </div>
+
+            <div class="card" style="box-shadow:none;padding:0">
+              <h4 style="margin:0 0 8px 0">Uso de Autenticaciones</h4>
+              <div id="authBars"></div>
+            </div>
+
+            <div class="card" style="box-shadow:none;padding:0">
+              <h4 style="margin:0 0 8px 0">Hábitos</h4>
+              <div class="grid">
+                <div><div class="muted">Hora pico login</div><div><strong>${c.hora_pico_login ?? '—'}</strong></div></div>
+                <div><div class="muted">Hora pico transacción</div><div><strong>${c.hora_pico_tx ?? '—'}</strong></div></div>
+                <div><div class="muted">App más usada</div><div><strong>${c.app_top ?? '—'}</strong></div></div>
+              </div>
+            </div>
+
+            <div class="card" style="box-shadow:none;padding:0">
+              <h4 style="margin:0 0 8px 0">Valores cliente</h4>
+              <div class="grid">
+                <div class="kpi"><div class="muted">Promedio inicios sesión</div><h2>${pm.inicios_sesion ?? 0}</h2></div>
+                <div class="kpi"><div class="muted">Promedio monto transaccionado</div><h2>${fmtMoney(pm.monto_transaccionado ?? 0)}</h2></div>
+                <div class="kpi"><div class="muted">Prestamos activos</div><h2>${fmtMoney(pm.prestamo ?? 0)}</h2></div>
+                <div class="kpi"><div class="muted">Promedio transferencias</div><h2>${pm.transferencias ?? 0}</h2></div>
+              </div>
+            </div>
+          `;
+          renderAuthBars(document.getElementById('authBars'), c.auth_usage);
         }
 
-        const d = perfil.demografia || {};
-        const c = perfil.comportamiento || {};
-        const pm = (c.promedios_mensuales || {});
+        // --- Histograma 24/7 ---
+        const hist = histData[cedula] || null;
+        drawCharts(hist);
+        const total = hist?.total ?? 0;
+        const tz = hist?.tz || 'UTC';
+        document.getElementById('histMeta').textContent = hist
+          ? `Eventos: ${total.toLocaleString('es-EC')} • Zona horaria: ${tz}`
+          : 'Sin datos de actividad para esta cédula.';
 
-        cont.innerHTML = `
-          <div class="card" style="box-shadow:none;padding:0">
-            <h4 style="margin:0 0 8px 0">Demografía</h4>
-            <div class="grid">
-              <div><div class="muted">Estado civil</div><div><strong>${d.estado_civil ?? '—'}</strong></div></div>
-              <div><div class="muted">Género</div><div><strong>${d.genero ?? '—'}</strong></div></div>
-              <div><div class="muted">Estudios</div><div><strong>${d.nivel_estudios ?? '—'}</strong></div></div>
-              <div><div class="muted">Rango de edad</div><div><strong>${d.rango_edad ?? '—'}</strong></div></div>
-            </div>
-          </div>
-
-          <div class="card" style="box-shadow:none;padding:0">
-            <h4 style="margin:0 0 8px 0">Uso de Autenticaciones</h4>
-            <div id="authBars"></div>
-          </div>
-
-          <div class="card" style="box-shadow:none;padding:0">
-            <h4 style="margin:0 0 8px 0">Hábitos</h4>
-            <div class="grid">
-              <div><div class="muted">Hora pico login</div><div><strong>${c.hora_pico_login ?? '—'}</strong></div></div>
-              <div><div class="muted">Hora pico transacción</div><div><strong>${c.hora_pico_tx ?? '—'}</strong></div></div>
-              <div><div class="muted">App más usada</div><div><strong>${c.app_top ?? '—'}</strong></div></div>
-            </div>
-          </div>
-
-          <div class="card" style="box-shadow:none;padding:0">
-            <h4 style="margin:0 0 8px 0">Promedios mensuales</h4>
-            <div class="grid">
-              <div class="kpi"><div class="muted">Promedio inicios sesión</div><h2>${pm.inicios_sesion ?? 0}</h2></div>
-              <div class="kpi"><div class="muted">Promedio monto transaccionado</div><h2>${fmtMoney(pm.monto_transaccionado ?? 0)}</h2></div>
-              <div class="kpi"><div class="muted">Promedio transferencias</div><h2>${pm.transferencias ?? 0}</h2></div>
-              <div class="kpi"><div class="muted">Prestamos activos</div><h2>${fmtMoney(pm.prestamo ?? 0)}</h2></div>
-            </div>
-          </div>
-        `;
-
-        renderAuthBars(document.getElementById('authBars'), c.auth_usage);
         invalidateMapSoon();
-      } catch (error) {
-        console.error(error);
-        alert("Error al cargar los datos. Revise que 'ubicaciones.json' y 'perfil_enriquecido.json' estén disponibles.");
+      } catch (err) {
+        console.error(err);
+        alert("Error al cargar uno de los recursos. Verifique que 'ubicaciones.json', 'perfil_enriquecido.json' y 'actividad_hist.json' existan.");
         invalidateMapSoon();
       }
     });
 
-    // Asegurar recalculo de tamaño al cargar y redimensionar
+    // Ajustes de tamaño del mapa
     window.addEventListener('load', () => invalidateMapSoon());
     window.addEventListener('resize', () => invalidateMapSoon());
   </script>
