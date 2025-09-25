@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ubicación y Perfil - Banco Pichincha</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+    :root { --gap: 16px; }
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7fa; margin: 0; }
+    header { background-color: #002b5c; padding: 16px; text-align: center; }
+    header img { height: 50px; }
+    main { max-width: 1100px; margin: 20px auto; padding: 20px; }
+    .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    #searchForm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    #searchForm input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; flex: 1; font-size: 16px; }
+    #searchForm button { background: #0071bc; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; }
+    #searchForm button i { margin-right: 8px; }
+
+    /* Dos columnas de igual altura */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--gap);
+      align-items: stretch; /* ambas tarjetas igualan la altura de la más alta */
+    }
+
+    /* La tarjeta del mapa estira su contenido (#map) para llenar toda la altura */
+    .map-card { display: flex; }
+    .map-card #map {
+      flex: 1 1 auto;
+      height: 100%;
+      min-height: 520px;   /* mínimo para pantallas pequeñas */
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background-color: #002b5c; color: white; }
+    tbody tr:nth-child(even) { background-color: #f0f0f0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .badge { display:inline-block; padding:4px 10px; border-radius: 999px; background:#eef2f7; font-size:12px; }
+    .bar { height: 10px; background: #e6eef7; border-radius: 999px; overflow: hidden; }
+    .bar > div { height: 100%; background: #0071bc; width: 0%; }
+    .kpi { text-align:center; }
+    .kpi h2 { margin: 6px 0 0 0; }
+    .muted { color:#6b7280; font-size:12px; }
+    .flex { display:flex; gap:14px; align-items:center; flex-wrap: wrap; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .map-card #map { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://raw.githubusercontent.com/AlexisBP96/ImgProyectos/main/BPLogo.png" alt="Banco Pichincha" />
+  </header>
+
+  <main>
+    <div class="card">
+      <form id="searchForm">
+        <input type="text" id="cedula" placeholder="Ingrese la cédula" maxlength="10">
+        <button type="submit"><i class="fas fa-search"></i> Buscar</button>
+      </form>
+    </div>
+
+    <div class="grid-2">
+      <div class="card map-card">
+        <div id="map"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0;">Perfil del Cliente</h3>
+        <div id="perfilCliente" class="grid"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top: 0;">Ubicaciones encontradas</h3>
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>Identificación</th>
+            <th>Segmento</th>
+            <th>Color</th>
+            <th># Inicios Sesión</th>
+            <th>Última Fecha</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([-0.22985, -78.52495], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    const markerLayer = L.layerGroup().addTo(map);
+
+    async function loadJSON(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('No se pudo cargar ' + url);
+      return r.json();
+    }
+
+    function renderAuthBars(container, auth) {
+      const entries = Object.entries(auth || {});
+      if (!entries.length) {
+        container.innerHTML = '<span class="muted">Sin datos</span>';
+        return;
+      }
+      container.innerHTML = entries.map(([k, v]) => {
+        const pct = Number(v) || 0;
+        return `
+          <div style="margin-bottom:10px">
+            <div class="flex"><span class="badge mono">${k}</span><span class="muted">${pct}%</span></div>
+            <div class="bar"><div style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+    }
+
+    function fmtMoney(n) {
+      if (n == null) return '—';
+      try { return Number(n).toLocaleString('es-EC', { style:'currency', currency:'USD', maximumFractionDigits:2 }); }
+      catch { return n; }
+    }
+
+    function invalidateMapSoon() {
+      // asegura que Leaflet recalcula tamaño al igualar alturas
+      setTimeout(() => { map.invalidateSize(); }, 50);
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cedula = document.getElementById('cedula').value.trim();
+      if (!cedula) return alert("Ingrese una cédula válida");
+
+      try {
+        const [ubicData, perfilData] = await Promise.all([
+          loadJSON('ubicaciones.json'),
+          loadJSON('perfil_enriquecido.json')
+        ]);
+
+        // --- Ubicaciones (mapa + tabla) ---
+        const ubicaciones = Array.isArray(ubicData)
+          ? ubicData.filter(item => String(item.identificacionOrdenante) == cedula)
+          : (ubicData[cedula]?.ubicaciones || []);
+
+        markerLayer.clearLayers();
+        const tbody = document.querySelector('#resultTable tbody');
+        tbody.innerHTML = '';
+
+        if (ubicaciones.length === 0) {
+          alert("No se encontraron ubicaciones para la cédula ingresada.");
+        } else {
+          ubicaciones.forEach(({ identificacionOrdenante, segmento, latitud, longitud, conteo, ultimaFecha }) => {
+            const color = segmento === 'Trabajo' ? 'green' : 'blue';
+            const fechaObj = new Date(ultimaFecha);
+            const fechaSolo = isNaN(fechaObj) ? (ultimaFecha || '—') : fechaObj.toISOString().split('T')[0];
+
+            const circle = L.circle([latitud, longitud], { radius: 500, color, fillColor: color, fillOpacity: 0.5 })
+              .bindPopup(`<b>${segmento}</b><br>${conteo} inicios de sesión<br>Última fecha: ${fechaSolo}`);
+            markerLayer.addLayer(circle);
+
+            const row = `
+              <tr>
+                <td>${identificacionOrdenante}</td>
+                <td>${segmento}</td>
+                <td><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:${color}"></span></td>
+                <td>${conteo}</td>
+                <td>${fechaSolo}</td>
+              </tr>`;
+            tbody.insertAdjacentHTML('beforeend', row);
+          });
+
+          const avgLat = ubicaciones.reduce((sum, u) => sum + Number(u.latitud), 0) / ubicaciones.length;
+          const avgLon = ubicaciones.reduce((sum, u) => sum + Number(u.longitud), 0) / ubicaciones.length;
+          if (!isNaN(avgLat) && !isNaN(avgLon)) map.setView([avgLat, avgLon], 14);
+        }
+
+        // --- Perfil enriquecido (panel derecho) ---
+        const perfil = perfilData[cedula];
+        const cont = document.getElementById('perfilCliente');
+        cont.innerHTML = '';
+
+        if (!perfil) {
+          cont.innerHTML = '<span class="muted">Sin datos de perfil para esta cédula.</span>';
+          invalidateMapSoon();
+          return;
+        }
+
+        const d = perfil.demografia || {};
+        const c = perfil.comportamiento || {};
+        const pm = (c.promedios_mensuales || {});
+
+        cont.innerHTML = `
+          <div class="card" style="box-shadow:none;padding:0">
+            <h4 style="margin:0 0 8px 0">Demografía</h4>
+            <div class="grid">
+              <div><div class="muted">Estado civil</div><div><strong>${d.estado_civil ?? '—'}</strong></div></div>
+              <div><div class="muted">Género</div><div><strong>${d.genero ?? '—'}</strong></div></div>
+              <div><div class="muted">Estudios</div><div><strong>${d.nivel_estudios ?? '—'}</strong></div></div>
+              <div><div class="muted">Rango de edad</div><div><strong>${d.rango_edad ?? '—'}</strong></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;padding:0">
+            <h4 style="margin:0 0 8px 0">Uso de Autenticaciones</h4>
+            <div id="authBars"></div>
+          </div>
+
+          <div class="card" style="box-shadow:none;padding:0">
+            <h4 style="margin:0 0 8px 0">Hábitos</h4>
+            <div class="grid">
+              <div><div class="muted">Hora pico login</div><div><strong>${c.hora_pico_login ?? '—'}</strong></div></div>
+              <div><div class="muted">Hora pico transacción</div><div><strong>${c.hora_pico_tx ?? '—'}</strong></div></div>
+              <div><div class="muted">App más usada</div><div><strong>${c.app_top ?? '—'}</strong></div></div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;padding:0">
+            <h4 style="margin:0 0 8px 0">Promedios mensuales</h4>
+            <div class="grid">
+              <div class="kpi"><div class="muted">Promedio inicios sesión</div><h2>${pm.inicios_sesion ?? 0}</h2></div>
+              <div class="kpi"><div class="muted">Promedio monto transaccionado</div><h2>${fmtMoney(pm.monto_transaccionado ?? 0)}</h2></div>
+              <div class="kpi"><div class="muted">Promedio transferencias</div><h2>${pm.transferencias ?? 0}</h2></div>
+              <div class="kpi"><div class="muted">Prestamos activos</div><h2>${fmtMoney(pm.prestamo ?? 0)}</h2></div>
+            </div>
+          </div>
+        `;
+
+        renderAuthBars(document.getElementById('authBars'), c.auth_usage);
+        invalidateMapSoon();
+      } catch (error) {
+        console.error(error);
+        alert("Error al cargar los datos. Revise que 'ubicaciones.json' y 'perfil_enriquecido.json' estén disponibles.");
+        invalidateMapSoon();
+      }
+    });
+
+    // Asegurar recalculo de tamaño al cargar y redimensionar
+    window.addEventListener('load', () => invalidateMapSoon());
+    window.addEventListener('resize', () => invalidateMapSoon());
+  </script>
+</body>
+</html>

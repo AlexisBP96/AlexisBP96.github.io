@@ -1,0 +1,150 @@
+{
+  "1708842149": {
+    "identificacion": "1708842149",
+    "demografia": {
+      "estado_civil": "CASADO",
+      "genero": "FEMENINO",
+      "nivel_estudios": "UNIVERSITARIOS",
+      "rango_edad": "8. 55-64"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "Biometrico": 98.72,
+        "Password": 1.28
+      },
+      "hora_pico_login": "6.Noche Temprana|18-21",
+      "hora_pico_tx": "6.Noche Temprana|18-21",
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 10.89,
+        "monto_transaccionado": 324.58,
+        "transferencias": 5.67,
+        "prestamo": 0.0
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-25T14:20:16.450161Z",
+      "version": "v2"
+    }
+  },
+  "1719795021": {
+    "identificacion": "1719795021",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "FEMENINO",
+      "nivel_estudios": null,
+      "rango_edad": "3. 21-24"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "Biometrico": 82.32,
+        "Pin": 14.73,
+        "Password": 2.95
+      },
+      "hora_pico_login": "3.Mañana Regular|10-13",
+      "hora_pico_tx": "3.Mañana Regular|10-13",
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 109.78,
+        "monto_transaccionado": 19021.34,
+        "transferencias": 81.0,
+        "prestamo": 171.4
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-25T14:20:16.453500Z",
+      "version": "v2"
+    }
+  },
+  "1721364428": {
+    "identificacion": "1721364428",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "MASCULINO",
+      "nivel_estudios": "UNIVERSITARIOS",
+      "rango_edad": "6. 35-44"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "Biometrico": 99.17,
+        "Pin": 0.41,
+        "Password": 0.41
+      },
+      "hora_pico_login": "2.Mañana Pico|7-10",
+      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 36.0,
+        "monto_transaccionado": 1206.56,
+        "transferencias": 25.56,
+        "prestamo": 34.49
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-25T14:20:16.456290Z",
+      "version": "v2"
+    }
+  },
+  "1725377509": {
+    "identificacion": "1725377509",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "MASCULINO",
+      "nivel_estudios": "UNIVERSITARIOS",
+      "rango_edad": "5. 27-34"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "Biometrico": 94.67,
+        "Pin": 4.88,
+        "Password": 0.44
+      },
+      "hora_pico_login": "2.Mañana Pico|7-10",
+      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 123.11,
+        "monto_transaccionado": 10353.1,
+        "transferencias": 81.89,
+        "prestamo": 97668.89
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-25T14:20:16.459496Z",
+      "version": "v2"
+    }
+  },
+  "1727364224": {
+    "identificacion": "1727364224",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "FEMENINO",
+      "nivel_estudios": "MEDIOS / SECUNDARIOS",
+      "rango_edad": "4. 25-26"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "Biometrico": 99.67,
+        "Password": 0.33
+      },
+      "hora_pico_login": "2.Mañana Pico|7-10",
+      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 117.56,
+        "monto_transaccionado": 4127.88,
+        "transferencias": 109.44,
+        "prestamo": 2254.52
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-25T14:20:16.462476Z",
+      "version": "v2"
+    }
+  }
+}

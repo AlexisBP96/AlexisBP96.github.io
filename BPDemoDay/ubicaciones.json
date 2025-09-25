@@ -1,0 +1,82 @@
+[
+    {
+        "identificacionOrdenante": 1708842149,
+        "segmento": "Casa",
+        "latitud": -0.23856643500490168,
+        "longitud": -78.52160444389432,
+        "conteo": 4,
+        "ultimaFecha": "2025-06-26 21:16:42+00:00"
+    },
+    {
+        "identificacionOrdenante": 1708842149,
+        "segmento": "Trabajo",
+        "latitud": -0.3402639088241832,
+        "longitud": -78.55080598955936,
+        "conteo": 3,
+        "ultimaFecha": "2025-06-27 14:29:43+00:00"
+    },
+    {
+        "identificacionOrdenante": 1719795021,
+        "segmento": "Casa",
+        "latitud": -0.24336712214268136,
+        "longitud": -78.51367742966592,
+        "conteo": 27,
+        "ultimaFecha": "2025-07-01 21:54:07+00:00"
+    },
+    {
+        "identificacionOrdenante": 1719795021,
+        "segmento": "Trabajo",
+        "latitud": -0.23947910172677314,
+        "longitud": -78.52073614726521,
+        "conteo": 32,
+        "ultimaFecha": "2025-06-27 15:36:51+00:00"
+    },
+    {
+        "identificacionOrdenante": 1721364428,
+        "segmento": "Casa",
+        "latitud": -0.023396362772105626,
+        "longitud": -78.44970364295921,
+        "conteo": 8,
+        "ultimaFecha": "2025-06-29 19:50:15+00:00"
+    },
+    {
+        "identificacionOrdenante": 1721364428,
+        "segmento": "Trabajo",
+        "latitud": -0.023391111364547995,
+        "longitud": -78.44972875000117,
+        "conteo": 6,
+        "ultimaFecha": "2025-06-26 15:19:21+00:00"
+    },
+    {
+        "identificacionOrdenante": 1725377509,
+        "segmento": "Casa",
+        "latitud": -0.23425427999999998,
+        "longitud": -78.5217259,
+        "conteo": 35,
+        "ultimaFecha": "2025-07-01 07:22:54+00:00"
+    },
+    {
+        "identificacionOrdenante": 1725377509,
+        "segmento": "Trabajo",
+        "latitud": -0.23406720909090908,
+        "longitud": -78.52185326818181,
+        "conteo": 22,
+        "ultimaFecha": "2025-06-30 15:22:35+00:00"
+    },
+    {
+        "identificacionOrdenante": 1727364224,
+        "segmento": "Casa",
+        "latitud": -0.23871651262370755,
+        "longitud": -78.5215877521131,
+        "conteo": 46,
+        "ultimaFecha": "2025-07-01 17:21:32+00:00"
+    },
+    {
+        "identificacionOrdenante": 1727364224,
+        "segmento": "Trabajo",
+        "latitud": -0.26062572762211017,
+        "longitud": -78.53752009745958,
+        "conteo": 39,
+        "ultimaFecha": "2025-06-25 10:42:43+00:00"
+    }
+]
