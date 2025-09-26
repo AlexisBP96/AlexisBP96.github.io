@@ -9,11 +9,11 @@
     },
     "comportamiento": {
       "auth_usage": {
-        "Biometrico": 98.72,
-        "Password": 1.28
+        "biometrico": 98.72,
+        "password": 1.28
       },
-      "hora_pico_login": "6.Noche Temprana|18-21",
-      "hora_pico_tx": "6.Noche Temprana|18-21",
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
       "app_top": "Banca Movil",
       "promedios_mensuales": {
         "inicios_sesion": 10.89,
@@ -24,7 +24,37 @@
     },
     "fuentes": {
       "csv": "transacciones.csv",
-      "generado_en": "2025-09-25T14:20:16.450161Z",
+      "generado_en": "2025-09-26T00:38:44.996242Z",
+      "version": "v2"
+    }
+  },
+  "1718014002": {
+    "identificacion": "1718014002",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "MASCULINO",
+      "nivel_estudios": "UNIVERSITARIOS",
+      "rango_edad": "6. 35-44"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "biometrico": 96.62,
+        "password": 1.69,
+        "pin": 1.69
+      },
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 117.44,
+        "monto_transaccionado": 11817.93,
+        "transferencias": 68.33,
+        "prestamo": 14266.9
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-26T00:38:45.001262Z",
       "version": "v2"
     }
   },
@@ -38,12 +68,12 @@
     },
     "comportamiento": {
       "auth_usage": {
-        "Biometrico": 82.32,
-        "Pin": 14.73,
-        "Password": 2.95
+        "biometrico": 82.32,
+        "pin": 14.73,
+        "password": 2.95
       },
-      "hora_pico_login": "3.Mañana Regular|10-13",
-      "hora_pico_tx": "3.Mañana Regular|10-13",
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
       "app_top": "Banca Movil",
       "promedios_mensuales": {
         "inicios_sesion": 109.78,
@@ -54,7 +84,7 @@
     },
     "fuentes": {
       "csv": "transacciones.csv",
-      "generado_en": "2025-09-25T14:20:16.453500Z",
+      "generado_en": "2025-09-26T00:38:45.006262Z",
       "version": "v2"
     }
   },
@@ -68,12 +98,12 @@
     },
     "comportamiento": {
       "auth_usage": {
-        "Biometrico": 99.17,
-        "Pin": 0.41,
-        "Password": 0.41
+        "biometrico": 99.17,
+        "pin": 0.41,
+        "password": 0.41
       },
-      "hora_pico_login": "2.Mañana Pico|7-10",
-      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
       "app_top": "Banca Movil",
       "promedios_mensuales": {
         "inicios_sesion": 36.0,
@@ -84,7 +114,36 @@
     },
     "fuentes": {
       "csv": "transacciones.csv",
-      "generado_en": "2025-09-25T14:20:16.456290Z",
+      "generado_en": "2025-09-26T00:38:45.011262Z",
+      "version": "v2"
+    }
+  },
+  "1722247572": {
+    "identificacion": "1722247572",
+    "demografia": {
+      "estado_civil": "SOLTERO",
+      "genero": "MASCULINO",
+      "nivel_estudios": "MEDIOS / SECUNDARIOS",
+      "rango_edad": "5. 27-34"
+    },
+    "comportamiento": {
+      "auth_usage": {
+        "biometrico": 98.92,
+        "password": 1.08
+      },
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
+      "app_top": "Banca Movil",
+      "promedios_mensuales": {
+        "inicios_sesion": 77.22,
+        "monto_transaccionado": 35305.51,
+        "transferencias": 43.22,
+        "prestamo": 51168.47
+      }
+    },
+    "fuentes": {
+      "csv": "transacciones.csv",
+      "generado_en": "2025-09-26T00:38:45.015782Z",
       "version": "v2"
     }
   },
@@ -98,12 +157,12 @@
     },
     "comportamiento": {
       "auth_usage": {
-        "Biometrico": 94.67,
-        "Pin": 4.88,
-        "Password": 0.44
+        "biometrico": 94.67,
+        "pin": 4.88,
+        "password": 0.44
       },
-      "hora_pico_login": "2.Mañana Pico|7-10",
-      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
       "app_top": "Banca Movil",
       "promedios_mensuales": {
         "inicios_sesion": 123.11,
@@ -114,7 +173,7 @@
     },
     "fuentes": {
       "csv": "transacciones.csv",
-      "generado_en": "2025-09-25T14:20:16.459496Z",
+      "generado_en": "2025-09-26T00:38:45.021310Z",
       "version": "v2"
     }
   },
@@ -128,22 +187,23 @@
     },
     "comportamiento": {
       "auth_usage": {
-        "Biometrico": 99.67,
-        "Password": 0.33
+        "biometrico": 99.67,
+        "password": 0.33
       },
-      "hora_pico_login": "2.Mañana Pico|7-10",
-      "hora_pico_tx": "2.Mañana Pico|7-10",
+      "hora_pico_login": null,
+      "hora_pico_tx": null,
       "app_top": "Banca Movil",
       "promedios_mensuales": {
         "inicios_sesion": 117.56,
         "monto_transaccionado": 4127.88,
         "transferencias": 109.44,
         "prestamo": 2254.52
+
       }
     },
     "fuentes": {
       "csv": "transacciones.csv",
-      "generado_en": "2025-09-25T14:20:16.462476Z",
+      "generado_en": "2025-09-26T00:38:45.026828Z",
       "version": "v2"
     }
   }
